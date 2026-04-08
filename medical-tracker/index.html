@@ -109,17 +109,47 @@
     #mob-more-content .more-item i { font-size: 1.1rem; color: var(--accent); width: 20px; text-align: center; }
 
     @media (max-width: 767px) {
+      /* Layout */
       .sidebar { display: none !important; }
       .main-wrapper { margin-left: 0 !important; }
       .content-area { padding: 0.75rem 0.75rem calc(64px + 1rem) !important; overflow-x: hidden; }
       #mob-bottom-nav { display: block !important; }
       body { overflow-x: hidden; }
-      .table-responsive, table { overflow-x: auto; display: block; width: 100%; }
-      .row { margin: 0; }
-      .demo-banner { font-size: .78rem; }
-      h2.fw-bold { font-size: 1.2rem; }
-      .stat-card { padding: .6rem .5rem; }
-      .stat-value { font-size: 1.3rem; }
+
+      /* Typography */
+      .demo-banner { font-size: .75rem; line-height: 1.5; }
+      h2.fw-bold { font-size: 1.15rem; }
+
+      /* Stat cards - keep single row but shrink */
+      .stat-card { padding: .5rem .3rem; }
+      .stat-value { font-size: 1.1rem !important; }
+      .stat-label { font-size: .56rem !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+      /* All tables — horizontal scroll inside card */
+      .card-body.p-0 { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+      .card-body.p-0 table { min-width: 520px; }
+
+      /* Dashboard diagnoses table */
+      #dash-content .card-body.p-0 table { min-width: 420px; }
+
+      /* Vitals stat labels */
+      #vitals-cards .stat-value { font-size: 1rem !important; }
+
+      /* Section title + parent name — allow wrap */
+      .d-flex.justify-content-between { flex-wrap: wrap; gap: 6px; }
+
+      /* Next appointment info box */
+      .d-flex.align-items-start.gap-2 { font-size: .82rem; }
+
+      /* Badge text — don't let it break */
+      .badge { white-space: nowrap; }
+
+      /* Card headers */
+      .card-header { font-size: .85rem; }
+
+      /* Table font */
+      .table { font-size: .8rem; }
+      .table td, .table th { padding: .5rem .6rem !important; white-space: nowrap; }
     }
   </style>
 </head>
