@@ -169,6 +169,22 @@
     .outcome-hit{color:var(--green);font-weight:600}
     .outcome-miss{color:var(--red);font-weight:600}
     .outcome-partial{color:var(--yellow);font-weight:600}
+
+    @media (max-width: 768px) {
+      .header-inner { height: auto; padding: 10px 0; gap: 10px; flex-wrap: wrap; }
+      .tab-toggle { overflow-x: auto; width: 100%; }
+      .header-right { display: none; }
+      #clock { display: none; }
+      main { padding: 16px 12px; }
+      .stocks-grid { grid-template-columns: 1fr; }
+      .toolbar { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 6px; }
+      .status-bar { flex-direction: column; align-items: flex-start; gap: 8px; }
+      .stats-row { margin-left: 0; gap: 14px; }
+      .levels { grid-template-columns: 1fr 1fr 1fr; gap: 5px; }
+      .level-price { font-size: .78rem; }
+      .back-table { font-size: .78rem; }
+      .back-table th, .back-table td { padding: 8px 10px; }
+    }
   </style>
 </head>
 <body>
