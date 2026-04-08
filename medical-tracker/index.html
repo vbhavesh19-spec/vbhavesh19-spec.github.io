@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Medical Tracker — Family Health Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --sidebar-w: 220px;
+      --sidebar-bg: #1a2942;
+      --sidebar-active: #2d4a72;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --bg: #f1f5f9;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #e2e8f0;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 0.9rem; }
+
+    /* SIDEBAR */
+    .sidebar { width: var(--sidebar-w); min-height: 100vh; background: var(--sidebar-bg); position: fixed; top: 0; left: 0; z-index: 1040; display: flex; flex-direction: column; overflow-y: auto; }
+    .sidebar-brand { padding: 1.25rem 1rem; font-size: 1rem; font-weight: 700; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.1); text-decoration: none; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
+    .sidebar-brand:hover { color: #fff; }
+    .sidebar-section { padding: 0.5rem 0.75rem 0.25rem; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-top: 0.5rem; }
+    .sidebar .nav-link { color: rgba(255,255,255,0.7); padding: 0.5rem 1rem; border-radius: 6px; margin: 1px 0.5rem; display: flex; align-items: center; gap: 0.6rem; font-size: 0.85rem; transition: background 0.15s, color 0.15s; cursor: pointer; text-decoration: none; }
+    .sidebar .nav-link:hover, .sidebar .nav-link.active { background: var(--sidebar-active); color: #fff; }
+    .sidebar .nav-link i { font-size: 1rem; width: 18px; }
+    .parent-switcher { display: flex; margin: 0.5rem; background: rgba(255,255,255,0.08); border-radius: 8px; overflow: hidden; }
+    .parent-switcher a { flex: 1; text-align: center; padding: 0.45rem 0.5rem; color: rgba(255,255,255,0.6); font-size: 0.8rem; font-weight: 600; text-decoration: none; transition: background 0.15s, color 0.15s; cursor: pointer; }
+    .parent-switcher a.active { background: var(--accent); color: #fff; border-radius: 6px; }
+    .sidebar-footer { margin-top: auto; padding: 0.75rem 0.5rem; border-top: 1px solid rgba(255,255,255,0.1); }
+
+    /* MAIN */
+    .main-wrapper { margin-left: var(--sidebar-w); min-height: 100vh; display: flex; flex-direction: column; }
+    .content-area { padding: 1.5rem; flex: 1; }
+
+    /* CARDS */
+    .card { border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+    .card-header { background: #fff; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 0.88rem; padding: 0.75rem 1rem; border-radius: 10px 10px 0 0 !important; }
+    .stat-card { border-radius: 10px; padding: 1rem 1.25rem; border: 1px solid var(--border); background: #fff; }
+    .stat-card .stat-value { font-size: 1.8rem; font-weight: 700; line-height: 1; }
+    .stat-card .stat-label { font-size: 0.75rem; color: var(--muted); margin-top: 0.2rem; }
+
+    /* TABLES */
+    .table { font-size: 0.85rem; }
+    .table th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); font-weight: 600; border-top: none; }
+
+    /* BADGES */
+    .badge { font-size: 0.7rem; font-weight: 600; border-radius: 5px; }
+    .abnormal-badge { background: #fef2f2; color: #ef4444; border: 1px solid #fecaca; font-size: 0.7rem; padding: 0.15rem 0.4rem; border-radius: 4px; font-weight: 600; }
+    .normal-badge { background: #f0fdf4; color: #22c55e; border: 1px solid #bbf7d0; font-size: 0.7rem; padding: 0.15rem 0.4rem; border-radius: 4px; font-weight: 600; }
+
+    /* DEMO BANNER */
+    .demo-banner { background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 10px 16px; font-size: 0.78rem; color: #92400e; margin-bottom: 1.5rem; }
+
+    /* PANEL SWITCHING */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* VITALS CHART */
+    .chart-container { position: relative; height: 200px; }
+
+    /* MOBILE */
+    @media (max-width: 767px) {
+      .sidebar { display: none; }
+      .main-wrapper { margin-left: 0; }
+      .content-area { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <a class="sidebar-brand" onclick="showPanel('home')">
+    <i class="bi bi-heart-pulse-fill text-danger"></i> Medical Tracker
+  </a>
+  <div class="parent-switcher">
+    <a id="switcher-1" class="active" onclick="switchParent(1)">Dad</a>
+    <a id="switcher-2" onclick="switchParent(2)">Mum</a>
+  </div>
+  <div class="sidebar-section">Navigation</div>
+  <nav class="nav flex-column">
+    <a class="nav-link active" id="nav-dashboard" onclick="showPanel('dashboard')"><i class="bi bi-grid-1x2"></i> Dashboard</a>
+    <a class="nav-link" id="nav-medications" onclick="showPanel('medications')"><i class="bi bi-capsule"></i> Medications</a>
+    <a class="nav-link" id="nav-appointments" onclick="showPanel('appointments')"><i class="bi bi-calendar-check"></i> Appointments</a>
+    <a class="nav-link" id="nav-vitals" onclick="showPanel('vitals')"><i class="bi bi-activity"></i> Vitals</a>
+    <a class="nav-link" id="nav-labs" onclick="showPanel('labs')"><i class="bi bi-flask"></i> Lab Results</a>
+    <a class="nav-link" id="nav-diagnoses" onclick="showPanel('diagnoses')"><i class="bi bi-clipboard2-pulse"></i> Diagnoses</a>
+  </nav>
+  <div class="sidebar-footer">
+    <a class="nav-link text-white-50" style="font-size:0.78rem;padding:0.5rem 1rem;display:flex;align-items:center;gap:0.6rem"><i class="bi bi-info-circle"></i> Demo Mode</a>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main-wrapper">
+  <div class="content-area">
+
+    <div class="demo-banner">
+      <i class="bi bi-info-circle me-1"></i> <strong>Demo Mode:</strong> This is a static showcase of the Family Medical Tracker. All records are illustrative sample data. The real app uses a live SQLite database with Claude AI for parsing medical reports.
+    </div>
+
+    <!-- HOME (landing) -->
+    <div id="panel-home" class="panel active">
+      <h2 class="mb-1 fw-bold">Family Medical Records</h2>
+      <p class="text-muted mb-4">Select a parent to view their health summary.</p>
+      <div class="row g-4">
+        <div class="col-md-6">
+          <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <span class="fw-bold fs-6"><i class="bi bi-person-circle me-2 text-primary"></i>Dad (Ramesh)</span>
+            </div>
+            <div class="card-body">
+              <p class="text-muted small mb-3"><i class="bi bi-calendar2 me-1"></i>1952-08-14 &ensp;<span class="badge bg-danger-subtle text-danger border border-danger-subtle">B+</span>&ensp;<span class="badge bg-warning-subtle text-warning border border-warning-subtle"><i class="bi bi-exclamation-triangle me-1"></i>Penicillin allergy</span></p>
+              <div class="row g-2 mb-3">
+                <div class="col-3"><div class="stat-card text-center"><div class="stat-value text-primary">5</div><div class="stat-label">Meds</div></div></div>
+                <div class="col-3"><div class="stat-card text-center"><div class="stat-value text-danger">3</div><div class="stat-label">Diagnoses</div></div></div>
+                <div class="col-3"><div class="stat-card text-center border-warning"><div class="stat-value text-warning">2</div><div class="stat-label">Abnormal</div></div></div>
+                <div class="col-3"><div class="stat-card text-center"><div class="stat-value text-secondary">8</div><div class="stat-label">Docs</div></div></div>
+              </div>
+              <div class="d-flex align-items-start gap-2 p-2 rounded mb-2" style="background:#eff6ff;border:1px solid #bfdbfe;">
+                <i class="bi bi-calendar-event text-primary mt-1"></i>
+                <div class="small"><strong>Next:</strong> 2025-04-10 — Dr. Mehta (Cardiology)<br><span class="text-muted">Quarterly follow-up</span></div>
+              </div>
+              <p class="small text-muted mb-0"><i class="bi bi-activity me-1"></i>Last vitals (2025-03-28): BP 138/88 · Sugar 142 · 74 kg</p>
+            </div>
+            <div class="card-footer bg-transparent">
+              <button class="btn btn-primary btn-sm" onclick="switchParent(1);showPanel('dashboard')">Open Dashboard <i class="bi bi-arrow-right ms-1"></i></button>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <span class="fw-bold fs-6"><i class="bi bi-person-circle me-2 text-primary"></i>Mum (Sudha)</span>
+            </div>
+            <div class="card-body">
+              <p class="text-muted small mb-3"><i class="bi bi-calendar2 me-1"></i>1955-03-22 &ensp;<span class="badge bg-danger-subtle text-danger border border-danger-subtle">O+</span></p>
+              <div class="row g-2 mb-3">
+                <div class="col-3"><div class="stat-card text-center"><div class="stat-value text-primary">3</div><div class="stat-label">Meds</div></div></div>
+                <div class="col-3"><div class="stat-card text-center"><div class="stat-value text-danger">2</div><div class="stat-label">Diagnoses</div></div></div>
+                <div class="col-3"><div class="stat-card text-center"><div class="stat-value text-muted">0</div><div class="stat-label">Abnormal</div></div></div>
+                <div class="col-3"><div class="stat-card text-center"><div class="stat-value text-secondary">5</div><div class="stat-label">Docs</div></div></div>
+              </div>
+              <div class="d-flex align-items-start gap-2 p-2 rounded mb-2" style="background:#eff6ff;border:1px solid #bfdbfe;">
+                <i class="bi bi-calendar-event text-primary mt-1"></i>
+                <div class="small"><strong>Next:</strong> 2025-04-18 — Dr. Kulkarni (Endocrinology)<br><span class="text-muted">Thyroid annual review</span></div>
+              </div>
+              <p class="small text-muted mb-0"><i class="bi bi-activity me-1"></i>Last vitals (2025-03-25): BP 122/78 · Sugar 98 · 62 kg</p>
+            </div>
+            <div class="card-footer bg-transparent">
+              <button class="btn btn-primary btn-sm" onclick="switchParent(2);showPanel('dashboard')">Open Dashboard <i class="bi bi-arrow-right ms-1"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="panel-dashboard" class="panel">
+      <div id="dash-content"></div>
+    </div>
+
+    <!-- MEDICATIONS -->
+    <div id="panel-medications" class="panel">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="fw-bold mb-0" id="med-title">Medications</h2>
+      </div>
+      <div class="card"><div class="card-body p-0">
+        <table class="table table-hover mb-0" id="med-table">
+          <thead class="table-light"><tr><th>Medication</th><th>Dose</th><th>Frequency</th><th>Prescribed By</th><th>Since</th><th>Status</th></tr></thead>
+          <tbody id="med-body"></tbody>
+        </table>
+      </div></div>
+    </div>
+
+    <!-- APPOINTMENTS -->
+    <div id="panel-appointments" class="panel">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="fw-bold mb-0" id="appt-title">Appointments</h2>
+      </div>
+      <div class="card"><div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead class="table-light"><tr><th>Date</th><th>Doctor</th><th>Specialty</th><th>Hospital</th><th>Reason</th><th>Notes</th></tr></thead>
+          <tbody id="appt-body"></tbody>
+        </table>
+      </div></div>
+    </div>
+
+    <!-- VITALS -->
+    <div id="panel-vitals" class="panel">
+      <h2 class="fw-bold mb-3" id="vitals-title">Vitals</h2>
+      <div class="row g-3 mb-4" id="vitals-cards"></div>
+      <div class="card mb-4"><div class="card-header">Blood Pressure Trend</div>
+        <div class="card-body"><div class="chart-container"><canvas id="bpChart"></canvas></div></div>
+      </div>
+      <div class="card"><div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead class="table-light"><tr><th>Date</th><th>BP (mmHg)</th><th>Heart Rate</th><th>Blood Sugar</th><th>Weight</th><th>SpO2</th></tr></thead>
+          <tbody id="vitals-body"></tbody>
+        </table>
+      </div></div>
+    </div>
+
+    <!-- LAB RESULTS -->
+    <div id="panel-labs" class="panel">
+      <h2 class="fw-bold mb-3" id="labs-title">Lab Results</h2>
+      <div class="card"><div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead class="table-light"><tr><th>Date</th><th>Test Name</th><th>Value</th><th>Reference Range</th><th>Status</th><th>Lab</th></tr></thead>
+          <tbody id="labs-body"></tbody>
+        </table>
+      </div></div>
+    </div>
+
+    <!-- DIAGNOSES -->
+    <div id="panel-diagnoses" class="panel">
+      <h2 class="fw-bold mb-3" id="diag-title">Diagnoses</h2>
+      <div id="diag-cards" class="row g-3"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const data = {
+  1: {
+    name: 'Dad (Ramesh)',
+    dob: '1952-08-14', blood: 'B+', allergy: 'Penicillin',
+    medications: [
+      { name:'Amlodipine', dose:'5 mg', freq:'Once daily (morning)', doctor:'Dr. Mehta', since:'2021-06', status:'Active' },
+      { name:'Metformin', dose:'500 mg', freq:'Twice daily (with meals)', doctor:'Dr. Sharma', since:'2018-03', status:'Active' },
+      { name:'Atorvastatin', dose:'20 mg', freq:'Once daily (night)', doctor:'Dr. Mehta', since:'2020-09', status:'Active' },
+      { name:'Aspirin', dose:'75 mg', freq:'Once daily (morning)', doctor:'Dr. Mehta', since:'2021-06', status:'Active' },
+      { name:'Metoprolol', dose:'25 mg', freq:'Twice daily', doctor:'Dr. Mehta', since:'2022-01', status:'Active' },
+    ],
+    appointments: [
+      { date:'2025-04-10', doctor:'Dr. Mehta', specialty:'Cardiology', hospital:'Apollo Hospital', reason:'Quarterly follow-up', notes:'Review BP logs, ECG scheduled' },
+      { date:'2025-03-05', doctor:'Dr. Sharma', specialty:'Diabetology', hospital:'Fortis Clinic', reason:'HbA1c review', notes:'HbA1c 7.2 — marginal, review diet' },
+      { date:'2025-01-18', doctor:'Dr. Mehta', specialty:'Cardiology', hospital:'Apollo Hospital', reason:'Echo + stress test', notes:'EF 58% — normal. Mild LVH noted.' },
+      { date:'2024-11-22', doctor:'Dr. Nair', specialty:'Ophthalmology', hospital:'Eye Care Centre', reason:'Annual eye check', notes:'Early diabetic retinopathy stage 1 — monitor' },
+    ],
+    vitals: [
+      { date:'2025-03-28', bp:'138/88', hr:'76', sugar:'142', weight:'74', spo2:'97' },
+      { date:'2025-03-14', bp:'142/90', hr:'78', sugar:'156', weight:'74.2', spo2:'97' },
+      { date:'2025-02-28', bp:'135/85', hr:'74', sugar:'138', weight:'73.8', spo2:'98' },
+      { date:'2025-02-14', bp:'140/88', hr:'80', sugar:'162', weight:'74.5', spo2:'97' },
+      { date:'2025-01-31', bp:'144/92', hr:'82', sugar:'148', weight:'75', spo2:'96' },
+      { date:'2025-01-15', bp:'136/86', hr:'76', sugar:'135', weight:'74.8', spo2:'97' },
+    ],
+    labs: [
+      { date:'2025-03-05', test:'HbA1c', value:'7.2%', range:'< 7.0%', status:'abnormal', lab:'SRL Diagnostics' },
+      { date:'2025-03-05', test:'Fasting Glucose', value:'142 mg/dL', range:'70–99 mg/dL', status:'abnormal', lab:'SRL Diagnostics' },
+      { date:'2025-03-05', test:'Total Cholesterol', value:'186 mg/dL', range:'< 200 mg/dL', status:'normal', lab:'SRL Diagnostics' },
+      { date:'2025-03-05', test:'LDL Cholesterol', value:'112 mg/dL', range:'< 100 mg/dL', status:'normal', lab:'SRL Diagnostics' },
+      { date:'2025-03-05', test:'HDL Cholesterol', value:'48 mg/dL', range:'> 40 mg/dL', status:'normal', lab:'SRL Diagnostics' },
+      { date:'2025-03-05', test:'Creatinine', value:'1.1 mg/dL', range:'0.7–1.2 mg/dL', status:'normal', lab:'SRL Diagnostics' },
+      { date:'2025-01-18', test:'ECG', value:'Normal sinus rhythm', range:'Normal', status:'normal', lab:'Apollo Hospital' },
+      { date:'2025-01-18', test:'Echo (EF)', value:'58%', range:'55–70%', status:'normal', lab:'Apollo Hospital' },
+    ],
+    diagnoses: [
+      { condition:'Type 2 Diabetes Mellitus', since:'2018', severity:'Moderate', doctor:'Dr. Sharma', notes:'On Metformin. HbA1c target <7.0%. Quarterly monitoring.' },
+      { condition:'Hypertension', since:'2021', severity:'Mild', doctor:'Dr. Mehta', notes:'BP controlled on Amlodipine + Metoprolol. Target <130/80.' },
+      { condition:'Hypercholesterolaemia', since:'2020', severity:'Mild', doctor:'Dr. Mehta', notes:'LDL on target with Atorvastatin 20mg. Annual lipid panel.' },
+    ]
+  },
+  2: {
+    name: 'Mum (Sudha)',
+    dob: '1955-03-22', blood: 'O+', allergy: null,
+    medications: [
+      { name:'Levothyroxine', dose:'50 mcg', freq:'Once daily (empty stomach)', doctor:'Dr. Kulkarni', since:'2015-07', status:'Active' },
+      { name:'Calcium + Vit D3', dose:'500mg/400IU', freq:'Once daily (with meal)', doctor:'Dr. Kulkarni', since:'2019-01', status:'Active' },
+      { name:'Metoprolol', dose:'12.5 mg', freq:'Once daily', doctor:'Dr. Mehta', since:'2023-04', status:'Active' },
+    ],
+    appointments: [
+      { date:'2025-04-18', doctor:'Dr. Kulkarni', specialty:'Endocrinology', hospital:'Kokilaben Hospital', reason:'Annual thyroid review', notes:'TSH + T4 ordered' },
+      { date:'2025-03-12', doctor:'Dr. Mehta', specialty:'Cardiology', hospital:'Apollo Hospital', reason:'Mild palpitations review', notes:'Holter normal. Metoprolol dose maintained.' },
+      { date:'2025-01-08', doctor:'Dr. Rao', specialty:'Orthopaedics', hospital:'Fortis Clinic', reason:'Knee pain — right', notes:'Mild osteoarthritis. Physiotherapy recommended.' },
+    ],
+    vitals: [
+      { date:'2025-03-25', bp:'122/78', hr:'68', sugar:'98', weight:'62', spo2:'99' },
+      { date:'2025-03-10', bp:'118/76', hr:'70', sugar:'94', weight:'62.2', spo2:'99' },
+      { date:'2025-02-22', bp:'124/80', hr:'72', sugar:'102', weight:'62.5', spo2:'98' },
+      { date:'2025-02-08', bp:'120/78', hr:'68', sugar:'96', weight:'62.3', spo2:'99' },
+      { date:'2025-01-25', bp:'126/82', hr:'74', sugar:'100', weight:'63', spo2:'98' },
+    ],
+    labs: [
+      { date:'2025-01-08', test:'TSH', value:'2.4 mIU/L', range:'0.4–4.0 mIU/L', status:'normal', lab:'Metropolis' },
+      { date:'2025-01-08', test:'Free T4', value:'1.1 ng/dL', range:'0.8–1.8 ng/dL', status:'normal', lab:'Metropolis' },
+      { date:'2025-01-08', test:'Calcium', value:'9.2 mg/dL', range:'8.5–10.5 mg/dL', status:'normal', lab:'Metropolis' },
+      { date:'2025-01-08', test:'Vitamin D', value:'28 ng/mL', range:'30–100 ng/mL', status:'normal', lab:'Metropolis' },
+      { date:'2025-01-08', test:'Fasting Glucose', value:'98 mg/dL', range:'70–99 mg/dL', status:'normal', lab:'Metropolis' },
+    ],
+    diagnoses: [
+      { condition:'Hypothyroidism', since:'2015', severity:'Mild', doctor:'Dr. Kulkarni', notes:'Well-controlled on Levothyroxine 50mcg. Annual TSH check.' },
+      { condition:'Osteopenia', since:'2019', severity:'Mild', doctor:'Dr. Kulkarni', notes:'Calcium + Vit D supplementation. DEXA scan every 2 years.' },
+    ]
+  }
+};
+
+let currentParent = 1;
+let bpChartInstance = null;
+
+function switchParent(id) {
+  currentParent = id;
+  document.getElementById('switcher-1').classList.toggle('active', id === 1);
+  document.getElementById('switcher-2').classList.toggle('active', id === 2);
+  refreshCurrentPanel();
+}
+
+function showPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sidebar .nav-link').forEach(l => l.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  const navEl = document.getElementById('nav-' + name);
+  if (navEl) navEl.classList.add('active');
+  refreshCurrentPanel();
+}
+
+function refreshCurrentPanel() {
+  const p = data[currentParent];
+  // Determine active panel
+  const active = document.querySelector('.panel.active');
+  if (!active) return;
+  const id = active.id.replace('panel-', '');
+
+  if (id === 'dashboard') renderDashboard(p);
+  else if (id === 'medications') renderMedications(p);
+  else if (id === 'appointments') renderAppointments(p);
+  else if (id === 'vitals') renderVitals(p);
+  else if (id === 'labs') renderLabs(p);
+  else if (id === 'diagnoses') renderDiagnoses(p);
+}
+
+function renderDashboard(p) {
+  const next = p.appointments[0];
+  const last = p.vitals[0];
+  const abnormal = p.labs.filter(l => l.status === 'abnormal').length;
+  document.getElementById('dash-content').innerHTML = `
+    <h2 class="fw-bold mb-1">${p.name}</h2>
+    <p class="text-muted mb-3 small"><i class="bi bi-calendar2 me-1"></i>${p.dob}&ensp;
+      <span class="badge bg-danger-subtle text-danger border border-danger-subtle">${p.blood}</span>
+      ${p.allergy ? `&ensp;<span class="badge bg-warning-subtle text-warning border border-warning-subtle"><i class="bi bi-exclamation-triangle me-1"></i>${p.allergy} allergy</span>` : ''}
+    </p>
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-3"><div class="stat-card text-center"><div class="stat-value text-primary">${p.medications.length}</div><div class="stat-label">Medications</div></div></div>
+      <div class="col-6 col-md-3"><div class="stat-card text-center"><div class="stat-value text-danger">${p.diagnoses.length}</div><div class="stat-label">Diagnoses</div></div></div>
+      <div class="col-6 col-md-3"><div class="stat-card text-center ${abnormal>0?'border-warning':''}"><div class="stat-value ${abnormal>0?'text-warning':'text-muted'}">${abnormal}</div><div class="stat-label">Abnormal Labs</div></div></div>
+      <div class="col-6 col-md-3"><div class="stat-card text-center"><div class="stat-value text-success">${p.appointments.length}</div><div class="stat-label">Appointments</div></div></div>
+    </div>
+    <div class="row g-3 mb-4">
+      <div class="col-md-6">
+        <div class="card h-100">
+          <div class="card-header"><i class="bi bi-calendar-check text-primary me-2"></i>Next Appointment</div>
+          <div class="card-body">
+            <div class="d-flex align-items-start gap-2 p-2 rounded" style="background:#eff6ff;border:1px solid #bfdbfe;">
+              <i class="bi bi-calendar-event text-primary mt-1"></i>
+              <div class="small"><strong>${next.date}</strong> — Dr. ${next.doctor} (${next.specialty})<br><span class="text-muted">${next.hospital} · ${next.reason}</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card h-100">
+          <div class="card-header"><i class="bi bi-activity text-success me-2"></i>Latest Vitals (${last.date})</div>
+          <div class="card-body">
+            <div class="row g-2 text-center">
+              <div class="col-4"><div class="fw-bold text-danger fs-5">${last.bp}</div><div class="text-muted" style="font-size:0.7rem">Blood Pressure</div></div>
+              <div class="col-4"><div class="fw-bold text-primary fs-5">${last.hr}</div><div class="text-muted" style="font-size:0.7rem">Heart Rate</div></div>
+              <div class="col-4"><div class="fw-bold text-warning fs-5">${last.sugar}</div><div class="text-muted" style="font-size:0.7rem">Blood Sugar</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><i class="bi bi-clipboard2-pulse text-danger me-2"></i>Active Diagnoses</div>
+      <div class="card-body p-0">
+        <table class="table mb-0">
+          <thead class="table-light"><tr><th>Condition</th><th>Since</th><th>Doctor</th><th>Notes</th></tr></thead>
+          <tbody>${p.diagnoses.map(d=>`<tr><td class="fw-semibold">${d.condition}</td><td>${d.since}</td><td>${d.doctor}</td><td class="text-muted small">${d.notes}</td></tr>`).join('')}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function renderMedications(p) {
+  document.getElementById('med-title').textContent = `Medications — ${p.name}`;
+  document.getElementById('med-body').innerHTML = p.medications.map(m => `
+    <tr>
+      <td class="fw-semibold">${m.name}</td>
+      <td>${m.dose}</td>
+      <td>${m.freq}</td>
+      <td>${m.doctor}</td>
+      <td>${m.since}</td>
+      <td><span class="badge bg-success-subtle text-success border border-success-subtle">${m.status}</span></td>
+    </tr>`).join('');
+}
+
+function renderAppointments(p) {
+  document.getElementById('appt-title').textContent = `Appointments — ${p.name}`;
+  document.getElementById('appt-body').innerHTML = p.appointments.map((a,i) => `
+    <tr>
+      <td><strong>${a.date}</strong>${i===0?' <span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-1">Upcoming</span>':''}</td>
+      <td>${a.doctor}</td>
+      <td>${a.specialty}</td>
+      <td>${a.hospital}</td>
+      <td>${a.reason}</td>
+      <td class="text-muted small">${a.notes}</td>
+    </tr>`).join('');
+}
+
+function renderVitals(p) {
+  document.getElementById('vitals-title').textContent = `Vitals — ${p.name}`;
+  const last = p.vitals[0];
+  document.getElementById('vitals-cards').innerHTML = `
+    <div class="col-6 col-md-3"><div class="stat-card text-center"><div class="stat-value text-danger">${last.bp}</div><div class="stat-label">Blood Pressure</div></div></div>
+    <div class="col-6 col-md-3"><div class="stat-card text-center"><div class="stat-value text-primary">${last.hr} bpm</div><div class="stat-label">Heart Rate</div></div></div>
+    <div class="col-6 col-md-3"><div class="stat-card text-center"><div class="stat-value text-warning">${last.sugar} mg/dL</div><div class="stat-label">Blood Sugar</div></div></div>
+    <div class="col-6 col-md-3"><div class="stat-card text-center"><div class="stat-value text-success">${last.weight} kg</div><div class="stat-label">Weight</div></div></div>`;
+
+  document.getElementById('vitals-body').innerHTML = p.vitals.map(v => `
+    <tr>
+      <td>${v.date}</td>
+      <td>${v.bp}</td>
+      <td>${v.hr} bpm</td>
+      <td>${v.sugar} mg/dL</td>
+      <td>${v.weight} kg</td>
+      <td>${v.spo2}%</td>
+    </tr>`).join('');
+
+  // Chart
+  setTimeout(() => {
+    const ctx = document.getElementById('bpChart');
+    if (!ctx) return;
+    if (bpChartInstance) bpChartInstance.destroy();
+    const sys = p.vitals.map(v => parseInt(v.bp.split('/')[0])).reverse();
+    const dia = p.vitals.map(v => parseInt(v.bp.split('/')[1])).reverse();
+    const labels = p.vitals.map(v => v.date.slice(5)).reverse();
+    bpChartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          { label: 'Systolic', data: sys, borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.08)', borderWidth: 2, pointRadius: 4, tension: 0.3 },
+          { label: 'Diastolic', data: dia, borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.08)', borderWidth: 2, pointRadius: 4, tension: 0.3 }
+        ]
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { font: { size: 11 } } } }, scales: { y: { min: 60, max: 170, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } } }
+    });
+  }, 50);
+}
+
+function renderLabs(p) {
+  document.getElementById('labs-title').textContent = `Lab Results — ${p.name}`;
+  document.getElementById('labs-body').innerHTML = p.labs.map(l => `
+    <tr>
+      <td>${l.date}</td>
+      <td class="fw-semibold">${l.test}</td>
+      <td>${l.value}</td>
+      <td class="text-muted small">${l.range}</td>
+      <td>${l.status === 'abnormal' ? '<span class="abnormal-badge">ABNORMAL</span>' : '<span class="normal-badge">NORMAL</span>'}</td>
+      <td class="text-muted small">${l.lab}</td>
+    </tr>`).join('');
+}
+
+function renderDiagnoses(p) {
+  document.getElementById('diag-title').textContent = `Diagnoses — ${p.name}`;
+  document.getElementById('diag-cards').innerHTML = p.diagnoses.map(d => `
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span><i class="bi bi-clipboard2-pulse text-danger me-2"></i>${d.condition}</span>
+          <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">${d.severity}</span>
+        </div>
+        <div class="card-body">
+          <p class="small text-muted mb-1"><i class="bi bi-calendar me-1"></i>Diagnosed: ${d.since} &ensp; <i class="bi bi-person-badge me-1"></i>${d.doctor}</p>
+          <p class="small mb-0">${d.notes}</p>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// Init
+showPanel('home');
+</script>
+</body>
+</html>

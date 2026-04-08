@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Market Alpha — NSE Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg:#060a12;--bg2:#0b1120;
+      --surface:rgba(15,22,40,0.85);--surface2:rgba(20,30,55,0.6);
+      --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+      --text:#e8edf8;--muted:#5a6a8a;--muted2:#8899bb;
+      --blue:#3d8bff;--blue-glow:rgba(61,139,255,0.3);
+      --purple:#9b72ff;--cyan:#22d3ee;
+      --green:#22c55e;--green-dim:rgba(34,197,94,0.12);
+      --red:#f43f5e;--red-dim:rgba(244,63,94,0.12);
+      --yellow:#f59e0b;--orange:#fb923c;
+      --grad1:linear-gradient(135deg,#3d8bff,#9b72ff);
+      --grad2:linear-gradient(135deg,#22c55e,#06b6d4);
+      --grad3:linear-gradient(135deg,#f43f5e,#f59e0b);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;overflow-x:hidden;}
+    body::before{content:'';position:fixed;top:-200px;left:-200px;width:700px;height:700px;background:radial-gradient(circle,rgba(61,139,255,0.08),transparent 70%);pointer-events:none;z-index:0;}
+    body::after{content:'';position:fixed;bottom:-200px;right:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(155,114,255,0.07),transparent 70%);pointer-events:none;z-index:0;}
+
+    /* HEADER */
+    header{position:sticky;top:0;z-index:200;background:rgba(6,10,18,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 24px;}
+    .header-inner{max-width:1380px;margin:0 auto;display:flex;align-items:center;gap:16px;height:64px;flex-wrap:wrap;}
+    .logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+    .logo-icon{width:36px;height:36px;border-radius:10px;background:var(--grad1);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fff;box-shadow:0 0 16px var(--blue-glow);}
+    .logo-text{font-size:1.1rem;font-weight:800;color:var(--text);letter-spacing:-0.3px}
+    .logo-sub{font-size:0.65rem;color:var(--muted);font-weight:400;display:block;margin-top:-2px}
+    .tab-toggle{display:flex;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:12px;padding:4px;gap:2px;}
+    .tab-btn{padding:7px 20px;border-radius:8px;font-size:0.8rem;font-weight:600;border:none;cursor:pointer;transition:all 0.25s;color:var(--muted2);background:transparent;white-space:nowrap;}
+    .tab-btn.active{background:var(--grad1);color:#fff;box-shadow:0 2px 12px var(--blue-glow);}
+    .tab-btn:hover:not(.active){color:var(--text);background:rgba(255,255,255,0.06)}
+    .header-right{display:flex;align-items:center;gap:12px;margin-left:auto;flex-wrap:wrap}
+    #clock{font-size:0.78rem;color:var(--muted2);font-variant-numeric:tabular-nums;font-weight:500}
+    .market-badge{padding:4px 12px;border-radius:20px;font-size:0.7rem;font-weight:700;letter-spacing:0.8px;}
+    .market-close{background:var(--red-dim);color:var(--red);border:1px solid rgba(244,63,94,0.3)}
+    .demo-badge{padding:4px 12px;border-radius:20px;font-size:0.7rem;font-weight:700;letter-spacing:0.8px;background:rgba(245,158,11,0.12);color:var(--yellow);border:1px solid rgba(245,158,11,0.3);}
+    .btn{padding:8px 18px;border-radius:9px;font-size:0.8rem;font-weight:600;border:none;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+    .btn-primary{background:var(--grad1);color:#fff;box-shadow:0 2px 12px var(--blue-glow)}
+    .btn-ghost{background:rgba(255,255,255,0.05);color:var(--muted2);border:1px solid var(--border)}
+
+    /* MAIN */
+    main{max-width:1380px;margin:0 auto;padding:28px 20px;position:relative;z-index:1}
+    .tab-panel{display:none;animation:fadeIn 0.35s ease}
+    .tab-panel.active{display:block}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+    .glass{background:var(--surface);backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:16px;}
+    .glass-sm{background:var(--surface2);border:1px solid var(--border);border-radius:10px}
+
+    .disclaimer{background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:10px 16px;font-size:0.72rem;color:rgba(245,158,11,0.85);margin-bottom:24px;line-height:1.6;}
+
+    /* STATUS BAR */
+    .status-bar{display:flex;align-items:center;gap:12px;padding:14px 20px;margin-bottom:24px;}
+    .status-icon{font-size:1.1rem}
+    .status-text{flex:1;font-size:0.83rem;color:var(--muted2)}
+    .stats-row{display:flex;gap:24px;margin-left:auto;flex-wrap:wrap}
+    .stat{text-align:right}
+    .stat-label{font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.7px}
+    .stat-value{font-size:0.95rem;font-weight:700;color:var(--text);margin-top:1px}
+
+    /* TOOLBAR */
+    .toolbar{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
+    .toolbar-label{font-size:0.75rem;color:var(--muted);font-weight:600;margin-right:4px}
+    .chip{padding:5px 14px;border-radius:8px;font-size:0.75rem;font-weight:500;border:1px solid var(--border);color:var(--muted2);background:transparent;cursor:pointer;transition:all 0.15s;}
+    .chip.active,.chip:hover{background:rgba(61,139,255,0.15);border-color:rgba(61,139,255,0.5);color:var(--blue)}
+
+    /* STOCK CARDS */
+    .stocks-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:14px;}
+    .stock-card{background:var(--surface);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:16px;padding:18px;transition:border-color 0.2s,transform 0.2s,box-shadow 0.2s;position:relative;overflow:hidden;}
+    .stock-card:hover{border-color:rgba(61,139,255,0.35);transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,0.35);}
+    .stock-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--grad1);opacity:0.6;}
+    .risk-LOW .stock-card::before{background:var(--grad2)}
+    .risk-HIGH .stock-card::before{background:var(--grad3)}
+    .card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+    .sym{font-size:1.1rem;font-weight:800;letter-spacing:0.2px;color:var(--text)}
+    .badges{display:flex;gap:6px;margin-top:5px;flex-wrap:wrap}
+    .badge{font-size:0.6rem;font-weight:700;padding:2px 8px;border-radius:6px;letter-spacing:0.5px;}
+    .badge-green{background:var(--green-dim);color:var(--green);border:1px solid rgba(34,197,94,0.25)}
+    .badge-yellow{background:rgba(245,158,11,0.1);color:var(--yellow);border:1px solid rgba(245,158,11,0.25)}
+    .badge-red{background:var(--red-dim);color:var(--red);border:1px solid rgba(244,63,94,0.25)}
+    .badge-blue{background:rgba(61,139,255,0.1);color:var(--blue);border:1px solid rgba(61,139,255,0.25)}
+    .badge-purple{background:rgba(155,114,255,0.1);color:var(--purple);border:1px solid rgba(155,114,255,0.25)}
+    .price-block{text-align:right}
+    .price{font-size:1.18rem;font-weight:800;font-variant-numeric:tabular-nums}
+    .chg{font-size:0.75rem;font-weight:600;margin-top:3px}
+    .pos{color:var(--green)}.neg{color:var(--red)}
+    .score-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+    .score-track{flex:1;height:5px;background:rgba(255,255,255,0.07);border-radius:3px;overflow:hidden}
+    .score-fill{height:100%;border-radius:3px;transition:width 0.6s cubic-bezier(0.4,0,0.2,1)}
+    .score-num{font-size:0.8rem;font-weight:700;min-width:38px;text-align:right}
+    .score-lbl{font-size:0.65rem;color:var(--muted)}
+    .levels{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
+    .level{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:9px;text-align:center;}
+    .level-lbl{font-size:0.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px}
+    .level-price{font-size:0.88rem;font-weight:700;font-variant-numeric:tabular-nums}
+    .level-pct{font-size:0.62rem;margin-top:2px;font-weight:500}
+    .sl-color{color:var(--red)}.t1-color{color:var(--green)}.t2-color{color:var(--cyan)}
+    .inds{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+    .ind{font-size:0.65rem;font-family:monospace;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:5px;padding:3px 8px;color:var(--muted2);}
+    .sigs{display:none;flex-direction:column;gap:4px;margin-top:8px}
+    .expanded .sigs{display:flex}
+    .sig{font-size:0.7rem;color:var(--muted2);display:flex;gap:6px}
+    .sig::before{content:'✓';color:var(--green);flex-shrink:0}
+    .expand-btn{width:100%;margin-top:10px;padding:6px;border-radius:8px;background:transparent;border:1px solid var(--border);color:var(--muted);font-size:0.7rem;cursor:pointer;transition:all 0.15s;}
+    .expand-btn:hover{border-color:var(--blue);color:var(--blue)}
+
+    /* OPTIONS TAB */
+    .vix-section{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center;margin-bottom:28px;}
+    .vix-card{padding:24px 32px;text-align:center;min-width:180px;}
+    .vix-label{font-size:0.65rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px}
+    .vix-value{font-size:3rem;font-weight:900;letter-spacing:-1px;line-height:1}
+    .vix-sub{font-size:0.72rem;margin-top:8px;font-weight:500}
+    .vix-NORMAL{color:var(--cyan)}
+    .vix-info{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+    .info-pill{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
+    .info-pill .lbl{font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
+    .info-pill .val{font-size:1rem;font-weight:700}
+    .info-pill .desc{font-size:0.65rem;color:var(--muted2);margin-top:2px}
+    .idx-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:16px;margin-bottom:28px}
+    .idx-card{padding:22px}
+    .idx-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
+    .idx-name{font-size:1.2rem;font-weight:800}
+    .idx-spot{font-size:1.6rem;font-weight:900;font-variant-numeric:tabular-nums;color:var(--text)}
+    .idx-spot-lbl{font-size:0.62rem;color:var(--muted);text-transform:uppercase}
+    .bias-row{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+    .bias-badge{padding:5px 14px;border-radius:8px;font-size:0.75rem;font-weight:700;letter-spacing:0.5px;}
+    .BULLISH{background:var(--green-dim);color:var(--green);border:1px solid rgba(34,197,94,0.3)}
+    .BEARISH{background:var(--red-dim);color:var(--red);border:1px solid rgba(244,63,94,0.3)}
+    .NEUTRAL{background:rgba(34,211,238,0.08);color:var(--cyan);border:1px solid rgba(34,211,238,0.3)}
+    .bias-sig{font-size:0.68rem;color:var(--muted2);line-height:1.6}
+    .rec-box{background:rgba(61,139,255,0.06);border:1px solid rgba(61,139,255,0.2);border-radius:12px;padding:16px;margin-bottom:16px;}
+    .rec-title{font-size:0.65rem;text-transform:uppercase;letter-spacing:0.8px;color:var(--blue);margin-bottom:10px;font-weight:600}
+    .rec-main{font-size:1.4rem;font-weight:900;color:var(--text);margin-bottom:8px}
+    .rec-sub{font-size:0.72rem;color:var(--muted2)}
+    .rec-levels{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px}
+    .chain-section{margin-top:14px}
+    .chain-title{font-size:0.65rem;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);margin-bottom:8px;font-weight:600}
+    .chain-table{width:100%;border-collapse:collapse;font-size:0.72rem;font-variant-numeric:tabular-nums}
+    .chain-table th{padding:6px 10px;text-align:right;font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid var(--border);font-weight:600;}
+    .chain-table th:first-child{text-align:center}
+    .chain-table td{padding:7px 10px;text-align:right;border-bottom:1px solid rgba(255,255,255,0.03)}
+    .chain-table td:first-child{text-align:center;font-weight:700}
+    .chain-table tr.atm-row td{background:rgba(61,139,255,0.06);font-weight:700}
+    .chain-table tr.atm-row td:first-child::after{content:' ★';color:var(--blue)}
+    .ce-price{color:var(--green)}.pe-price{color:var(--red)}.delta-val{color:var(--muted2)}
+
+    /* PERFORMANCE TAB */
+    .perf-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:28px}
+    .perf-card{padding:20px;text-align:center}
+    .perf-value{font-size:2rem;font-weight:900;margin-bottom:4px}
+    .perf-label{font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px}
+    .perf-sub{font-size:0.72rem;color:var(--muted2);margin-top:4px}
+    .chart-wrap{padding:24px;margin-bottom:24px}
+    .chart-title{font-size:0.72rem;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:20px;font-weight:600}
+    .back-table{width:100%;border-collapse:collapse;font-size:0.8rem}
+    .back-table th{padding:10px 14px;text-align:left;font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid var(--border);font-weight:600;}
+    .back-table td{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,0.03);font-variant-numeric:tabular-nums}
+    .back-table tr:last-child td{border-bottom:none}
+    .back-table tr:hover td{background:rgba(255,255,255,0.02)}
+    .outcome-hit{color:var(--green);font-weight:600}
+    .outcome-miss{color:var(--red);font-weight:600}
+    .outcome-partial{color:var(--yellow);font-weight:600}
+  </style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <a class="logo" href="#">
+      <div class="logo-icon">M</div>
+      <div>
+        <span class="logo-text">Market Alpha</span>
+        <span class="logo-sub">NSE Technical Screener</span>
+      </div>
+    </a>
+    <div class="tab-toggle">
+      <button class="tab-btn active" onclick="switchTab('stocks',this)">📈 Stocks</button>
+      <button class="tab-btn" onclick="switchTab('options',this)">⚡ Options</button>
+      <button class="tab-btn" onclick="switchTab('performance',this)">📊 Performance</button>
+    </div>
+    <div class="header-right">
+      <span id="clock"></span>
+      <span class="market-badge market-close">MARKET CLOSED</span>
+      <span class="demo-badge">DEMO</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ═══════════════════ STOCKS TAB ═══════════════════ -->
+<div id="tab-stocks" class="tab-panel active">
+  <div class="disclaimer">
+    ⚠️ <strong>Demo Mode:</strong> This is a static showcase of the NSE Stock Screener. All data is sample/illustrative only and does not represent real market conditions. Not financial advice.
+  </div>
+
+  <div class="glass status-bar">
+    <span class="status-icon">✅</span>
+    <span class="status-text">Last screened: Today 4:15 PM IST · Scanned 500 Nifty 500 symbols · 15 stocks passed all filters</span>
+    <div class="stats-row">
+      <div class="stat"><div class="stat-label">Screened</div><div class="stat-value">500</div></div>
+      <div class="stat"><div class="stat-label">Passed</div><div class="stat-value" style="color:var(--green)">15</div></div>
+      <div class="stat"><div class="stat-label">Low Risk</div><div class="stat-value" style="color:var(--cyan)">8</div></div>
+      <div class="stat"><div class="stat-label">High Risk</div><div class="stat-value" style="color:var(--yellow)">7</div></div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <span class="toolbar-label">Filter:</span>
+    <button class="chip active" onclick="filterCards('all',this)">All (15)</button>
+    <button class="chip" onclick="filterCards('LOW',this)">🟢 Low Risk (8)</button>
+    <button class="chip" onclick="filterCards('HIGH',this)">🟡 High Risk (7)</button>
+    <button class="chip" onclick="filterCards('MOMENTUM',this)">⚡ Momentum</button>
+    <button class="chip" onclick="filterCards('BREAKOUT',this)">🚀 Breakout</button>
+  </div>
+
+  <div class="stocks-grid" id="stocks-grid"></div>
+</div>
+
+<!-- ═══════════════════ OPTIONS TAB ═══════════════════ -->
+<div id="tab-options" class="tab-panel">
+  <div class="disclaimer">⚠️ <strong>Demo Mode:</strong> Options data is illustrative. Real app uses live Upstox API + Black-Scholes pricing.</div>
+
+  <div class="vix-section">
+    <div class="glass vix-card">
+      <div class="vix-label">India VIX</div>
+      <div class="vix-value vix-NORMAL">14.2</div>
+      <div class="vix-sub vix-NORMAL">NORMAL</div>
+    </div>
+    <div class="vix-info">
+      <div class="info-pill glass-sm"><div class="lbl">Regime</div><div class="val" style="color:var(--cyan)">Normal</div><div class="desc">14–20 range</div></div>
+      <div class="info-pill glass-sm"><div class="lbl">Suggested Strategy</div><div class="val">Directional</div><div class="desc">Buy CE/PE spreads</div></div>
+      <div class="info-pill glass-sm"><div class="lbl">IV Percentile</div><div class="val">32%</div><div class="desc">Options relatively cheap</div></div>
+      <div class="info-pill glass-sm"><div class="lbl">Risk-Reward</div><div class="val" style="color:var(--green)">Favourable</div><div class="desc">Good for long options</div></div>
+      <div class="info-pill glass-sm"><div class="lbl">Expiry</div><div class="val">Apr 03, 2025</div><div class="desc">2 days to expiry</div></div>
+      <div class="info-pill glass-sm"><div class="lbl">PCR (Nifty)</div><div class="val">0.87</div><div class="desc">Slight bullish bias</div></div>
+    </div>
+  </div>
+
+  <div class="idx-grid">
+    <!-- NIFTY -->
+    <div class="glass idx-card">
+      <div class="idx-header">
+        <div><div class="idx-name">NIFTY 50</div><div style="font-size:0.65rem;color:var(--muted);margin-top:3px">NSE:NIFTY · Weekly Expiry Thu</div></div>
+        <div><div class="idx-spot-lbl">Spot</div><div class="idx-spot">23,847</div></div>
+      </div>
+      <div class="bias-row">
+        <span class="bias-badge BULLISH">BULLISH</span>
+        <div class="bias-sig">EMA 20 > EMA 50 · RSI 62 · MACD positive crossover · Above weekly pivot</div>
+      </div>
+      <div class="rec-box">
+        <div class="rec-title">Recommended Trade</div>
+        <div class="rec-main">BUY 23900 CE @ ₹85</div>
+        <div class="rec-sub">Expiry: 03 Apr 2025 · Delta 0.42 · Theta -12.4 · IV 13.8%</div>
+        <div class="rec-levels">
+          <div class="level"><div class="level-lbl">Entry</div><div class="level-price" style="color:var(--blue)">₹85</div></div>
+          <div class="level"><div class="level-lbl">Target</div><div class="level-price sl-color" style="color:var(--green)">₹140</div><div class="level-pct pos">+64.7%</div></div>
+          <div class="level"><div class="level-lbl">Stop Loss</div><div class="level-price sl-color">₹45</div><div class="level-pct neg">-47.1%</div></div>
+        </div>
+      </div>
+      <div class="chain-section">
+        <div class="chain-title">Strike Chain (nearest 5 strikes)</div>
+        <table class="chain-table">
+          <thead><tr><th>Strike</th><th>CE Price</th><th>CE Delta</th><th>PE Price</th><th>PE Delta</th></tr></thead>
+          <tbody>
+            <tr><td>23600</td><td class="ce-price">312</td><td class="delta-val">0.72</td><td class="pe-price">48</td><td class="delta-val">-0.28</td></tr>
+            <tr><td>23700</td><td class="ce-price">228</td><td class="delta-val">0.64</td><td class="pe-price">65</td><td class="delta-val">-0.36</td></tr>
+            <tr><td>23800</td><td class="ce-price">152</td><td class="delta-val">0.54</td><td class="pe-price">89</td><td class="delta-val">-0.46</td></tr>
+            <tr class="atm-row"><td>23900</td><td class="ce-price">85</td><td class="delta-val">0.42</td><td class="pe-price">122</td><td class="delta-val">-0.58</td></tr>
+            <tr><td>24000</td><td class="ce-price">42</td><td class="delta-val">0.30</td><td class="pe-price">178</td><td class="delta-val">-0.70</td></tr>
+            <tr><td>24100</td><td class="ce-price">18</td><td class="delta-val">0.18</td><td class="pe-price">248</td><td class="delta-val">-0.82</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- BANKNIFTY -->
+    <div class="glass idx-card">
+      <div class="idx-header">
+        <div><div class="idx-name">BANKNIFTY</div><div style="font-size:0.65rem;color:var(--muted);margin-top:3px">NSE:BANKNIFTY · Weekly Expiry Wed</div></div>
+        <div><div class="idx-spot-lbl">Spot</div><div class="idx-spot">51,234</div></div>
+      </div>
+      <div class="bias-row">
+        <span class="bias-badge NEUTRAL">NEUTRAL</span>
+        <div class="bias-sig">Price between EMA 20/50 · RSI 52 · MACD flat · Near weekly pivot 51,200</div>
+      </div>
+      <div class="rec-box">
+        <div class="rec-title">Recommended Trade</div>
+        <div class="rec-main">STRADDLE 51200 @ ₹310</div>
+        <div class="rec-sub">Buy 51200 CE ₹155 + 51200 PE ₹155 · Breakeven: ±310 pts</div>
+        <div class="rec-levels">
+          <div class="level"><div class="level-lbl">Debit</div><div class="level-price" style="color:var(--blue)">₹310</div></div>
+          <div class="level"><div class="level-lbl">Upper B/E</div><div class="level-price" style="color:var(--green)">51,510</div></div>
+          <div class="level"><div class="level-lbl">Lower B/E</div><div class="level-price sl-color">50,890</div></div>
+        </div>
+      </div>
+      <div class="chain-section">
+        <div class="chain-title">Strike Chain</div>
+        <table class="chain-table">
+          <thead><tr><th>Strike</th><th>CE Price</th><th>CE Delta</th><th>PE Price</th><th>PE Delta</th></tr></thead>
+          <tbody>
+            <tr><td>50800</td><td class="ce-price">580</td><td class="delta-val">0.68</td><td class="pe-price">82</td><td class="delta-val">-0.32</td></tr>
+            <tr><td>51000</td><td class="ce-price">410</td><td class="delta-val">0.60</td><td class="pe-price">112</td><td class="delta-val">-0.40</td></tr>
+            <tr class="atm-row"><td>51200</td><td class="ce-price">155</td><td class="delta-val">0.50</td><td class="pe-price">155</td><td class="delta-val">-0.50</td></tr>
+            <tr><td>51400</td><td class="ce-price">78</td><td class="delta-val">0.38</td><td class="pe-price">278</td><td class="delta-val">-0.62</td></tr>
+            <tr><td>51600</td><td class="ce-price">32</td><td class="delta-val">0.24</td><td class="pe-price">432</td><td class="delta-val">-0.76</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ PERFORMANCE TAB ═══════════════════ -->
+<div id="tab-performance" class="tab-panel">
+  <div class="disclaimer">⚠️ <strong>Demo Mode:</strong> Backtesting results are simulated sample data for illustration purposes.</div>
+
+  <div class="perf-grid">
+    <div class="glass perf-card"><div class="perf-value" style="color:var(--green)">68.4%</div><div class="perf-label">Hit Rate</div><div class="perf-sub">Last 90 days</div></div>
+    <div class="glass perf-card"><div class="perf-value" style="color:var(--cyan)">2.3x</div><div class="perf-label">Avg Risk/Reward</div><div class="perf-sub">T1 hit average</div></div>
+    <div class="glass perf-card"><div class="perf-value" style="color:var(--green)">+24.7%</div><div class="perf-label">Avg Return</div><div class="perf-sub">On T1 hits</div></div>
+    <div class="glass perf-card"><div class="perf-value">247</div><div class="perf-label">Total Picks</div><div class="perf-sub">Across 90 sessions</div></div>
+    <div class="glass perf-card"><div class="perf-value" style="color:var(--green)">169</div><div class="perf-label">Hits (T1+)</div><div class="perf-sub">Target 1 reached</div></div>
+    <div class="glass perf-card"><div class="perf-value" style="color:var(--red)">78</div><div class="perf-label">Misses</div><div class="perf-sub">Stop loss hit</div></div>
+  </div>
+
+  <div class="glass chart-wrap">
+    <div class="chart-title">Weekly Hit Rate — Last 12 Weeks</div>
+    <canvas id="perfChart" height="80"></canvas>
+  </div>
+
+  <div class="glass" style="padding:0;overflow:hidden">
+    <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:0.78rem;font-weight:600;color:var(--muted2)">Recent Backtested Picks</span>
+      <span style="font-size:0.68rem;color:var(--muted)">Last 10 sessions</span>
+    </div>
+    <table class="back-table">
+      <thead><tr><th>Date</th><th>Symbol</th><th>Entry</th><th>T1</th><th>T2</th><th>SL</th><th>Outcome</th><th>Return</th></tr></thead>
+      <tbody>
+        <tr><td>01 Apr</td><td style="font-weight:700">SUNPHARMA</td><td>₹1,456</td><td>₹1,498</td><td>₹1,532</td><td>₹1,418</td><td class="outcome-hit">T2 HIT ✓</td><td class="pos">+5.2%</td></tr>
+        <tr><td>01 Apr</td><td style="font-weight:700">TITAN</td><td>₹3,234</td><td>₹3,318</td><td>₹3,388</td><td>₹3,150</td><td class="outcome-hit">T1 HIT ✓</td><td class="pos">+2.6%</td></tr>
+        <tr><td>01 Apr</td><td style="font-weight:700">LT</td><td>₹3,125</td><td>₹3,210</td><td>₹3,282</td><td>₹3,042</td><td class="outcome-miss">SL HIT ✗</td><td class="neg">-2.7%</td></tr>
+        <tr><td>31 Mar</td><td style="font-weight:700">RELIANCE</td><td>₹2,847</td><td>₹2,924</td><td>₹2,988</td><td>₹2,770</td><td class="outcome-hit">T1 HIT ✓</td><td class="pos">+2.7%</td></tr>
+        <tr><td>31 Mar</td><td style="font-weight:700">BHARTIARTL</td><td>₹1,567</td><td>₹1,613</td><td>₹1,648</td><td>₹1,524</td><td class="outcome-hit">T2 HIT ✓</td><td class="pos">+5.2%</td></tr>
+        <tr><td>31 Mar</td><td style="font-weight:700">ADANIENT</td><td>₹2,456</td><td>₹2,528</td><td>₹2,588</td><td>₹2,390</td><td class="outcome-partial">PARTIAL ∼</td><td class="pos">+2.9%</td></tr>
+        <tr><td>28 Mar</td><td style="font-weight:700">INFY</td><td>₹1,892</td><td>₹1,943</td><td>₹1,983</td><td>₹1,841</td><td class="outcome-miss">SL HIT ✗</td><td class="neg">-2.7%</td></tr>
+        <tr><td>28 Mar</td><td style="font-weight:700">HCLTECH</td><td>₹1,678</td><td>₹1,724</td><td>₹1,760</td><td>₹1,633</td><td class="outcome-hit">T1 HIT ✓</td><td class="pos">+2.7%</td></tr>
+        <tr><td>27 Mar</td><td style="font-weight:700">MARUTI</td><td>₹12,450</td><td>₹12,784</td><td>₹13,050</td><td>₹12,116</td><td class="outcome-hit">T2 HIT ✓</td><td class="pos">+4.8%</td></tr>
+        <tr><td>27 Mar</td><td style="font-weight:700">AXISBANK</td><td>₹1,123</td><td>₹1,155</td><td>₹1,181</td><td>₹1,093</td><td class="outcome-hit">T1 HIT ✓</td><td class="pos">+2.8%</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</main>
+
+<script>
+// ── Tab switching ──
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'performance') renderChart();
+}
+
+// ── Clock ──
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent = now.toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+setInterval(updateClock, 1000); updateClock();
+
+// ── Stock data ──
+const stocks = [
+  { sym:'SUNPHARMA', sector:'Pharma', price:'1,456.30', chg:'+34.80', pct:'+2.45%', pos:true, score:88, risk:'LOW', tags:['MOMENTUM','BREAKOUT'], badges:[['badge-green','MOMENTUM'],['badge-blue','BREAKOUT']], entry:'1456', sl:'1418', t1:'1498', t2:'1532', slpct:'-2.6%', t1pct:'+2.9%', t2pct:'+5.2%', sigs:['RSI(14) = 73 — bullish momentum zone','EMA 20 crossed above EMA 50 — golden cross','MACD histogram expanding positive','Volume 2.4x 20-day average — institutional buying','52-week high breakout — strong continuation signal'] },
+  { sym:'TITAN', sector:'Consumer', price:'3,234.15', chg:'+88.25', pct:'+2.81%', pos:true, score:87, risk:'LOW', tags:['MOMENTUM','BREAKOUT'], badges:[['badge-green','MOMENTUM'],['badge-blue','BREAKOUT']], entry:'3234', sl:'3150', t1:'3318', t2:'3388', slpct:'-2.6%', t1pct:'+2.6%', t2pct:'+4.8%', sigs:['RSI(14) = 74 — strong momentum','Price broke above 20-day Bollinger Band upper','MACD bullish divergence from lows','Volume surge 1.9x — accumulation phase','Closing above key resistance 3,200'] },
+  { sym:'ADANIENT', sector:'Conglomerate', price:'2,456.80', chg:'+75.40', pct:'+3.17%', pos:true, score:90, risk:'HIGH', tags:['MOMENTUM','BREAKOUT'], badges:[['badge-green','MOMENTUM'],['badge-purple','HIGH BETA']], entry:'2456', sl:'2390', t1:'2528', t2:'2588', slpct:'-2.7%', t1pct:'+2.9%', t2pct:'+5.3%', sigs:['RSI(14) = 76 — strong uptrend','All 3 EMAs (20/50/200) aligned bullish','MACD above signal line for 8 consecutive days','Volume 3.1x average — very high activity','Supertrend (7,3) flipped bullish yesterday'] },
+  { sym:'RELIANCE', sector:'Energy / Retail', price:'2,847.65', chg:'+33.90', pct:'+1.21%', pos:true, score:78, risk:'LOW', tags:['MOMENTUM'], badges:[['badge-green','MOMENTUM'],['badge-yellow','LARGECAP']], entry:'2847', sl:'2770', t1:'2924', t2:'2988', slpct:'-2.7%', t1pct:'+2.7%', t2pct:'+5.0%', sigs:['RSI(14) = 58 — trending, not overbought','EMA 20 > EMA 50 — medium-term uptrend','Volume 1.6x 20-day average','Price bounced off EMA 20 support','MACD positive, building momentum'] },
+  { sym:'BHARTIARTL', sector:'Telecom', price:'1,567.20', chg:'+13.85', pct:'+0.89%', pos:true, score:80, risk:'LOW', tags:['MOMENTUM','BREAKOUT'], badges:[['badge-green','MOMENTUM'],['badge-blue','BREAKOUT']], entry:'1567', sl:'1524', t1:'1613', t2:'1648', slpct:'-2.7%', t1pct:'+2.9%', t2pct:'+5.2%', sigs:['RSI(14) = 64 — bullish zone','Breakout above multi-week consolidation at 1,550','Volume confirmation on breakout day','EMA 20/50/200 all trending up','Sector tailwind: 5G capex cycle continuing'] },
+  { sym:'LT', sector:'Infra / Engineering', price:'3,125.40', chg:'+56.20', pct:'+1.83%', pos:true, score:82, risk:'LOW', tags:['MOMENTUM'], badges:[['badge-green','MOMENTUM'],['badge-yellow','VALUE']], entry:'3125', sl:'3042', t1:'3210', t2:'3282', slpct:'-2.7%', t1pct:'+2.7%', t2pct:'+5.0%', sigs:['RSI(14) = 66 — momentum intact','Price holding above EMA 20 cleanly','MACD histogram positive and rising','Order book at 10-year high — fundamental support','Volume 1.8x average'] },
+  { sym:'HCLTECH', sector:'IT', price:'1,678.50', chg:'+26.70', pct:'+1.62%', pos:true, score:81, risk:'LOW', tags:['MOMENTUM'], badges:[['badge-green','MOMENTUM'],['badge-blue','IT SECTOR']], entry:'1678', sl:'1633', t1:'1724', t2:'1760', slpct:'-2.7%', t1pct:'+2.7%', t2pct:'+4.9%', sigs:['RSI(14) = 67 — bullish','EMA crossover 7 sessions ago, holding','Strong quarterly results — beat estimates','Volume 1.7x 20-day average','Nifty IT sector outperforming Nifty 50'] },
+  { sym:'MARUTI', sector:'Auto', price:'12,450.00', chg:'+136.50', pct:'+1.11%', pos:true, score:76, risk:'LOW', tags:['MOMENTUM'], badges:[['badge-green','MOMENTUM'],['badge-yellow','LARGECAP']], entry:'12450', sl:'12116', t1:'12784', t2:'13050', slpct:'-2.7%', t1pct:'+2.7%', t2pct:'+4.8%', sigs:['RSI(14) = 61 — mid-momentum','EMA 20 support holding for 3 weeks','Monthly sales data beat street estimates','MACD positive crossover on daily chart','Volume above 20-day average'] },
+  { sym:'INFY', sector:'IT', price:'1,892.30', chg:'+39.00', pct:'+2.10%', pos:true, score:85, risk:'HIGH', tags:['MOMENTUM','BREAKOUT'], badges:[['badge-green','MOMENTUM'],['badge-blue','BREAKOUT']], entry:'1892', sl:'1841', t1:'1943', t2:'1983', slpct:'-2.7%', t1pct:'+2.7%', t2pct:'+4.8%', sigs:['RSI(14) = 71 — approaching overbought, watch','Breakout from 3-month base at 1,850','Volume 2.2x on breakout — strong signal','MACD bullish crossover confirmed','EMA 50/200 golden cross forming'] },
+  { sym:'ICICIBANK', sector:'Banking', price:'1,234.75', chg:'+18.25', pct:'+1.50%', pos:true, score:75, risk:'LOW', tags:['MOMENTUM'], badges:[['badge-green','MOMENTUM'],['badge-yellow','BANKING']], entry:'1234', sl:'1201', t1:'1268', t2:'1296', slpct:'-2.7%', t1pct:'+2.7%', t2pct:'+5.0%', sigs:['RSI(14) = 55 — healthy momentum','Credit growth 15% YoY — strong fundamental','Volume 1.5x average — steady accumulation','EMA 20 trending up cleanly','NIM expansion expected next quarter'] },
+  { sym:'AXISBANK', sector:'Banking', price:'1,123.40', chg:'+6.60', pct:'+0.59%', pos:true, score:70, risk:'LOW', tags:['MOMENTUM'], badges:[['badge-green','MOMENTUM'],['badge-yellow','BANKING']], entry:'1123', sl:'1093', t1:'1155', t2:'1181', slpct:'-2.7%', t1pct:'+2.8%', t2pct:'+5.1%', sigs:['RSI(14) = 52 — building momentum','Consolidation breakout from 1,100 range','Volume 1.4x on move — confirms move','EMA 20 crossed EMA 50 this week','Analyst upgrades driving interest'] },
+  { sym:'WIPRO', sector:'IT', price:'567.80', chg:'+2.25', pct:'+0.40%', pos:true, score:63, risk:'HIGH', tags:['MOMENTUM'], badges:[['badge-yellow','MOMENTUM'],['badge-blue','IT SECTOR']], entry:'567', sl:'552', t1:'583', t2:'595', slpct:'-2.6%', t1pct:'+2.8%', t2pct:'+5.0%', sigs:['RSI(14) = 48 — weak momentum, caution','Price at EMA 20 resistance test','Volume marginally above average','MACD trying to cross zero line','Needs close above 570 to confirm'] },
+  { sym:'TCS', sector:'IT', price:'3,542.00', chg:'+28.00', pct:'+0.80%', pos:true, score:72, risk:'LOW', tags:['MOMENTUM'], badges:[['badge-green','MOMENTUM'],['badge-yellow','LARGECAP']], entry:'3542', sl:'3448', t1:'3638', t2:'3720', slpct:'-2.6%', t1pct:'+2.7%', t2pct:'+5.0%', sigs:['RSI(14) = 62 — good momentum','EMA 20 > 50 > 200 — all aligned','Large deal pipeline announced','Volume 1.6x 20-day average','AI services revenue growing 40% YoY'] },
+  { sym:'KOTAKBANK', sector:'Banking', price:'1,845.60', chg:'-9.25', pct:'-0.50%', pos:false, score:60, risk:'HIGH', tags:['MOMENTUM'], badges:[['badge-yellow','CAUTION'],['badge-yellow','BANKING']], entry:'1845', sl:'1796', t1:'1894', t2:'1935', slpct:'-2.7%', t1pct:'+2.6%', t2pct:'+4.9%', sigs:['RSI(14) = 42 — weakening momentum','Price below EMA 20 but above EMA 50','Volume 1.3x on down day — mild selling','MACD negative but flattening','Watch for bounce from EMA 50 support at 1,820'] },
+  { sym:'HDFCBANK', sector:'Banking', price:'1,678.40', chg:'-5.05', pct:'-0.30%', pos:false, score:65, risk:'HIGH', tags:['MOMENTUM'], badges:[['badge-yellow','CAUTION'],['badge-yellow','BANKING']], entry:'1678', sl:'1634', t1:'1724', t2:'1760', slpct:'-2.6%', t1pct:'+2.7%', t2pct:'+4.9%', sigs:['RSI(14) = 45 — neutral/weak','Price consolidating at EMA 20 support','Volume average — no conviction','MACD negative but narrowing gap','FII buying detected in last 3 sessions'] },
+];
+
+function renderStocks(filter) {
+  const grid = document.getElementById('stocks-grid');
+  let filtered = stocks;
+  if (filter === 'LOW') filtered = stocks.filter(s => s.risk === 'LOW');
+  else if (filter === 'HIGH') filtered = stocks.filter(s => s.risk === 'HIGH');
+  else if (filter === 'MOMENTUM') filtered = stocks.filter(s => s.tags.includes('MOMENTUM'));
+  else if (filter === 'BREAKOUT') filtered = stocks.filter(s => s.tags.includes('BREAKOUT'));
+
+  grid.innerHTML = filtered.map((s,i) => `
+    <div class="risk-${s.risk}" style="animation:fadeIn 0.4s ease ${i*0.05}s both">
+      <div class="stock-card" id="card-${s.sym}">
+        <div class="card-top">
+          <div>
+            <div class="sym">${s.sym}</div>
+            <div style="font-size:0.68rem;color:var(--muted);margin-top:2px">${s.sector}</div>
+            <div class="badges">${s.badges.map(([cls,lbl])=>`<span class="badge ${cls}">${lbl}</span>`).join('')}</div>
+          </div>
+          <div class="price-block">
+            <div class="price">₹${s.price}</div>
+            <div class="chg ${s.pos?'pos':'neg'}">${s.chg} (${s.pct})</div>
+          </div>
+        </div>
+        <div class="score-row">
+          <span class="score-lbl">Signal Score</span>
+          <div class="score-track"><div class="score-fill" style="width:${s.score}%;background:${s.score>=80?'var(--grad2)':s.score>=65?'var(--grad1)':'var(--grad3)'}"></div></div>
+          <span class="score-num" style="color:${s.score>=80?'var(--green)':s.score>=65?'var(--blue)':'var(--yellow)'}">${s.score}/100</span>
+        </div>
+        <div class="levels">
+          <div class="level"><div class="level-lbl">Entry</div><div class="level-price" style="color:var(--blue)">₹${s.entry}</div></div>
+          <div class="level"><div class="level-lbl">Target 1</div><div class="level-price t1-color">₹${s.t1}</div><div class="level-pct pos">${s.t1pct}</div></div>
+          <div class="level"><div class="level-lbl">Stop Loss</div><div class="level-price sl-color">₹${s.sl}</div><div class="level-pct neg">${s.slpct}</div></div>
+        </div>
+        <div class="inds">
+          <span class="ind">RSI: ${50+Math.floor(s.score/5)}</span>
+          <span class="ind">EMA20 ↑</span>
+          <span class="ind">MACD+</span>
+          <span class="ind">Vol: ${(1.2+s.score/100).toFixed(1)}x</span>
+        </div>
+        <div class="sigs">${s.sigs.map(sg=>`<div class="sig">${sg}</div>`).join('')}</div>
+        <button class="expand-btn" onclick="toggleExpand('${s.sym}',this)">▼ Show Signals</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleExpand(sym, btn) {
+  const card = document.getElementById('card-' + sym);
+  card.classList.toggle('expanded');
+  btn.textContent = card.classList.contains('expanded') ? '▲ Hide Signals' : '▼ Show Signals';
+}
+
+function filterCards(f, btn) {
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  renderStocks(f);
+}
+
+// ── Performance chart ──
+let chartRendered = false;
+function renderChart() {
+  if (chartRendered) return;
+  chartRendered = true;
+  const ctx = document.getElementById('perfChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Wk 1','Wk 2','Wk 3','Wk 4','Wk 5','Wk 6','Wk 7','Wk 8','Wk 9','Wk 10','Wk 11','Wk 12'],
+      datasets: [{
+        label: 'Hit Rate %',
+        data: [62, 71, 58, 75, 80, 66, 73, 69, 78, 64, 72, 68],
+        backgroundColor: 'rgba(61,139,255,0.25)',
+        borderColor: '#3d8bff',
+        borderWidth: 2,
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` Hit Rate: ${ctx.parsed.y}%` } } },
+      scales: {
+        y: { min: 0, max: 100, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#5a6a8a', callback: v => v + '%' } },
+        x: { grid: { display: false }, ticks: { color: '#5a6a8a' } }
+      }
+    }
+  });
+}
+
+renderStocks('all');
+</script>
+</body>
+</html>

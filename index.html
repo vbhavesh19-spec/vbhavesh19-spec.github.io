@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bhavesh — Portfolio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg:        #09090f;
+      --bg2:       #0e0e18;
+      --surface:   #13131f;
+      --surface2:  #1a1a2e;
+      --border:    rgba(255,255,255,.07);
+      --text:      #e8e8f5;
+      --muted:     #6b6b8a;
+      --pink:      #f857a6;
+      --blue:      #57c7f8;
+      --purple:    #c957f8;
+      --green:     #4de8a1;
+      --orange:    #ff9a44;
+      --yellow:    #f9f047;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* ─── Noise texture overlay ─── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ─── Blobs ─── */
+    .blob {
+      position: fixed; border-radius: 50%;
+      filter: blur(100px); opacity: .15;
+      animation: drift 12s ease-in-out infinite alternate;
+      pointer-events: none; z-index: 0;
+    }
+    .b1 { width:500px;height:500px;background:var(--pink);  top:-150px;left:-150px; }
+    .b2 { width:450px;height:450px;background:var(--blue);  bottom:-100px;right:-100px;animation-delay:-6s; }
+    .b3 { width:350px;height:350px;background:var(--purple);top:50%;left:55%;animation-delay:-3s; }
+    @keyframes drift {
+      from { transform: translate(0,0) scale(1); }
+      to   { transform: translate(50px,40px) scale(1.15); }
+    }
+
+    /* ─── Nav ─── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 0 5%;
+      height: 64px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(9,9,15,.75);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      font-weight: 800; font-size: 1.1rem;
+      background: linear-gradient(90deg, var(--pink), var(--blue));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-decoration: none;
+    }
+    .nav-links { display: flex; gap: 28px; list-style: none; }
+    .nav-links a {
+      color: var(--muted); text-decoration: none; font-size: .88rem;
+      font-weight: 500; transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    /* ─── Sections ─── */
+    section { position: relative; z-index: 1; }
+
+    /* ─── Hero ─── */
+    #hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      padding: 80px 5% 60px;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 16px; border-radius: 99px;
+      border: 1px solid rgba(248,87,166,.3);
+      background: rgba(248,87,166,.07);
+      font-size: .82rem; font-weight: 500; color: var(--pink);
+      margin-bottom: 28px;
+      animation: fadeUp .8s ease both;
+    }
+    .hero-badge span { width:8px;height:8px;background:var(--pink);border-radius:50%;animation:pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.3} }
+
+    .hero-name {
+      font-size: clamp(3.5rem, 10vw, 8rem);
+      font-weight: 900; letter-spacing: -.04em; line-height: 1;
+      background: linear-gradient(135deg, var(--pink) 0%, #ff5858 25%, var(--orange) 50%, var(--blue) 75%, var(--purple) 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      animation: shine 5s linear infinite, fadeUp .9s ease .1s both;
+      margin-bottom: 20px;
+    }
+    @keyframes shine { to { background-position: 200% center; } }
+
+    .hero-title {
+      font-size: clamp(1rem, 2.5vw, 1.3rem);
+      font-weight: 400; color: var(--muted);
+      margin-bottom: 16px;
+      animation: fadeUp .9s ease .2s both;
+    }
+    .hero-title strong { color: var(--text); font-weight: 600; }
+
+    .hero-bio {
+      max-width: 560px; font-size: 1rem;
+      color: var(--muted); line-height: 1.75;
+      animation: fadeUp .9s ease .3s both;
+      margin-bottom: 36px;
+    }
+
+    .hero-actions {
+      display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+      animation: fadeUp .9s ease .4s both;
+      margin-bottom: 56px;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 11px 24px; border-radius: 10px; font-size: .92rem;
+      font-weight: 600; text-decoration: none; cursor: pointer;
+      transition: opacity .2s, transform .15s;
+    }
+    .btn:hover { opacity: .85; transform: translateY(-2px); }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--pink), #c23f80);
+      color: #fff; border: none;
+    }
+    .btn-ghost {
+      background: var(--surface); color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .scroll-hint {
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      color: var(--muted); font-size: .8rem;
+      animation: fadeUp 1s ease .6s both;
+    }
+    .scroll-line {
+      width: 1px; height: 48px;
+      background: linear-gradient(to bottom, var(--muted), transparent);
+      animation: scrollLine 2s ease-in-out infinite;
+    }
+    @keyframes scrollLine { 0%,100%{transform:scaleY(1);opacity:.6}50%{transform:scaleY(.6);opacity:.2} }
+
+    @keyframes fadeUp {
+      from { opacity:0;transform:translateY(28px); }
+      to   { opacity:1;transform:translateY(0); }
+    }
+
+    /* ─── Section headings ─── */
+    .section-wrap { padding: 90px 5%; max-width: 1100px; margin: 0 auto; }
+    .section-label {
+      font-size: .75rem; font-weight: 700; letter-spacing: .14em;
+      text-transform: uppercase; color: var(--pink); margin-bottom: 10px;
+    }
+    .section-title {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800; letter-spacing: -.03em; margin-bottom: 12px;
+    }
+    .section-sub {
+      color: var(--muted); font-size: 1rem; max-width: 520px; margin-bottom: 48px;
+    }
+
+    /* ─── Skills ─── */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+    .skill-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px; padding: 22px;
+      transition: border-color .2s, transform .2s;
+    }
+    .skill-card:hover { border-color: rgba(248,87,166,.3); transform: translateY(-3px); }
+    .skill-icon { font-size: 1.8rem; margin-bottom: 10px; }
+    .skill-name { font-weight: 700; font-size: 1rem; margin-bottom: 6px; }
+    .skill-desc { font-size: .84rem; color: var(--muted); line-height: 1.55; }
+    .skill-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+    .stag {
+      padding: 3px 10px; border-radius: 99px; font-size: .75rem;
+      font-weight: 600; background: var(--surface2); color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    /* ─── Projects ─── */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+    .project-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px; overflow: hidden;
+      display: flex; flex-direction: column;
+      transition: border-color .2s, transform .2s, box-shadow .2s;
+    }
+    .project-card:hover {
+      border-color: rgba(87,199,248,.25);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 50px rgba(0,0,0,.4);
+    }
+    .project-banner {
+      height: 140px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 3rem; position: relative; overflow: hidden;
+    }
+    .project-banner::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(to bottom, transparent 40%, var(--surface));
+    }
+    .project-body { padding: 20px; flex: 1; display: flex; flex-direction: column; }
+    .project-type {
+      font-size: .72rem; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
+    }
+    .project-name { font-size: 1.15rem; font-weight: 700; margin-bottom: 8px; }
+    .project-desc { font-size: .87rem; color: var(--muted); line-height: 1.6; flex: 1; }
+    .project-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border);
+    }
+    .tech-stack { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tech-tag {
+      padding: 3px 9px; border-radius: 6px; font-size: .72rem;
+      font-weight: 600; background: var(--surface2); color: var(--muted);
+    }
+    .project-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: var(--blue); text-decoration: none; font-size: .82rem;
+      font-weight: 600; white-space: nowrap;
+      transition: opacity .15s;
+    }
+    .project-link:hover { opacity: .7; }
+    .project-link.disabled { color: var(--muted); pointer-events: none; }
+
+    /* ─── Excel work ─── */
+    .excel-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .excel-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px; padding: 22px;
+      display: flex; gap: 16px;
+      transition: border-color .2s, transform .2s;
+    }
+    .excel-card:hover { border-color: rgba(77,232,161,.3); transform: translateY(-3px); }
+    .excel-icon {
+      width: 48px; height: 48px; border-radius: 10px;
+      background: linear-gradient(135deg, #1d6f42, #21a366);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; flex-shrink: 0;
+    }
+    .excel-name { font-weight: 700; font-size: .95rem; margin-bottom: 5px; }
+    .excel-desc { font-size: .83rem; color: var(--muted); line-height: 1.5; }
+    .excel-link {
+      display: inline-flex; align-items: center; gap: 5px;
+      margin-top: 10px; font-size: .8rem; font-weight: 600;
+      color: var(--green); text-decoration: none; transition: opacity .15s;
+    }
+    .excel-link:hover { opacity: .7; }
+
+    /* ─── About / Interests ─── */
+    .about-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 40px;
+      align-items: start;
+    }
+    .about-text p { color: var(--muted); margin-bottom: 14px; font-size: .97rem; line-height: 1.75; }
+    .about-text p strong { color: var(--text); }
+    .interest-tags { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+    .itag {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 8px 16px; border-radius: 99px; font-size: .88rem; font-weight: 600;
+      background: var(--surface2); border: 1px solid var(--border);
+      transition: transform .2s, border-color .2s;
+    }
+    .itag:hover { transform: translateY(-3px); border-color: rgba(255,255,255,.2); }
+
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .stat-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 18px 20px;
+    }
+    .stat-num { font-size: 2rem; font-weight: 800; }
+    .stat-label { font-size: .8rem; color: var(--muted); margin-top: 2px; }
+
+    /* ─── Contact ─── */
+    #contact { background: var(--bg2); }
+    .contact-inner {
+      max-width: 700px; margin: 0 auto;
+      text-align: center; padding: 90px 5%;
+    }
+    .contact-links { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; margin-top: 32px; }
+    .clink {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 12px 24px; border-radius: 10px;
+      border: 1px solid var(--border); background: var(--surface);
+      color: var(--text); text-decoration: none; font-weight: 600; font-size: .92rem;
+      transition: border-color .2s, transform .2s;
+    }
+    .clink:hover { border-color: rgba(248,87,166,.4); transform: translateY(-2px); }
+    .clink-icon { font-size: 1.2rem; }
+
+    /* ─── Footer ─── */
+    footer {
+      text-align: center; padding: 28px;
+      color: var(--muted); font-size: .82rem;
+      border-top: 1px solid var(--border);
+      position: relative; z-index: 1;
+    }
+    footer a { color: var(--pink); text-decoration: none; }
+
+    /* ─── Divider ─── */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 0 5%;
+    }
+
+    /* ─── Scrollbar ─── */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 99px; }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .about-grid { grid-template-columns: 1fr; }
+      .stat-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Blobs -->
+<div class="blob b1"></div>
+<div class="blob b2"></div>
+<div class="blob b3"></div>
+
+<!-- Nav -->
+<nav>
+  <a class="nav-logo" href="#hero">BVS</a>
+  <ul class="nav-links">
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#excel">Analysis</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- Hero -->
+<section id="hero">
+  <div class="hero-badge">
+    <span></span> Open to opportunities
+  </div>
+  <h1 class="hero-name">Bhavesh</h1>
+  <p class="hero-title"><strong>Finance &amp; Technology</strong> — Analyst · Builder · Explorer</p>
+  <p class="hero-bio">
+    Curious mind who bridges financial analysis and technology. I build tools that turn data into decisions — from stock screeners to health trackers.
+  </p>
+  <div class="hero-actions">
+    <a class="btn btn-primary" href="#projects">View My Work</a>
+    <a class="btn btn-ghost" href="Bhavesh Shah_CV.pdf" download>Download CV ↓</a>
+    <a class="btn btn-ghost" href="https://github.com/vbhavesh19-spec" target="_blank">GitHub ↗</a>
+  </div>
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    Scroll to explore
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Skills -->
+<section id="skills">
+  <div class="section-wrap">
+    <div class="section-label">What I bring</div>
+    <h2 class="section-title">Skills &amp; Expertise</h2>
+    <p class="section-sub">A blend of financial acumen and technical skills — built through hands-on projects.</p>
+    <div class="skills-grid">
+      <div class="skill-card">
+        <div class="skill-icon">📊</div>
+        <div class="skill-name">Financial Analysis</div>
+        <div class="skill-desc">P&amp;L modeling, equity research, 10-year financial trend analysis, ratio analysis and valuation frameworks.</div>
+        <div class="skill-tags">
+          <span class="stag">Excel</span><span class="stag">Financial Modeling</span><span class="stag">Equity</span>
+        </div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🐍</div>
+        <div class="skill-name">Python Development</div>
+        <div class="skill-desc">Building data-driven web apps, API integrations, screeners, and automation scripts using Python.</div>
+        <div class="skill-tags">
+          <span class="stag">Python</span><span class="stag">Flask</span><span class="stag">Pandas</span><span class="stag">REST APIs</span>
+        </div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">📈</div>
+        <div class="skill-name">Stock &amp; Market Analysis</div>
+        <div class="skill-desc">Technical screening of Nifty 500 stocks, options strategies, backtesting, and live market data pipelines.</div>
+        <div class="skill-tags">
+          <span class="stag">NSE</span><span class="stag">Technical Analysis</span><span class="stag">Options</span>
+        </div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🌐</div>
+        <div class="skill-name">Web Development</div>
+        <div class="skill-desc">Building clean, responsive front-end interfaces with HTML, CSS, and JavaScript — no framework needed.</div>
+        <div class="skill-tags">
+          <span class="stag">HTML/CSS</span><span class="stag">JavaScript</span><span class="stag">Responsive</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Projects -->
+<section id="projects">
+  <div class="section-wrap">
+    <div class="section-label">Things I've built</div>
+    <h2 class="section-title">Projects</h2>
+    <p class="section-sub">Real tools I use myself — from tracking health to screening stocks.</p>
+    <div class="projects-grid">
+
+      <div class="project-card">
+        <div class="project-banner" style="background:linear-gradient(135deg,#060a12,#0d1b3e)">📈</div>
+        <div class="project-body">
+          <div class="project-type">Fintech · Dashboard</div>
+          <div class="project-name">NSE Stock Screener</div>
+          <div class="project-desc">A full-featured stock market dashboard for Nifty 500 — technical screening, options analysis, live charts, backtesting engine, and market alerts. Built as a production-grade tool.</div>
+          <div class="project-footer">
+            <div class="tech-stack">
+              <span class="tech-tag">Python</span>
+              <span class="tech-tag">Flask</span>
+              <span class="tech-tag">Chart.js</span>
+              <span class="tech-tag">Upstox API</span>
+            </div>
+            <a class="project-link" href="stock-screener/index.html">Live Demo →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-banner" style="background:linear-gradient(135deg,#0a1628,#1a2942)">🏥</div>
+        <div class="project-body">
+          <div class="project-type">Health Tech · Dashboard</div>
+          <div class="project-name">Medical Tracker</div>
+          <div class="project-desc">A family health management dashboard — track medications, appointments, health metrics, and documents across multiple family members. Clean sidebar-driven UI.</div>
+          <div class="project-footer">
+            <div class="tech-stack">
+              <span class="tech-tag">Python</span>
+              <span class="tech-tag">Flask</span>
+              <span class="tech-tag">Bootstrap 5</span>
+              <span class="tech-tag">Chart.js</span>
+            </div>
+            <a class="project-link" href="medical-tracker/index.html">Live Demo →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-banner" style="background:linear-gradient(135deg,#0f0f13,#1a1a2e)">💸</div>
+        <div class="project-body">
+          <div class="project-type">Finance Tool · Web App</div>
+          <div class="project-name">Expense Tracker</div>
+          <div class="project-desc">A multi-category personal finance tracker with income/expense logging, monthly summaries, visual bar charts, and persistent local storage. Zero dependencies, runs offline.</div>
+          <div class="project-footer">
+            <div class="tech-stack">
+              <span class="tech-tag">HTML</span>
+              <span class="tech-tag">CSS</span>
+              <span class="tech-tag">JavaScript</span>
+            </div>
+            <a class="project-link" href="expense-tracker/index.html">Live Demo →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-banner" style="background:linear-gradient(135deg,#1a1a0a,#2e2410)">🌐</div>
+        <div class="project-body">
+          <div class="project-type">Web · Personal Branding</div>
+          <div class="project-name">Personal Profile Page</div>
+          <div class="project-desc">A minimal, animated personal landing page with dark/light mode, gradient animations, and floating tag interests. Built with pure CSS animations — no frameworks.</div>
+          <div class="project-footer">
+            <div class="tech-stack">
+              <span class="tech-tag">HTML</span>
+              <span class="tech-tag">CSS Animations</span>
+              <span class="tech-tag">JS</span>
+            </div>
+            <a class="project-link" href="my-page/index.html">Live Demo →</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Excel / Analysis Work -->
+<section id="excel">
+  <div class="section-wrap">
+    <div class="section-label">Data &amp; Analysis</div>
+    <h2 class="section-title">Financial Modelling</h2>
+    <p class="section-sub">Excel-based financial analysis covering real listed companies and market data.</p>
+    <div class="excel-grid">
+
+      <div class="excel-card">
+        <div class="excel-icon">📑</div>
+        <div>
+          <div class="excel-name">Zomato Financial Analysis</div>
+          <div class="excel-desc">In-depth Excel model covering Zomato's financials — revenue breakdown, margin trends, unit economics, and key growth metrics.</div>
+          <a class="excel-link" href="20250120_Zomato.xlsx" download>Download Excel ↓</a>
+        </div>
+      </div>
+
+      <div class="excel-card">
+        <div class="excel-icon">📊</div>
+        <div>
+          <div class="excel-name">More Analysis Coming Soon</div>
+          <div class="excel-desc">Additional financial models — sector deep-dives, P&amp;L breakdowns, and valuation frameworks — will be published here.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- About -->
+<section id="about">
+  <div class="section-wrap">
+    <div class="section-label">The person behind the work</div>
+    <h2 class="section-title">About Me</h2>
+    <div class="about-grid">
+      <div class="about-text">
+        <p>I'm <strong>Bhavesh</strong> — someone who genuinely enjoys building things. Whether it's a financial model in Excel or a full-stack web app in Python, I like understanding how systems work and making them better.</p>
+        <p>My interest in <strong>markets and finance</strong> led me to build tools I actually use — a stock screener that tracks Nifty 500 in real time, financial models for companies like HUL, and an expense tracker for day-to-day clarity.</p>
+        <p>Outside of work, you'll find me on a badminton court, on a trail somewhere, or halfway through writing something I'll probably never publish.</p>
+        <div class="interest-tags">
+          <span class="itag">🏸 Racquet Sports</span>
+          <span class="itag">🥾 Trekking</span>
+          <span class="itag">🏃 Marathon Running</span>
+          <span class="itag">✍️ Writing</span>
+          <span class="itag">🕺 Dancing</span>
+          <span class="itag">🌍 Exploring</span>
+        </div>
+      </div>
+      <div>
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-num" style="color:var(--pink)">5+</div>
+            <div class="stat-label">Projects Built</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" style="color:var(--blue)">500+</div>
+            <div class="stat-label">Stocks Screened</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" style="color:var(--green)">10Y</div>
+            <div class="stat-label">Financial Data Modelled</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" style="color:var(--purple)">∞</div>
+            <div class="stat-label">Curiosity</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Contact -->
+<section id="contact">
+  <div class="contact-inner">
+    <div class="section-label" style="text-align:center">Get in touch</div>
+    <h2 class="section-title" style="text-align:center;font-size:clamp(1.8rem,4vw,2.6rem)">Let's Connect</h2>
+    <p style="color:var(--muted);font-size:1rem;max-width:440px;margin:0 auto">
+      Whether it's a job opportunity, a collaboration, or just to talk markets — I'm always open for a conversation.
+    </p>
+    <div class="contact-links">
+      <a class="clink" href="https://github.com/vbhavesh19-spec" target="_blank">
+        <span class="clink-icon">🐙</span> GitHub
+      </a>
+      <a class="clink" href="Bhavesh Shah_CV.pdf" download>
+        <span class="clink-icon">📄</span> Download CV
+      </a>
+      <a class="clink" href="mailto:your@email.com">
+        <span class="clink-icon">✉️</span> Email Me
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  Built by <a href="#">Bhavesh</a> · <a href="https://github.com/vbhavesh19-spec" target="_blank">github.com/vbhavesh19-spec</a>
+</footer>
+
+</body>
+</html>

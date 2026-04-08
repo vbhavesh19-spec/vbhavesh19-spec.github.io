@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bhavesh</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* ── theme variables ── */
+    :root {
+      --bg: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      --bio-color: rgba(255, 255, 255, 0.7);
+      --bio-accent: #57c7f8;
+      --toggle-bg: rgba(255, 255, 255, 0.12);
+      --toggle-hover: rgba(255, 255, 255, 0.22);
+      --toggle-border: rgba(255, 255, 255, 0.2);
+      --toggle-icon: '☀️';
+    }
+
+    html.light {
+      --bg: linear-gradient(135deg, #e0eafc, #cfdef3, #f0e6ff);
+      --bio-color: rgba(40, 30, 70, 0.75);
+      --bio-accent: #7c3aed;
+      --toggle-bg: rgba(0, 0, 0, 0.08);
+      --toggle-hover: rgba(0, 0, 0, 0.15);
+      --toggle-border: rgba(0, 0, 0, 0.15);
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+      overflow-x: hidden;
+      overflow-y: auto;
+      font-family: 'Poppins', sans-serif;
+      transition: background 0.6s ease;
+    }
+
+    /* ── toggle button ── */
+    #theme-toggle {
+      position: fixed;
+      top: 1.2rem;
+      right: 1.4rem;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      border: 1.5px solid var(--toggle-border);
+      background: var(--toggle-bg);
+      cursor: pointer;
+      font-size: 1.3rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(8px);
+      transition: background 0.3s, border-color 0.3s, transform 0.2s;
+      z-index: 100;
+    }
+    #theme-toggle:hover {
+      background: var(--toggle-hover);
+      transform: scale(1.1) rotate(15deg);
+    }
+
+    /* ── card ── */
+    .card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.2rem;
+      padding: 2rem 1rem;
+      animation: fadeUp 1s ease both;
+    }
+
+    /* ── avatar ── */
+    .avatar {
+      width: clamp(90px, 14vw, 140px);
+      height: clamp(90px, 14vw, 140px);
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f857a6, #57c7f8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(1.4rem, 4vw, 2.8rem);
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: 0.04em;
+      box-shadow: 0 0 30px rgba(248, 87, 166, 0.5), 0 0 60px rgba(87, 199, 248, 0.3);
+      animation: fadeUp 1s ease 0.1s both;
+      flex-shrink: 0;
+    }
+
+    /* ── name ── */
+    .name {
+      font-size: clamp(5rem, 18vw, 14rem);
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      background: linear-gradient(90deg, #f857a6, #ff5858, #ffb347, #f9f047, #4de8a1, #57c7f8, #c957f8);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shine 4s linear infinite, float 3s ease-in-out infinite, fadeUp 1s ease 0.2s both;
+      user-select: none;
+      line-height: 1;
+    }
+
+    /* ── bio ── */
+    .bio {
+      font-size: clamp(0.95rem, 2.5vw, 1.25rem);
+      font-weight: 400;
+      color: var(--bio-color);
+      text-align: center;
+      max-width: 480px;
+      line-height: 1.7;
+      letter-spacing: 0.01em;
+      animation: fadeUp 1s ease 0.4s both;
+      transition: color 0.6s ease;
+    }
+    .bio span {
+      color: var(--bio-accent);
+      font-weight: 600;
+      transition: color 0.6s ease;
+    }
+
+    /* ── interests ── */
+    .interests {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.6rem;
+      max-width: 520px;
+      animation: fadeUp 1s ease 0.6s both;
+    }
+
+    .interests h2 {
+      width: 100%;
+      text-align: center;
+      font-size: clamp(0.7rem, 1.8vw, 0.85rem);
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--bio-color);
+      opacity: 0.6;
+      margin-bottom: 0.2rem;
+      transition: color 0.6s ease;
+    }
+
+    .tag {
+      padding: 0.35em 1em;
+      border-radius: 999px;
+      font-size: clamp(0.8rem, 2vw, 0.95rem);
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: 0.02em;
+      cursor: default;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .tag:hover {
+      transform: translateY(-3px) scale(1.06);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    }
+
+    .tag-pink   { background: linear-gradient(135deg, #f857a6, #ff5858); }
+    .tag-orange { background: linear-gradient(135deg, #ff9a44, #fc6076); }
+    .tag-yellow { background: linear-gradient(135deg, #f9f047, #f0a500); color: #2a1a00; }
+    .tag-green  { background: linear-gradient(135deg, #4de8a1, #0ba360); }
+    .tag-blue   { background: linear-gradient(135deg, #57c7f8, #1a6dff); }
+    .tag-purple { background: linear-gradient(135deg, #c957f8, #7c3aed); }
+    .tag-teal   { background: linear-gradient(135deg, #43e6d5, #1a9e8f); }
+
+    /* ── blobs ── */
+    .blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.35;
+      animation: drift 10s ease-in-out infinite alternate;
+      transition: opacity 0.6s ease;
+    }
+    html.light .blob { opacity: 0.25; }
+
+    .blob-1 { width: 400px; height: 400px; background: #f857a6; top: -100px; left: -100px; }
+    .blob-2 { width: 350px; height: 350px; background: #57c7f8; bottom: -80px; right: -80px; animation-delay: -5s; }
+    .blob-3 { width: 300px; height: 300px; background: #4de8a1; top: 40%; left: 60%; animation-delay: -2s; }
+
+    /* ── keyframes ── */
+    @keyframes shine {
+      to { background-position: 200% center; }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50%       { transform: translateY(-18px); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes drift {
+      from { transform: translate(0, 0) scale(1); }
+      to   { transform: translate(40px, 30px) scale(1.1); }
+    }
+  </style>
+</head>
+<body>
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <button id="theme-toggle" aria-label="Toggle dark/light mode">☀️</button>
+
+  <div class="card">
+    <div class="avatar">BVS</div>
+    <h1 class="name">Bhavesh</h1>
+    <p class="bio">
+      Curious mind & <span>creative builder</span>. Passionate about technology,
+      data, and turning ideas into reality — one line of code at a time.
+    </p>
+
+    <div class="interests">
+      <h2>My Interests</h2>
+      <span class="tag tag-pink">🏸 Racquet Sports</span>
+      <span class="tag tag-green">🥾 Trekking</span>
+      <span class="tag tag-blue">🏃 Marathon Running</span>
+      <span class="tag tag-purple">✍️ Writing</span>
+      <span class="tag tag-orange">🕺 Dancing</span>
+      <span class="tag tag-teal">🏔️ Adventure</span>
+      <span class="tag tag-yellow">🌍 Exploring</span>
+    </div>
+  </div>
+
+  <script>
+    const btn = document.getElementById('theme-toggle');
+    btn.addEventListener('click', () => {
+      const isLight = document.documentElement.classList.toggle('light');
+      btn.textContent = isLight ? '☀️' : '🌙';
+    });
+  </script>
+</body>
+</html>
