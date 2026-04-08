@@ -271,6 +271,42 @@
       aside { display: none; }
       .form-row { grid-template-columns: 1fr 1fr; }
     }
+
+    @media (max-width: 600px) {
+      /* Header */
+      header { padding: 12px 16px; }
+      .logo h1 { font-size: 1rem; }
+      .logo span { display: none; }
+
+      /* Main spacing */
+      main { padding: 14px 14px; gap: 16px; }
+
+      /* Summary cards — 2 per row */
+      .summary-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .card { padding: 14px; }
+      .card-value { font-size: 1.35rem; }
+      .card-label, .card-sub { font-size: .72rem; }
+
+      /* Bar chart */
+      .chart-card { padding: 14px; }
+      .bar-label { width: 72px; font-size: .75rem; }
+      .bar-val { width: 60px; font-size: .75rem; }
+      .bar-row { gap: 8px; }
+
+      /* Add form — 1 column */
+      .add-card { padding: 14px; }
+      .form-row { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .form-row .field:nth-child(3) { grid-column: span 2; }
+      .form-row .field:nth-child(4) { grid-column: span 2; }
+      .form-row .type-toggle { grid-column: span 2; }
+
+      /* Transactions table — scroll horizontally */
+      .txn-card { overflow-x: auto; }
+      table { min-width: 420px; }
+      thead th { padding: 8px 12px; font-size: .68rem; }
+      td { padding: 9px 12px; font-size: .82rem; }
+      .txn-header { padding: 12px 14px; }
+    }
   </style>
 </head>
 <body>

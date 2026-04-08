@@ -171,19 +171,51 @@
     .outcome-partial{color:var(--yellow);font-weight:600}
 
     @media (max-width: 768px) {
-      .header-inner { height: auto; padding: 10px 0; gap: 10px; flex-wrap: wrap; }
-      .tab-toggle { overflow-x: auto; width: 100%; }
+      /* Header */
+      header { padding: 0 12px; }
+      .header-inner { height: auto; padding: 8px 0 10px; gap: 8px; flex-wrap: wrap; }
+      .logo-sub { display: none; }
+      .logo-text { font-size: .95rem; }
+      .tab-toggle { overflow-x: auto; width: 100%; -webkit-overflow-scrolling: touch; }
+      .tab-btn { padding: 7px 14px; font-size: 0.75rem; flex-shrink: 0; }
       .header-right { display: none; }
-      #clock { display: none; }
-      main { padding: 16px 12px; }
+
+      /* Main */
+      main { padding: 14px 12px; }
+
+      /* Stocks tab */
       .stocks-grid { grid-template-columns: 1fr; }
-      .toolbar { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 6px; }
-      .status-bar { flex-direction: column; align-items: flex-start; gap: 8px; }
-      .stats-row { margin-left: 0; gap: 14px; }
+      .toolbar { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 6px; -webkit-overflow-scrolling: touch; }
+      .status-bar { flex-direction: column; align-items: flex-start; gap: 8px; padding: 12px 14px; }
+      .status-text { font-size: .78rem; }
+      .stats-row { margin-left: 0; gap: 16px; width: 100%; justify-content: space-between; }
+      .disclaimer { font-size: .7rem; padding: 8px 12px; }
+
+      /* Stock card internals */
       .levels { grid-template-columns: 1fr 1fr 1fr; gap: 5px; }
+      .level { padding: 7px 5px; }
       .level-price { font-size: .78rem; }
-      .back-table { font-size: .78rem; }
-      .back-table th, .back-table td { padding: 8px 10px; }
+      .level-pct { font-size: .58rem; }
+      .level-lbl { font-size: .54rem; }
+
+      /* Options tab */
+      .vix-section { grid-template-columns: 1fr; gap: 12px; }
+      .vix-card { padding: 16px 20px; min-width: unset; text-align: center; }
+      .vix-value { font-size: 2.2rem; }
+      .idx-grid { grid-template-columns: 1fr; gap: 12px; } /* CRITICAL: was minmax(420px) */
+      .rec-main { font-size: 1.1rem; }
+      .rec-levels { grid-template-columns: 1fr 1fr 1fr; gap: 5px; }
+      .chain-section { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .chain-table { min-width: 380px; }
+      .bias-sig { font-size: .65rem; }
+
+      /* Performance tab */
+      .perf-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .perf-value { font-size: 1.5rem; }
+      .perf-card { padding: 14px; }
+      .chart-wrap { padding: 14px; overflow-x: auto; }
+      .back-table { font-size: .75rem; overflow-x: auto; display: block; width: 100%; }
+      .back-table th, .back-table td { padding: 7px 8px; white-space: nowrap; }
     }
   </style>
 </head>
