@@ -66,23 +66,60 @@
     .chart-container { position: relative; height: 200px; }
 
     /* MOBILE */
-    #mob-bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; height: 68px; background: rgba(20,32,58,.96); backdrop-filter: blur(20px); border-top: 1px solid rgba(255,255,255,.08); z-index: 2000; padding-bottom: env(safe-area-inset-bottom); }
-    #mob-bottom-nav .mob-tabs { display: flex; height: 100%; }
-    #mob-bottom-nav .mob-tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; border: none; background: none; color: rgba(255,255,255,.4); font-size: .62rem; font-weight: 700; letter-spacing: .04em; cursor: pointer; padding-top: 6px; transition: color .2s; -webkit-tap-highlight-color: transparent; }
-    #mob-bottom-nav .mob-tab.active { color: var(--accent); }
-    #mob-bottom-nav .mob-tab i { font-size: 1.15rem; }
-    #mob-more-sheet { display: none; position: fixed; inset: 0; z-index: 3000; }
+    /* ── MOBILE ── */
+    #mob-bottom-nav {
+      display: none;
+      position: fixed; bottom: 0; left: 0; right: 0;
+      height: 64px;
+      background: #1a2942;
+      border-top: 1px solid rgba(255,255,255,.1);
+      z-index: 9999;
+    }
+    #mob-bottom-nav .mob-tabs {
+      display: flex !important;
+      height: 100%;
+    }
+    #mob-bottom-nav .mob-tab {
+      flex: 1;
+      display: flex !important;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      border: none !important;
+      background: none !important;
+      color: rgba(255,255,255,.35) !important;
+      font-size: .6rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+      cursor: pointer;
+      padding: 0;
+      box-shadow: none !important;
+      border-radius: 0 !important;
+      transition: color .15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #mob-bottom-nav .mob-tab.active { color: var(--accent) !important; }
+    #mob-bottom-nav .mob-tab i { font-size: 1.2rem; display: block; }
+    #mob-more-sheet { display: none; position: fixed; inset: 0; z-index: 10000; }
     #mob-more-overlay { position: absolute; inset: 0; background: rgba(0,0,0,.6); }
     #mob-more-content { position: absolute; bottom: 0; left: 0; right: 0; background: #1a2942; border-radius: 20px 20px 0 0; padding: 20px 16px 40px; }
     #mob-more-content .more-handle { width: 40px; height: 4px; background: rgba(255,255,255,.15); border-radius: 99px; margin: 0 auto 18px; }
     #mob-more-content .more-item { display: flex; align-items: center; gap: 12px; padding: 13px 12px; border-radius: 10px; color: rgba(255,255,255,.8); cursor: pointer; font-size: .9rem; font-weight: 500; }
-    #mob-more-content .more-item:hover { background: rgba(255,255,255,.06); }
     #mob-more-content .more-item i { font-size: 1.1rem; color: var(--accent); width: 20px; text-align: center; }
+
     @media (max-width: 767px) {
-      .sidebar { display: none; }
-      .main-wrapper { margin-left: 0; }
-      .content-area { padding: 1rem 1rem calc(68px + 1rem); }
-      #mob-bottom-nav { display: block; }
+      .sidebar { display: none !important; }
+      .main-wrapper { margin-left: 0 !important; }
+      .content-area { padding: 0.75rem 0.75rem calc(64px + 1rem) !important; overflow-x: hidden; }
+      #mob-bottom-nav { display: block !important; }
+      body { overflow-x: hidden; }
+      .table-responsive, table { overflow-x: auto; display: block; width: 100%; }
+      .row { margin: 0; }
+      .demo-banner { font-size: .78rem; }
+      h2.fw-bold { font-size: 1.2rem; }
+      .stat-card { padding: .6rem .5rem; }
+      .stat-value { font-size: 1.3rem; }
     }
   </style>
 </head>
