@@ -66,16 +66,23 @@
     .chart-container { position: relative; height: 200px; }
 
     /* MOBILE */
-    #mob-menu-btn { display: none; position: fixed; bottom: 20px; right: 20px; z-index: 2000; width: 52px; height: 52px; border-radius: 50%; background: var(--accent); color: #fff; border: none; font-size: 1.4rem; cursor: pointer; box-shadow: 0 4px 16px rgba(59,130,246,.5); }
-    #mob-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 1500; }
-    #mob-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: var(--sidebar-bg); z-index: 1600; border-radius: 20px 20px 0 0; padding: 20px; }
-    #mob-nav .nav-link { color: rgba(255,255,255,.8); padding: .6rem 1rem; border-radius: 8px; margin: 2px 0; display: flex; align-items: center; gap: .6rem; font-size: .9rem; cursor: pointer; }
-    #mob-nav .nav-link:hover { background: var(--sidebar-active); color: #fff; }
+    #mob-bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; height: 68px; background: rgba(20,32,58,.96); backdrop-filter: blur(20px); border-top: 1px solid rgba(255,255,255,.08); z-index: 2000; padding-bottom: env(safe-area-inset-bottom); }
+    #mob-bottom-nav .mob-tabs { display: flex; height: 100%; }
+    #mob-bottom-nav .mob-tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; border: none; background: none; color: rgba(255,255,255,.4); font-size: .62rem; font-weight: 700; letter-spacing: .04em; cursor: pointer; padding-top: 6px; transition: color .2s; -webkit-tap-highlight-color: transparent; }
+    #mob-bottom-nav .mob-tab.active { color: var(--accent); }
+    #mob-bottom-nav .mob-tab i { font-size: 1.15rem; }
+    #mob-more-sheet { display: none; position: fixed; inset: 0; z-index: 3000; }
+    #mob-more-overlay { position: absolute; inset: 0; background: rgba(0,0,0,.6); }
+    #mob-more-content { position: absolute; bottom: 0; left: 0; right: 0; background: #1a2942; border-radius: 20px 20px 0 0; padding: 20px 16px 40px; }
+    #mob-more-content .more-handle { width: 40px; height: 4px; background: rgba(255,255,255,.15); border-radius: 99px; margin: 0 auto 18px; }
+    #mob-more-content .more-item { display: flex; align-items: center; gap: 12px; padding: 13px 12px; border-radius: 10px; color: rgba(255,255,255,.8); cursor: pointer; font-size: .9rem; font-weight: 500; }
+    #mob-more-content .more-item:hover { background: rgba(255,255,255,.06); }
+    #mob-more-content .more-item i { font-size: 1.1rem; color: var(--accent); width: 20px; text-align: center; }
     @media (max-width: 767px) {
       .sidebar { display: none; }
       .main-wrapper { margin-left: 0; }
-      .content-area { padding: 1rem; }
-      #mob-menu-btn { display: flex; align-items: center; justify-content: center; }
+      .content-area { padding: 1rem 1rem calc(68px + 1rem); }
+      #mob-bottom-nav { display: block; }
     }
   </style>
 </head>
@@ -497,17 +504,36 @@ function renderDiagnoses(p) {
 showPanel('home');
 </script>
 
-<!-- Mobile nav -->
-<button id="mob-menu-btn" onclick="document.getElementById('mob-overlay').style.display='block';document.getElementById('mob-nav').style.display='block'">☰</button>
-<div id="mob-overlay" onclick="this.style.display='none';document.getElementById('mob-nav').style.display='none'"></div>
-<div id="mob-nav">
-  <div style="text-align:center;color:rgba(255,255,255,.5);font-size:.75rem;margin-bottom:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;">Navigate</div>
-  <a class="nav-link" onclick="showPanel('home');document.getElementById('mob-overlay').style.display='none';document.getElementById('mob-nav').style.display='none'"><i class="bi bi-house"></i> Home</a>
-  <a class="nav-link" onclick="showPanel('dashboard');document.getElementById('mob-overlay').style.display='none';document.getElementById('mob-nav').style.display='none'"><i class="bi bi-grid-1x2"></i> Dashboard</a>
-  <a class="nav-link" onclick="showPanel('medications');document.getElementById('mob-overlay').style.display='none';document.getElementById('mob-nav').style.display='none'"><i class="bi bi-capsule"></i> Medications</a>
-  <a class="nav-link" onclick="showPanel('appointments');document.getElementById('mob-overlay').style.display='none';document.getElementById('mob-nav').style.display='none'"><i class="bi bi-calendar-check"></i> Appointments</a>
-  <a class="nav-link" onclick="showPanel('vitals');document.getElementById('mob-overlay').style.display='none';document.getElementById('mob-nav').style.display='none'"><i class="bi bi-activity"></i> Vitals</a>
-  <a class="nav-link" onclick="showPanel('labs');document.getElementById('mob-overlay').style.display='none';document.getElementById('mob-nav').style.display='none'"><i class="bi bi-flask"></i> Lab Results</a>
+<!-- Mobile bottom nav -->
+<div id="mob-bottom-nav">
+  <div class="mob-tabs">
+    <button class="mob-tab active" id="mobt-dashboard" onclick="mobNav('dashboard')"><i class="bi bi-grid-1x2"></i>Dashboard</button>
+    <button class="mob-tab" id="mobt-medications" onclick="mobNav('medications')"><i class="bi bi-capsule"></i>Meds</button>
+    <button class="mob-tab" id="mobt-vitals" onclick="mobNav('vitals')"><i class="bi bi-activity"></i>Vitals</button>
+    <button class="mob-tab" id="mobt-appointments" onclick="mobNav('appointments')"><i class="bi bi-calendar-check"></i>Appts</button>
+    <button class="mob-tab" id="mobt-more" onclick="openMoreSheet()"><i class="bi bi-grid"></i>More</button>
+  </div>
 </div>
+
+<div id="mob-more-sheet">
+  <div id="mob-more-overlay" onclick="closeMoreSheet()"></div>
+  <div id="mob-more-content">
+    <div class="more-handle"></div>
+    <div class="more-item" onclick="mobNav('labs');closeMoreSheet()"><i class="bi bi-flask"></i> Lab Results</div>
+    <div class="more-item" onclick="mobNav('diagnoses');closeMoreSheet()"><i class="bi bi-clipboard2-pulse"></i> Diagnoses</div>
+    <div class="more-item" onclick="mobNav('home');closeMoreSheet()"><i class="bi bi-house"></i> Home</div>
+  </div>
+</div>
+
+<script>
+function mobNav(panel) {
+  showPanel(panel);
+  document.querySelectorAll('.mob-tab').forEach(t => t.classList.remove('active'));
+  const btn = document.getElementById('mobt-' + panel);
+  if (btn) btn.classList.add('active');
+}
+function openMoreSheet() { document.getElementById('mob-more-sheet').style.display = 'block'; }
+function closeMoreSheet() { document.getElementById('mob-more-sheet').style.display = 'none'; }
+</script>
 </body>
 </html>
