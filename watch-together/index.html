@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<title>WatchTogether</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --pg:#F7EFD8; --pg2:#F0E5C4; --pg3:#E8D9B2;
+  --card:#FDFAF2; --rule:#CDBF99; --rule2:#DDD0B2;
+  --amber:#A8700E; --amber-h:#8B5C08; --amber-g:#C8991A;
+  --ink:#1A1005; --ink2:#3A2810; --ink3:#6A5238; --ink4:#9A8262;
+  --red:#7B2018; --green:#2A6B3A;
+  --r:6px;
+  --serif:'Playfair Display',Georgia,serif;
+  --sans:'Lato','Segoe UI',system-ui,sans-serif;
+  --sh:0 2px 12px rgba(40,20,5,.10);
+  --sh2:0 8px 32px rgba(40,20,5,.18);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;}
+body{
+  background-color:var(--pg);
+  font-family:var(--sans);color:var(--ink);min-height:100vh;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E");
+  background-size:300px;
+}
+
+/* ── Layout ── */
+.page{max-width:960px;margin:0 auto;padding:0 16px 130px;}
+
+/* ── Masthead ── */
+.masthead{text-align:center;padding:40px 0 32px;border-bottom:1px solid var(--rule);margin-bottom:36px;}
+.mast-pre{font-family:var(--sans);font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.2em;color:var(--amber);display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px;}
+.mast-pre::before,.mast-pre::after{content:'';display:block;width:36px;height:1px;background:var(--amber);opacity:.5;}
+.masthead h1{font-family:var(--serif);font-size:clamp(2.2rem,7vw,4rem);font-weight:900;letter-spacing:-.02em;line-height:1;color:var(--ink);}
+.masthead h1 em{font-style:italic;color:var(--amber);}
+.mast-sub{font-family:var(--sans);font-size:.8rem;color:var(--ink4);letter-spacing:.06em;text-transform:uppercase;margin-top:8px;}
+.mast-rule{display:flex;align-items:center;gap:10px;margin-top:16px;}
+.mast-rule hr{flex:1;border:none;border-top:1px solid var(--rule2);}
+.mast-rule span{font-family:var(--serif);font-style:italic;font-size:.78rem;color:var(--ink4);white-space:nowrap;}
+
+/* ── Section head ── */
+.sec-head{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+.sec-head h2{font-family:var(--serif);font-size:1rem;font-weight:700;color:var(--ink2);white-space:nowrap;}
+.sec-head hr{flex:1;border:none;border-top:1px solid var(--rule2);}
+.sec-num{font-family:var(--sans);font-size:.65rem;font-weight:700;color:var(--amber);letter-spacing:.12em;text-transform:uppercase;background:rgba(168,112,14,.08);border:1px solid rgba(168,112,14,.22);border-radius:3px;padding:2px 7px;white-space:nowrap;}
+
+/* ── Person cards ── */
+#persons-list{display:flex;flex-direction:column;gap:14px;margin-bottom:20px;}
+.pcard{background:var(--card);border:1px solid var(--rule2);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;animation:sIn .28s ease both;transition:box-shadow .2s;}
+.pcard:focus-within{box-shadow:0 2px 20px rgba(168,112,14,.13);}
+@keyframes sIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.pcard-top{background:var(--pg2);border-bottom:1px solid var(--rule2);padding:9px 14px;display:flex;align-items:center;gap:10px;}
+.pcard-num{font-family:var(--serif);font-style:italic;font-size:.95rem;color:var(--amber);font-weight:700;flex-shrink:0;}
+.pcard-name{font-family:var(--serif);font-size:.9rem;font-weight:700;flex:1;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.pcard-del{background:none;border:none;cursor:pointer;color:var(--ink4);font-size:1rem;padding:4px 6px;border-radius:3px;transition:color .15s,background .15s;line-height:1;min-width:32px;min-height:32px;display:flex;align-items:center;justify-content:center;}
+.pcard-del:hover{color:var(--red);background:rgba(123,32,24,.07);}
+
+.pcard-body{
+  padding:14px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px 14px;
+}
+.f-full{grid-column:1/-1;}
+@media(max-width:420px){
+  .pcard-body{grid-template-columns:1fr;}
+  .f-full{grid-column:1;}
+}
+
+.field{display:flex;flex-direction:column;gap:4px;}
+.field label{font-family:var(--sans);font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--ink4);}
+.field input,.field select{
+  background:var(--pg);border:1px solid var(--rule);border-radius:var(--r);
+  color:var(--ink);padding:10px 12px;
+  font-family:var(--sans);font-size:16px;
+  outline:none;width:100%;transition:border-color .15s,box-shadow .15s;
+  -webkit-appearance:none;appearance:none;
+}
+.field select{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6' fill='none' stroke='%239A8262' stroke-width='1.4'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;
+  padding-right:32px;
+}
+.field input:focus,.field select:focus{border-color:var(--amber-g);box-shadow:0 0 0 3px rgba(168,112,14,.11);background:#fff;}
+.field input::placeholder{color:var(--ink4);}
+.field select option{background:#fff;color:var(--ink);}
+.year-row{display:flex;gap:8px;align-items:center;}
+.year-row input{flex:1;min-width:0;}
+.year-sep{color:var(--ink4);font-size:.9rem;flex-shrink:0;}
+
+/* ── Actions ── */
+.actions{display:flex;gap:10px;align-items:stretch;margin-bottom:48px;flex-wrap:wrap;}
+.btn-add{
+  background:transparent;border:1px dashed var(--rule);color:var(--ink3);
+  border-radius:var(--r);padding:13px 18px;
+  font-family:var(--sans);font-size:.82rem;font-weight:700;
+  cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px;letter-spacing:.03em;
+  min-height:48px;
+}
+.btn-add:hover{border-color:var(--amber);color:var(--amber);background:rgba(168,112,14,.05);}
+.btn-find{
+  flex:1;min-width:160px;
+  background:var(--ink);border:1px solid var(--ink2);color:var(--pg);
+  border-radius:var(--r);padding:13px 28px;
+  font-family:var(--serif);font-size:1rem;font-weight:700;font-style:italic;
+  cursor:pointer;letter-spacing:.01em;
+  transition:all .2s;display:flex;align-items:center;justify-content:center;gap:10px;
+  box-shadow:3px 3px 0 var(--amber);min-height:48px;
+}
+.btn-find:hover{background:var(--ink2);box-shadow:5px 5px 0 var(--amber-g);transform:translate(-1px,-1px);}
+.btn-find:active{transform:translate(1px,1px);box-shadow:1px 1px 0 var(--amber);}
+.btn-find:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:2px 2px 0 var(--amber);}
+
+/* ── Loading ── */
+.loading-bar{
+  background:var(--pg2);border:1px solid var(--rule2);border-radius:var(--r);
+  padding:28px;text-align:center;color:var(--ink3);
+  font-family:var(--serif);font-style:italic;font-size:1rem;
+}
+.spin{display:inline-block;width:20px;height:20px;border:2px solid var(--rule);border-top-color:var(--amber);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── Results header ── */
+.res-intro{border-top:2px solid var(--ink);border-bottom:1px solid var(--rule);padding:14px 0 12px;margin-bottom:28px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
+.res-intro h2{font-family:var(--serif);font-size:1.2rem;font-weight:900;color:var(--ink);}
+.res-for{font-family:var(--serif);font-style:italic;font-size:.95rem;color:var(--ink3);}
+.res-count{margin-left:auto;font-family:var(--sans);font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--amber);}
+
+/* ── Movie grid ── */
+.movies-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:20px;}
+@media(max-width:479px){.movies-grid{grid-template-columns:1fr;}}
+@media(min-width:480px) and (max-width:699px){.movies-grid{grid-template-columns:1fr 1fr;}}
+
+/* ── Movie card ── */
+.mcard{
+  background:var(--card);border:1px solid var(--rule2);border-radius:var(--r);
+  box-shadow:var(--sh);overflow:hidden;cursor:pointer;
+  transition:transform .22s ease,box-shadow .22s;
+  animation:rIn .4s cubic-bezier(.16,1,.3,1) both;
+  display:flex;flex-direction:column;position:relative;
+}
+.mcard:hover{transform:translateY(-5px) rotate(.15deg);box-shadow:var(--sh2);}
+@keyframes rIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+.mcard:nth-child(1){animation-delay:.04s}.mcard:nth-child(2){animation-delay:.09s}
+.mcard:nth-child(3){animation-delay:.14s}.mcard:nth-child(4){animation-delay:.19s}
+.mcard:nth-child(5){animation-delay:.24s}.mcard:nth-child(6){animation-delay:.29s}
+
+/* poster */
+.mcard-poster{width:100%;height:155px;overflow:hidden;position:relative;flex-shrink:0;}
+.mcard-poster-fallback{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:3rem;}
+.mcard-poster::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,transparent 40%,var(--card) 100%);}
+.mcard-num{position:absolute;top:9px;right:10px;z-index:2;font-family:var(--serif);font-style:italic;font-weight:700;font-size:.7rem;color:rgba(255,255,255,.8);text-shadow:0 1px 4px rgba(0,0,0,.6);letter-spacing:.04em;}
+
+/* card body */
+.mcard-body{padding:2px 14px 14px;flex:1;display:flex;flex-direction:column;gap:6px;}
+.mcard-title-row{display:flex;align-items:flex-start;gap:8px;}
+.mcard-title{font-family:var(--serif);font-size:1rem;font-weight:700;line-height:1.25;color:var(--ink);flex:1;}
+.mcard-rating{font-family:var(--sans);font-size:.75rem;font-weight:700;color:var(--amber);white-space:nowrap;background:var(--pg2);border:1px solid var(--rule);border-radius:3px;padding:2px 6px;flex-shrink:0;margin-top:2px;}
+.mcard-tags{display:flex;gap:4px;flex-wrap:wrap;}
+.tag{font-family:var(--sans);font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:2px;border:1px solid;letter-spacing:.03em;text-transform:uppercase;}
+.tag-year{color:var(--ink4);border-color:var(--rule);background:var(--pg2);}
+.tag-movie{color:#1A4A7B;border-color:rgba(26,74,123,.25);background:rgba(26,74,123,.06);}
+.tag-series{color:#1A5A2A;border-color:rgba(26,90,42,.25);background:rgba(26,90,42,.06);}
+.mcard-why{font-family:var(--sans);font-size:.78rem;color:var(--ink3);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.mcard-cast{font-family:var(--sans);font-size:.71rem;color:var(--ink4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mcard-more{
+  margin-top:auto;padding-top:9px;
+  font-family:var(--sans);font-size:.72rem;font-weight:700;
+  color:var(--amber);display:flex;align-items:center;gap:5px;
+  background:none;border:none;border-top:1px solid var(--rule2);
+  cursor:pointer;text-transform:uppercase;letter-spacing:.07em;
+  transition:color .15s;min-height:36px;
+}
+.mcard-more:hover{color:var(--amber-h);}
+
+/* ── No results ── */
+.no-res{border:1px dashed var(--rule);border-radius:var(--r);padding:40px 20px;text-align:center;font-family:var(--serif);font-style:italic;color:var(--ink3);line-height:1.8;}
+.no-res big{display:block;font-size:2rem;font-style:normal;margin-bottom:10px;}
+
+/* ── Modal ── */
+.mov{position:fixed;inset:0;background:rgba(26,16,5,.58);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);z-index:1000;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;}
+.mov.open{opacity:1;pointer-events:all;}
+.mbox{
+  background:var(--card);border:1px solid var(--rule);
+  border-radius:var(--r) var(--r) 0 0;
+  width:100%;max-width:560px;max-height:92vh;overflow-y:auto;
+  transform:translateY(30px);transition:transform .3s cubic-bezier(.16,1,.3,1);
+  padding-bottom:env(safe-area-inset-bottom,20px);
+  box-shadow:0 -6px 40px rgba(26,16,5,.22);position:relative;
+}
+.mov.open .mbox{transform:translateY(0);}
+@media(min-width:600px){
+  .mov{align-items:center;padding:20px;}
+  .mbox{border-radius:var(--r);max-height:85vh;}
+}
+.mbox-handle{width:34px;height:3px;background:var(--rule);border-radius:2px;margin:10px auto 0;cursor:pointer;}
+.mbox-poster{width:100%;height:170px;overflow:hidden;position:relative;flex-shrink:0;}
+.mbox-poster-fallback{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:4.5rem;}
+.mbox-poster::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,transparent 30%,var(--card) 100%);}
+.mbox-close{position:absolute;top:10px;right:12px;z-index:10;background:rgba(247,239,216,.88);border:1px solid var(--rule);color:var(--ink3);border-radius:50%;width:30px;height:30px;font-size:.85rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.mbox-close:hover{background:var(--pg3);color:var(--ink);}
+.mbox-rule{display:flex;align-items:center;gap:8px;padding:0 18px;margin-bottom:2px;}
+.mbox-rule hr{flex:1;border:none;border-top:1px solid var(--rule2);}
+.mbox-rule span{font-family:var(--sans);font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--amber);}
+.mbox-body{padding:4px 18px 22px;}
+.mbox-title{font-family:var(--serif);font-size:1.5rem;font-weight:900;line-height:1.2;color:var(--ink);margin-bottom:8px;}
+.mbox-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:12px;}
+.mbox-rating{font-family:var(--sans);font-size:.82rem;font-weight:700;color:var(--amber);border:1px solid var(--rule);background:var(--pg2);border-radius:3px;padding:2px 9px;}
+.mbox-why{background:var(--pg2);border-left:3px solid var(--amber);border-radius:0 var(--r) var(--r) 0;padding:10px 13px;font-family:var(--sans);font-size:.8rem;color:var(--ink2);line-height:1.55;margin-bottom:16px;}
+.mbox-why strong{color:var(--amber-h);font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;display:block;margin-bottom:3px;}
+.msec{font-family:var(--sans);font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--ink4);margin-bottom:5px;margin-top:14px;display:flex;align-items:center;gap:8px;}
+.msec::after{content:'';flex:1;height:1px;background:var(--rule2);}
+.mbox-desc{font-family:var(--sans);font-size:.86rem;color:var(--ink2);line-height:1.7;}
+.mbox-cast{font-family:var(--sans);font-size:.83rem;color:var(--ink3);line-height:1.5;}
+.mbox-genres{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px;}
+.mg{font-family:var(--sans);font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:3px 10px;border-radius:2px;border:1px solid;}
+.mbox-cta{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--ink);color:var(--pg);border:none;border-radius:var(--r);padding:12px 18px;font-family:var(--serif);font-style:italic;font-size:.92rem;font-weight:700;text-decoration:none;margin-top:18px;transition:all .15s;box-shadow:2px 2px 0 var(--amber);}
+.mbox-cta:hover{background:var(--ink2);box-shadow:4px 4px 0 var(--amber-g);transform:translate(-1px,-1px);}
+
+/* ── Sticky bar ── */
+.sticky{display:none;position:fixed;bottom:0;left:0;right:0;z-index:100;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(to top,var(--pg) 65%,transparent);}
+@media(max-width:600px){.sticky{display:block;}.sticky .btn-find{width:100%;}.btn-find.desk{display:none;}}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--pg2);}::-webkit-scrollbar-thumb{background:var(--rule);border-radius:3px;}
+::selection{background:rgba(168,112,14,.2);}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Masthead -->
+  <header class="masthead">
+    <div class="mast-pre">Film Recommendations</div>
+    <h1>Watch<em>Together</em></h1>
+    <p class="mast-sub">For the people who are far apart</p>
+    <div class="mast-rule"><hr><span>Add everyone · Get your picks · Press play</span><hr></div>
+  </header>
+
+  <!-- Persons -->
+  <div class="sec-head">
+    <h2>Who's Watching Tonight?</h2><hr><span class="sec-num">Step 1</span>
+  </div>
+  <div id="persons-list"></div>
+
+  <!-- Actions -->
+  <div class="actions">
+    <button class="btn-add" onclick="addPerson()">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1.5v10M1.5 6.5h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      Add Another Person
+    </button>
+    <button class="btn-find desk" onclick="findMovies()" id="find-btn-desk">Find Our Movie &rarr;</button>
+  </div>
+
+  <div id="results"></div>
+</div>
+
+<!-- Sticky mobile find -->
+<div class="sticky">
+  <button class="btn-find" onclick="findMovies()" id="find-btn-mob">Find Our Movie &rarr;</button>
+</div>
+
+<!-- Modal -->
+<div class="mov" id="mov" onclick="closeMov(event)">
+  <div class="mbox" id="mbox">
+    <div class="mbox-handle" onclick="closeMovDirect()"></div>
+    <button class="mbox-close" onclick="closeMovDirect()">✕</button>
+    <div class="mbox-poster" id="mbox-poster"></div>
+    <div class="mbox-rule"><hr><span id="mbox-genre-lbl">Drama</span><hr></div>
+    <div class="mbox-body">
+      <div class="mbox-title"  id="mbox-title"></div>
+      <div class="mbox-meta"   id="mbox-meta"></div>
+      <div class="mbox-why"    id="mbox-why"></div>
+      <div class="msec">The Story</div>
+      <div class="mbox-desc"   id="mbox-desc"></div>
+      <div class="msec">Cast</div>
+      <div class="mbox-cast"   id="mbox-cast"></div>
+      <div class="msec">Genres</div>
+      <div class="mbox-genres" id="mbox-genres"></div>
+      <a href="#" id="mbox-link" class="mbox-cta" target="_blank" rel="noopener">View on IMDB &rarr;</a>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════
+   DATABASE  (~200 titles across all moods & genres)
+════════════════════════════════════════════════════ */
+const DB = [
+/* ── All-Time Classics ── */
+{t:"Casablanca",y:1942,k:"Movie",g:["Drama","Romance","War"],r:8.5,c:"Humphrey Bogart, Ingrid Bergman",id:"tt0034583",e:"🎷",d:"A cynical American expatriate must choose between love and virtue when his former lover walks into his Moroccan nightclub during WWII. The most perfect screenplay Hollywood ever produced."},
+{t:"Rear Window",y:1954,k:"Movie",g:["Mystery","Thriller"],r:8.5,c:"James Stewart, Grace Kelly",id:"tt0047396",e:"🔭",d:"A photographer with a broken leg spies on his neighbours through his window and becomes convinced he's witnessed a murder. Hitchcock's most purely suspenseful film — Grace Kelly is luminous."},
+{t:"Some Like It Hot",y:1959,k:"Movie",g:["Comedy","Music","Romance"],r:8.2,c:"Marilyn Monroe, Tony Curtis, Jack Lemmon",id:"tt0053291",e:"🎺",d:"Two musicians witness a mob murder and go on the run disguised as women in an all-female band. Nobody's perfect."},
+{t:"Lawrence of Arabia",y:1962,k:"Movie",g:["Adventure","Biography","Drama","History","War"],r:8.3,c:"Peter O'Toole, Omar Sharif",id:"tt0056172",e:"🏜️",d:"A British officer leads the Arab revolt against the Ottoman Empire in WWI — and is slowly consumed by it. The greatest epic ever made — David Lean's 70mm masterpiece."},
+{t:"One Flew Over the Cuckoo's Nest",y:1975,k:"Movie",g:["Drama"],r:8.7,c:"Jack Nicholson, Louise Fletcher",id:"tt0073486",e:"🐦",d:"A free-spirited man fakes insanity to avoid prison work and finds himself in a mental institution run by a terrifying nurse. Jack Nicholson at his most magnetic."},
+{t:"Apocalypse Now",y:1979,k:"Movie",g:["Drama","Mystery","War"],r:8.4,c:"Martin Sheen, Marlon Brando, Robert Duvall",id:"tt0078788",e:"🚁",d:"A captain travels up the Mekong to terminate the command of a rogue colonel who has gone insane. Coppola's Vietnam nightmare — the Horror, the Horror."},
+{t:"Raging Bull",y:1980,k:"Movie",g:["Biography","Drama","Sport"],r:8.2,c:"Robert De Niro, Joe Pesci",id:"tt0081398",e:"🥊",d:"The rise and self-destruction of middleweight champion Jake LaMotta. Scorsese and De Niro at their rawest — the most intense performance ever captured on film."},
+{t:"Amadeus",y:1984,k:"Movie",g:["Biography","Drama","Music"],r:8.4,c:"F. Murray Abraham, Tom Hulce",id:"tt0086879",e:"🎹",d:"Antonio Salieri narrates his obsessive envy of Mozart — a man he considered touched by God and destroyed by his own excesses. Miloš Forman's richest film."},
+{t:"Full Metal Jacket",y:1987,k:"Movie",g:["Drama","War"],r:8.3,c:"Matthew Modine, R. Lee Ermey, Vincent D'Onofrio",id:"tt0093058",e:"🪖",d:"Vietnam in two halves — a brutal boot camp and the chaos of Hue City. Kubrick's most cynical film about war and the systems that manufacture soldiers."},
+{t:"Pulp Fiction",y:1994,k:"Movie",g:["Crime","Drama","Thriller"],r:8.9,c:"John Travolta, Samuel L. Jackson, Uma Thurman",id:"tt0110912",e:"💉",d:"Interconnected crime stories in Los Angeles — hitmen, a mob boss's wife, a boxer, and a pair of robbers. Tarantino's masterpiece of dialogue and structure. Royale with Cheese."},
+{t:"Toy Story",y:1995,k:"Movie",g:["Animation","Adventure","Comedy","Family","Fantasy"],r:8.3,c:"Tom Hanks, Tim Allen (voices)",id:"tt0114709",e:"🤠",d:"A pull-string cowboy toy feels threatened when his kid's birthday brings a new space ranger. The film that launched Pixar and reinvented animation — still warm and funny on every rewatch."},
+{t:"Braveheart",y:1995,k:"Movie",g:["Biography","Drama","History","Romance","War"],r:8.3,c:"Mel Gibson, Sophie Marceau",id:"tt0112573",e:"🏴",d:"Scottish warrior William Wallace leads his country's rebellion against English rule after the murder of his wife. Gibson's most passionate film — the battle sequences are brutal and thrilling."},
+{t:"Fargo",y:1996,k:"Movie",g:["Crime","Drama","Thriller"],r:8.1,c:"Frances McDormand, William H. Macy",id:"tt0116282",e:"❄️",d:"A car salesman hires two criminals to kidnap his wife for ransom — and a pregnant small-town sheriff investigates the trail of bodies. The Coens at their most darkly funny."},
+{t:"L.A. Confidential",y:1997,k:"Movie",g:["Crime","Drama","Mystery","Thriller"],r:8.2,c:"Russell Crowe, Guy Pearce, Kevin Spacey",id:"tt0119488",e:"🌴",d:"Three very different LAPD cops in the 1950s converge on a Hollywood murder investigation. The most elegant neo-noir Hollywood ever produced."},
+{t:"American History X",y:1998,k:"Movie",g:["Drama"],r:8.5,c:"Edward Norton, Edward Furlong",id:"tt0120586",e:"✊",d:"A former neo-Nazi tries to stop his younger brother from going down the same path after serving time. Edward Norton's most powerful performance."},
+{t:"The Big Lebowski",y:1998,k:"Movie",g:["Comedy","Crime"],r:8.1,c:"Jeff Bridges, John Goodman, Julianne Moore",id:"tt0118715",e:"🎳",d:"A case of mistaken identity drags 'The Dude' into a kidnapping scheme. The Coens' most beloved cult film — endlessly quotable, deeply weird, and somehow profound."},
+{t:"The Green Mile",y:1999,k:"Movie",g:["Crime","Drama","Fantasy"],r:8.6,c:"Tom Hanks, Michael Clarke Duncan",id:"tt0120689",e:"🖐️",d:"A death row corrections officer forms a bond with an enormous inmate who may have a miraculous gift. Frank Darabont's second great Stephen King adaptation — deeply moving."},
+{t:"The Lord of the Rings: The Fellowship of the Ring",y:2001,k:"Movie",g:["Adventure","Drama","Fantasy"],r:8.9,c:"Elijah Wood, Ian McKellen, Viggo Mortensen",id:"tt0120737",e:"💍",d:"A hobbit inherits a ring of terrible power and must carry it to its destruction. Peter Jackson's first act of Middle-earth magic — the film that made fantasy cinema respectable."},
+{t:"The Lord of the Rings: The Two Towers",y:2002,k:"Movie",g:["Adventure","Drama","Fantasy","Action"],r:8.8,c:"Elijah Wood, Viggo Mortensen, Andy Serkis",id:"tt0167261",e:"🏰",d:"The fellowship is broken; Frodo and Sam continue toward Mordor while Aragorn fights at Helm's Deep. Gollum is one of the great characters in cinema history."},
+{t:"The Lord of the Rings: The Return of the King",y:2003,k:"Movie",g:["Adventure","Drama","Fantasy","Action"],r:9.0,c:"Elijah Wood, Viggo Mortensen, Ian McKellen",id:"tt0167260",e:"👑",d:"The final battle for Middle-earth. Sweeping, devastating, and triumphant — the only fantasy film to win Best Picture, and it deserved every single one of its 11 Oscars."},
+{t:"City of God",y:2002,k:"Movie",g:["Crime","Drama"],r:8.6,c:"Alexandre Rodrigues, Leandro Firmino",id:"tt0317248",e:"🔫",d:"Two boys growing up in the slums of Rio de Janeiro take very different paths — one with a camera, one with a gun. Brazil's greatest film and one of the most kinetic crime movies ever made."},
+{t:"Catch Me If You Can",y:2002,k:"Movie",g:["Biography","Crime","Drama"],r:8.1,c:"Leonardo DiCaprio, Tom Hanks",id:"tt0264464",e:"✈️",d:"A teenage con artist successfully impersonates a pilot, doctor, and lawyer while evading the FBI. Spielberg's most effortlessly entertaining film — DiCaprio is absolutely magnetic."},
+{t:"Lost in Translation",y:2003,k:"Movie",g:["Drama","Romance"],r:7.7,c:"Bill Murray, Scarlett Johansson",id:"tt0335266",e:"🌃",d:"A fading actor and a lonely newlywed form an unexpected connection in Tokyo. Sofia Coppola's most intimate film — what they whisper at the end is the most famous secret in cinema."},
+{t:"Mystic River",y:2003,k:"Movie",g:["Crime","Drama","Mystery","Thriller"],r:7.9,c:"Sean Penn, Tim Robbins, Kevin Bacon",id:"tt0327056",e:"🌊",d:"A childhood trauma echoes through three men when one of their daughters is murdered. Eastwood directs Penn and Robbins to career-best performances in a genuinely tragic mystery."},
+{t:"Million Dollar Baby",y:2004,k:"Movie",g:["Drama","Sport"],r:8.1,c:"Clint Eastwood, Hilary Swank, Morgan Freeman",id:"tt0405159",e:"🥊",d:"A veteran boxing trainer reluctantly takes on a determined young woman. The film hides where it's really going until it's too late — you will not see it coming."},
+{t:"The Incredibles",y:2004,k:"Movie",g:["Animation","Action","Adventure","Comedy","Family"],r:8.0,c:"Craig T. Nelson, Holly Hunter (voices)",id:"tt0317705",e:"🦸",d:"A family of superheroes in suburban hiding are forced back into action. Still the best superhero film ever made — a love letter to marriage, parenthood, and being your best self."},
+{t:"Hotel Rwanda",y:2004,k:"Movie",g:["Biography","Drama","History","War"],r:8.1,c:"Don Cheadle, Sophie Okonedo",id:"tt0395169",e:"🏨",d:"A hotel manager uses his connections to shelter over a thousand Tutsi refugees during the 1994 genocide. Don Cheadle gives one of the great humanitarian performances in cinema history."},
+{t:"Pan's Labyrinth",y:2006,k:"Movie",g:["Adventure","Drama","Fantasy","War"],r:8.2,c:"Ivana Baquero, Sergi López, Doug Jones",id:"tt0457430",e:"🌿",d:"A young girl in post-Civil War Spain retreats into a dark fairy-tale world while her stepfather's brutal reality closes in. Del Toro's most personal and haunting film."},
+{t:"Children of Men",y:2006,k:"Movie",g:["Action","Drama","Sci-Fi","Thriller"],r:7.9,c:"Clive Owen, Julianne Moore, Michael Caine",id:"tt0206634",e:"👶",d:"In a future where humanity has become infertile, a reluctant man must escort the world's only pregnant woman to safety. Cuarón's greatest achievement — including an uncut 4-minute car ambush."},
+{t:"The Departed",y:2006,k:"Movie",g:["Crime","Drama","Thriller"],r:8.5,c:"Leonardo DiCaprio, Matt Damon, Jack Nicholson",id:"tt0407887",e:"🪬",d:"An undercover cop and a mob informant within the police force race to expose each other. Scorsese's most propulsive film — and his Best Picture winner. The ending is genuinely shocking."},
+{t:"The Lives of Others",y:2006,k:"Movie",g:["Drama","Mystery","Thriller"],r:8.4,c:"Ulrich Mühe, Martina Gedeck",id:"tt0405094",e:"🎧",d:"A Stasi officer surveilling a playwright in East Berlin begins to be moved by what he hears. The greatest German film of the 21st century — and one of the most moving."},
+{t:"Zodiac",y:2007,k:"Movie",g:["Crime","Drama","Mystery","Thriller"],r:7.7,c:"Jake Gyllenhaal, Mark Ruffalo, Robert Downey Jr.",id:"tt0443706",e:"♐",d:"A cartoonist, reporter, and detective become obsessed with identifying the Zodiac Killer. Fincher's most underrated film — a procedural about obsession that never offers a clean ending."},
+{t:"There Will Be Blood",y:2007,k:"Movie",g:["Drama"],r:8.2,c:"Daniel Day-Lewis, Paul Dano",id:"tt0469494",e:"🛢️",d:"An oil prospector rises to domination over California's frontier, destroying everything around him. Daniel Day-Lewis' most ferocious performance in P.T. Anderson's American myth."},
+{t:"In Bruges",y:2008,k:"Movie",g:["Comedy","Crime","Drama","Thriller"],r:7.9,c:"Colin Farrell, Brendan Gleeson, Ralph Fiennes",id:"tt0780536",e:"🏰",d:"Two hit men hide out in a medieval Belgian city while waiting for orders. Darkly funny, surprisingly moving, and genuinely original — Colin Farrell's best performance."},
+{t:"Slumdog Millionaire",y:2008,k:"Movie",g:["Crime","Drama","Romance"],r:8.0,c:"Dev Patel, Freida Pinto, Anil Kapoor",id:"tt1010048",e:"📺",d:"A teen from the slums of Mumbai correctly answers every question on Who Wants to Be a Millionaire — and each answer comes from his brutal childhood. Danny Boyle's most joyful film."},
+{t:"Inglourious Basterds",y:2009,k:"Movie",g:["Adventure","Drama","War"],r:8.3,c:"Brad Pitt, Christoph Waltz",id:"tt0361748",e:"🔞",d:"A revenge fantasy set in Nazi-occupied France — a Jewish-American hit squad and a young French woman both plot to kill Hitler. Christoph Waltz's Hans Landa is one of cinema's great villains."},
+{t:"District 9",y:2009,k:"Movie",g:["Action","Drama","Sci-Fi","Thriller"],r:7.9,c:"Sharlto Copley, Jason Cope",id:"tt1136608",e:"🛸",d:"Aliens stuck in South Africa are herded into slums while a bureaucrat gets exposed to their biology. Neill Blomkamp's debut is the most intelligent alien-contact metaphor since Close Encounters."},
+{t:"Black Swan",y:2010,k:"Movie",g:["Drama","Thriller"],r:8.0,c:"Natalie Portman, Mila Kunis, Vincent Cassel",id:"tt0947798",e:"🦢",d:"A ballerina wins the lead in Swan Lake — but the pursuit of perfection begins to unravel her mind. Aronofsky's most visceral film. Natalie Portman's Oscar was fully deserved."},
+{t:"The King's Speech",y:2010,k:"Movie",g:["Biography","Drama","History"],r:8.0,c:"Colin Firth, Geoffrey Rush, Helena Bonham Carter",id:"tt1504320",e:"🎙️",d:"King George VI works with an unorthodox speech therapist to overcome his stammer before wartime broadcasts. Firth and Rush have one of the great screen partnerships."},
+{t:"Drive",y:2011,k:"Movie",g:["Action","Crime","Drama"],r:7.8,c:"Ryan Gosling, Carey Mulligan, Bryan Cranston",id:"tt0780504",e:"🚗",d:"A Hollywood stunt driver moonlights as a getaway driver and gets pulled into a heist that goes fatally wrong. Winding Refn's most beautiful film — synth-soaked, violent, and deeply romantic."},
+{t:"Little Miss Sunshine",y:2006,k:"Movie",g:["Adventure","Comedy","Drama"],r:7.8,c:"Steve Carell, Toni Collette, Greg Kinnear",id:"tt0449059",e:"☀️",d:"A dysfunctional family drives a VW bus across the country for their daughter's beauty pageant. The most lovable indie comedy of its decade — the finale is pure joy."},
+{t:"Django Unchained",y:2012,k:"Movie",g:["Drama","Western"],r:8.5,c:"Jamie Foxx, Christoph Waltz, Leonardo DiCaprio",id:"tt1853728",e:"🤠",d:"A freed slave teams with a bounty hunter to rescue his wife from a cruel plantation owner. Tarantino's most entertaining film — and his most pointed critique of America's original sin."},
+{t:"Wolf of Wall Street",y:2013,k:"Movie",g:["Biography","Comedy","Crime","Drama"],r:8.2,c:"Leonardo DiCaprio, Jonah Hill, Margot Robbie",id:"tt0993846",e:"📊",d:"The true story of Jordan Belfort's rise and fall as a fraudulent stock broker. Scorsese's most kinetic film — DiCaprio is utterly fearless. Three hours of pure excess that passes like an hour."},
+{t:"Her",y:2013,k:"Movie",g:["Drama","Romance","Sci-Fi"],r:8.0,c:"Joaquin Phoenix, Scarlett Johansson (voice)",id:"tt1798709",e:"💻",d:"A lonely man falls in love with his AI operating system. Spike Jonze's most tender film — and the most thoughtful meditation on loneliness, intimacy, and what connection actually means."},
+{t:"12 Years a Slave",y:2013,k:"Movie",g:["Biography","Drama","History"],r:8.1,c:"Chiwetel Ejiofor, Michael Fassbender, Lupita Nyong'o",id:"tt2024544",e:"⛓️",d:"A free Black man in Washington is kidnapped and sold into slavery in the antebellum South. Steve McQueen's Best Picture winner is unflinching and necessary. Chiwetel Ejiofor is extraordinary."},
+{t:"Nightcrawler",y:2014,k:"Movie",g:["Crime","Drama","Thriller"],r:7.9,c:"Jake Gyllenhaal, Rene Russo",id:"tt2872718",e:"📹",d:"A sociopathic stringer films crime scenes at night and sells the footage to a local TV station. Jake Gyllenhaal's most disturbing performance — a portrait of modern media and moral vacancy."},
+{t:"Birdman",y:2014,k:"Movie",g:["Comedy","Drama"],r:7.7,c:"Michael Keaton, Edward Norton, Emma Stone",id:"tt2562232",e:"🦅",d:"A washed-up superhero actor tries to mount a Broadway comeback. Shot to look like one continuous take — and secretly, deeply sad. Keaton's career-best performance."},
+{t:"The Revenant",y:2015,k:"Movie",g:["Action","Adventure","Drama","Western"],r:8.0,c:"Leonardo DiCaprio, Tom Hardy",id:"tt1663202",e:"🐻",d:"A frontiersman mauled by a bear crawls back from death to take revenge on the man who left him for dead. DiCaprio's Oscar performance — and Lubezki's cinematography is unlike anything else."},
+{t:"Sicario",y:2015,k:"Movie",g:["Action","Crime","Drama","Thriller"],r:7.6,c:"Emily Blunt, Josh Brolin, Benicio del Toro",id:"tt3397884",e:"💊",d:"An idealistic FBI agent is recruited into a shadowy government task force fighting the Mexican drug trade. Villeneuve's most morally unsettling film — what is the right thing here?"},
+{t:"Spotlight",y:2015,k:"Movie",g:["Biography","Crime","Drama","History","Mystery","Thriller"],r:8.1,c:"Michael Keaton, Mark Ruffalo, Rachel McAdams",id:"tt1895587",e:"🔦",d:"The Boston Globe's investigative team uncovers systemic child abuse in the Catholic Church. The best journalism film since All the President's Men — and a deserving Best Picture winner."},
+{t:"Green Book",y:2018,k:"Movie",g:["Biography","Comedy","Drama"],r:8.2,c:"Viggo Mortensen, Mahershala Ali",id:"tt6966692",e:"🎹",d:"A working-class Italian-American drives an elegant Black pianist on a tour through the Deep South in 1962. The warmth between Mortensen and Ali makes this film irresistible."},
+{t:"Spider-Man: Into the Spider-Verse",y:2018,k:"Movie",g:["Animation","Action","Adventure","Comedy","Family","Sci-Fi"],r:8.4,c:"Shameik Moore, Hailee Steinfeld (voices)",id:"tt4633694",e:"🕷️",d:"Miles Morales becomes Spider-Man and teams with Spider-People from other dimensions. The most visually inventive animated film since Spirited Away — and the best Spider-Man story ever told."},
+{t:"Joker",y:2019,k:"Movie",g:["Crime","Drama","Thriller"],r:8.4,c:"Joaquin Phoenix, Robert De Niro",id:"tt7286456",e:"🃏",d:"A failed stand-up comedian and aspiring clown spirals into madness and becomes Gotham's symbol of chaos. Joaquin Phoenix's most committed, terrifying performance."},
+{t:"Portrait of a Lady on Fire",y:2019,k:"Movie",g:["Drama","Romance"],r:8.1,c:"Noémie Merlant, Adèle Haenel",id:"tt8613070",e:"🔥",d:"A painter is commissioned to secretly paint a noblewoman's portrait before her arranged marriage. Céline Sciamma's most precise and devastating film — a love story told entirely through looking."},
+{t:"Soul",y:2020,k:"Movie",g:["Animation","Adventure","Comedy","Drama","Family","Music"],r:8.1,c:"Jamie Foxx, Tina Fey (voices)",id:"tt2948372",e:"🎷",d:"A jazz musician accidentally enters the afterlife and desperately tries to return to his body. Pixar's most philosophical film — a meditation on purpose, joy, and what makes life worth living."},
+{t:"The Father",y:2020,k:"Movie",g:["Drama"],r:8.2,c:"Anthony Hopkins, Olivia Colman",id:"tt10272386",e:"🧓",d:"An aging man with dementia struggles to make sense of his shifting reality. Anthony Hopkins won his second Oscar — this is a film you experience rather than watch."},
+{t:"The Batman",y:2022,k:"Movie",g:["Action","Crime","Drama","Mystery","Thriller"],r:7.8,c:"Robert Pattinson, Zoë Kravitz, Paul Dano",id:"tt1877830",e:"🦇",d:"A reclusive Batman investigates a serial killer targeting Gotham's elite. Matt Reeves' noir reimagining makes Pattinson's damaged, obsessive Bruce Wayne the most compelling since Ledger's Joker."},
+{t:"Killers of the Flower Moon",y:2023,k:"Movie",g:["Crime","Drama","History","Mystery","Western"],r:7.7,c:"Leonardo DiCaprio, Robert De Niro, Lily Gladstone",id:"tt5537002",e:"🌺",d:"The systematic murder of Osage Nation members for their oil wealth in 1920s Oklahoma. Scorsese's most measured and devastating film — Lily Gladstone is the quiet heart of everything."},
+{t:"Past Lives",y:2023,k:"Movie",g:["Drama","Romance"],r:7.9,c:"Greta Lee, Teo Yoo, John Magaro",id:"tt21235248",e:"✈️",d:"Two childhood sweethearts from Seoul meet again 24 years later in New York, each carrying a different version of the life they might have had. Celine Song's debut is heartbreaking and wise."},
+{t:"Poor Things",y:2023,k:"Movie",g:["Comedy","Drama","Fantasy","Romance","Sci-Fi"],r:7.9,c:"Emma Stone, Mark Ruffalo, Willem Dafoe",id:"tt14230458",e:"⚡",d:"A woman brought back to life with a child's brain discovers the pleasures and horrors of the world. Emma Stone won her second Oscar — and Yorgos Lanthimos made his most joyful film."},
+
+/* ── Hollywood Classics & Drama ── */
+{t:"The Shawshank Redemption",y:1994,k:"Movie",g:["Drama"],r:9.3,c:"Tim Robbins, Morgan Freeman",id:"tt0111161",e:"🕊️",d:"A wrongfully convicted banker forms an unlikely friendship in prison and nurses an unshakeable hope for freedom. The greatest film ever made about hope."},
+{t:"The Godfather",y:1972,k:"Movie",g:["Crime","Drama"],r:9.2,c:"Marlon Brando, Al Pacino",id:"tt0068646",e:"🌹",d:"The aging patriarch of an organized crime dynasty transfers control to his reluctant son. Coppola's towering masterpiece — every scene is a lesson in filmmaking."},
+{t:"12 Angry Men",y:1957,k:"Movie",g:["Crime","Drama"],r:9.0,c:"Henry Fonda, Lee J. Cobb",id:"tt0050083",e:"⚖️",d:"Twelve jurors must decide a murder verdict — one man isn't so sure about guilty. A single-room pressure cooker about justice, bias, and the courage to speak up."},
+{t:"Schindler's List",y:1993,k:"Movie",g:["Biography","Drama","History"],r:9.0,c:"Liam Neeson, Ralph Fiennes, Ben Kingsley",id:"tt0108052",e:"🕯️",d:"A German businessman saves over a thousand Jewish lives during the Holocaust by employing them in his factory. Spielberg's most important film — devastating and essential."},
+{t:"The Dark Knight",y:2008,k:"Movie",g:["Action","Crime","Drama","Thriller"],r:9.0,c:"Christian Bale, Heath Ledger",id:"tt0468569",e:"🦇",d:"Batman faces the Joker in a battle that tests every moral limit. Heath Ledger's Oscar-winning performance is one of cinema's all-time greats."},
+{t:"12th Fail",y:2023,k:"Movie",g:["Biography","Drama"],r:9.0,c:"Vikrant Massey, Medha Shankar",id:"tt23849204",e:"📚",d:"The true story of a boy from a tiny village who failed his boards and still became an IPS officer through pure, stubborn persistence. One of the most inspiring Indian films ever."},
+{t:"The Godfather Part II",y:1974,k:"Movie",g:["Crime","Drama"],r:9.0,c:"Al Pacino, Robert De Niro",id:"tt0071562",e:"🎩",d:"Michael Corleone expands the family empire while his father's rise from Sicily plays out in parallel. A rare sequel that matches the original."},
+{t:"Parasite",y:2019,k:"Movie",g:["Comedy","Drama","Thriller"],r:8.5,c:"Song Kang-ho, Choi Woo-shik",id:"tt6751668",e:"🏚️",d:"A poor Korean family slowly infiltrates a wealthy household — until a shocking discovery changes everything. Bong Joon-ho's Palme d'Or masterclass."},
+{t:"Goodfellas",y:1990,k:"Movie",g:["Biography","Crime","Drama"],r:8.7,c:"Ray Liotta, Robert De Niro, Joe Pesci",id:"tt0099685",e:"💎",d:"Henry Hill's rise and fall inside the New York mob. Scorsese's most electric film — every frame buzzes with energy and dread."},
+{t:"The Silence of the Lambs",y:1991,k:"Movie",g:["Crime","Drama","Thriller"],r:8.6,c:"Jodie Foster, Anthony Hopkins",id:"tt0102926",e:"🦋",d:"An FBI trainee seeks help from a brilliant, imprisoned cannibal to catch a serial killer. Anthony Hopkins delivers one of cinema's most terrifying performances in only 16 minutes of screen time."},
+{t:"Se7en",y:1995,k:"Movie",g:["Crime","Drama","Mystery","Thriller"],r:8.6,c:"Brad Pitt, Morgan Freeman, Kevin Spacey",id:"tt0114369",e:"🔦",d:"Two detectives hunt a serial killer using the seven deadly sins as his motif. Fincher's rain-soaked nightmare builds to one of cinema's most shocking endings."},
+{t:"Forrest Gump",y:1994,k:"Movie",g:["Drama","Romance"],r:8.8,c:"Tom Hanks, Robin Wright",id:"tt0109830",e:"🏃",d:"A gentle man with a pure heart accidentally witnesses and influences every major American event from the 60s to 80s. Warm, funny, and quietly devastating."},
+{t:"Fight Club",y:1999,k:"Movie",g:["Drama","Mystery","Thriller"],r:8.8,c:"Brad Pitt, Edward Norton, Helena Bonham Carter",id:"tt0137523",e:"🧼",d:"An insomniac office worker and a reckless soap salesman form an underground fight club that grows into something far more dangerous. Fincher's anarchic provocation still hits hard."},
+{t:"Inception",y:2010,k:"Movie",g:["Action","Adventure","Sci-Fi","Thriller"],r:8.8,c:"Leonardo DiCaprio, Joseph Gordon-Levitt",id:"tt1375666",e:"🌀",d:"A thief who steals secrets from dreams is hired to plant an idea instead. Nolan's most dazzling puzzle box — the ending is still debated."},
+{t:"Interstellar",y:2014,k:"Movie",g:["Adventure","Drama","Sci-Fi"],r:8.7,c:"Matthew McConaughey, Anne Hathaway",id:"tt0816692",e:"🪐",d:"An astronaut travels through a wormhole to find humanity a new home while time passes differently for his daughter. Breathtaking and deeply emotional."},
+{t:"The Prestige",y:2006,k:"Movie",g:["Drama","Mystery","Sci-Fi","Thriller"],r:8.5,c:"Christian Bale, Hugh Jackman",id:"tt0482571",e:"🎩",d:"Two rival magicians become dangerously obsessed with sabotaging each other. Every frame hides a clue — rewatch it immediately."},
+{t:"Memento",y:2000,k:"Movie",g:["Mystery","Thriller"],r:8.4,c:"Guy Pearce, Carrie-Anne Moss",id:"tt0209144",e:"📸",d:"A man with short-term memory loss hunts his wife's killer using tattoos and polaroids. Nolan's first masterpiece — told entirely in reverse. Mind-bending and genuinely moving."},
+{t:"No Country for Old Men",y:2007,k:"Movie",g:["Crime","Drama","Thriller"],r:8.2,c:"Tommy Lee Jones, Javier Bardem, Josh Brolin",id:"tt0477348",e:"💼",d:"A hunter stumbles on a drug deal gone wrong and takes the money — with a terrifying hitman on his trail. The Coens' bleakest, most brilliant film."},
+{t:"Prisoners",y:2013,k:"Movie",g:["Crime","Drama","Mystery","Thriller"],r:8.1,c:"Hugh Jackman, Jake Gyllenhaal, Viola Davis",id:"tt1392214",e:"🔐",d:"Two girls go missing on Thanksgiving. A desperate father decides to take matters into his own hands. Villeneuve's most suffocating thriller."},
+{t:"Gone Girl",y:2014,k:"Movie",g:["Drama","Mystery","Thriller"],r:8.1,c:"Ben Affleck, Rosamund Pike",id:"tt2267998",e:"🔍",d:"On their anniversary, Nick Dunne's wife goes missing. The investigation reveals nothing about their marriage was what it seemed. A razor-sharp thriller."},
+{t:"Whiplash",y:2014,k:"Movie",g:["Drama","Music"],r:8.5,c:"Miles Teller, J.K. Simmons",id:"tt2582802",e:"🥁",d:"A jazz drumming prodigy is pushed to his breaking point by a terrifyingly demanding instructor. The most stressful 107 minutes in cinema — and completely exhilarating."},
+{t:"Dead Poets Society",y:1989,k:"Movie",g:["Drama"],r:8.1,c:"Robin Williams, Ethan Hawke",id:"tt0097165",e:"📖",d:"An unconventional English teacher inspires a group of prep-school boys to seize the day. Robin Williams at his most gentle and powerful — O Captain, My Captain."},
+{t:"Good Will Hunting",y:1997,k:"Movie",g:["Drama","Romance"],r:8.3,c:"Matt Damon, Robin Williams, Ben Affleck",id:"tt0119217",e:"🧮",d:"A janitor at MIT turns out to be a self-taught genius with profound emotional wounds. The film that made Matt Damon and Ben Affleck household names — and Robin Williams unforgettable."},
+{t:"The Pursuit of Happyness",y:2006,k:"Movie",g:["Biography","Drama"],r:8.0,c:"Will Smith, Jaden Smith",id:"tt0454921",e:"💼",d:"A struggling salesman takes custody of his young son just as he's left with nothing. Will Smith gives the performance of his career alongside his real son."},
+{t:"A Beautiful Mind",y:2001,k:"Movie",g:["Biography","Drama"],r:8.2,c:"Russell Crowe, Jennifer Connelly",id:"tt0268978",e:"🧠",d:"The true story of John Nash, a mathematical genius whose brilliance was shadowed by paranoid schizophrenia. Russell Crowe is extraordinary."},
+{t:"The Social Network",y:2010,k:"Movie",g:["Biography","Drama"],r:7.8,c:"Jesse Eisenberg, Andrew Garfield, Justin Timberlake",id:"tt1285016",e:"💻",d:"The creation of Facebook told as a Greek tragedy of betrayal and ambition. Fincher and Sorkin fire on all cylinders — the opening scene alone is a masterclass."},
+{t:"Knives Out",y:2019,k:"Movie",g:["Comedy","Crime","Mystery","Thriller"],r:7.9,c:"Daniel Craig, Ana de Armas, Chris Evans",id:"tt8946378",e:"🔪",d:"An eccentric detective investigates a family of suspects when a beloved crime novelist is found dead. Witty, twisty, and immensely entertaining."},
+{t:"The Truman Show",y:1998,k:"Movie",g:["Comedy","Drama","Sci-Fi"],r:8.2,c:"Jim Carrey, Ed Harris",id:"tt0120382",e:"📺",d:"A man slowly realizes his entire life is a live TV show and he's the only one who doesn't know it. Jim Carrey's most nuanced performance in a film about surveillance and authenticity."},
+{t:"American Beauty",y:1999,k:"Movie",g:["Drama"],r:8.3,c:"Kevin Spacey, Annette Bening, Thora Birch",id:"tt0169547",e:"🌹",d:"A suburban father in mid-life crisis falls for his daughter's best friend while his wife pursues an affair. A darkly funny skewering of the American Dream."},
+{t:"Marriage Story",y:2019,k:"Movie",g:["Comedy","Drama","Romance"],r:7.9,c:"Adam Driver, Scarlett Johansson",id:"tt7653254",e:"💔",d:"A stage director and actress navigate a coast-to-coast divorce. Noah Baumbach's most painful and tender film — the argument scene is breathtaking."},
+{t:"Manchester by the Sea",y:2016,k:"Movie",g:["Drama"],r:7.8,c:"Casey Affleck, Michelle Williams, Lucas Hedges",id:"tt4034228",e:"🌊",d:"A janitor becomes guardian to his teenage nephew after his brother dies, and must return to the town where he suffered an unimaginable loss. One of the most quietly devastating films ever made."},
+{t:"Three Billboards Outside Ebbing, Missouri",y:2017,k:"Movie",g:["Crime","Drama"],r:8.1,c:"Frances McDormand, Woody Harrelson, Sam Rockwell",id:"tt5027774",e:"🚗",d:"After months pass with no suspects, a mother takes on the local police in a war of words and billboards. Frances McDormand is ferocious — but the film surprises you with grace."},
+{t:"Room",y:2015,k:"Movie",g:["Drama","Thriller"],r:8.1,c:"Brie Larson, Jacob Tremblay",id:"tt3170832",e:"🏠",d:"A young woman who has been held captive for years escapes with her five-year-old son who has never seen the outside world. Brie Larson and Jacob Tremblay are extraordinary."},
+{t:"Into the Wild",y:2007,k:"Movie",g:["Adventure","Biography","Drama"],r:8.1,c:"Emile Hirsch, Hal Holbrook, Sean Penn",id:"tt0758758",e:"🌲",d:"A top graduate burns his savings, abandons his car, and hitchhikes to Alaska to live in the wilderness. Penn's most personal film — beautiful, sad, and unforgettable."},
+{t:"Life is Beautiful",y:1997,k:"Movie",g:["Comedy","Drama","Romance"],r:8.6,c:"Roberto Benigni, Nicoletta Braschi",id:"tt0118799",e:"🌻",d:"A Jewish Italian man uses humour and imagination to shield his young son from the horrors of a Nazi concentration camp. You will cry at the end — and somehow feel uplifted."},
+{t:"Moonlight",y:2016,k:"Movie",g:["Drama"],r:7.4,c:"Mahershala Ali, Trevante Rhodes, Ashton Sanders",id:"tt4975722",e:"🌙",d:"Three chapters in the life of a young Black man in Miami — childhood, adolescence, adulthood — as he grapples with identity and intimacy. Barry Jenkins' Best Picture winner is exquisite."},
+{t:"Everything Everywhere All at Once",y:2022,k:"Movie",g:["Action","Adventure","Comedy","Sci-Fi"],r:7.8,c:"Michelle Yeoh, Ke Huy Quan, Jamie Lee Curtis",id:"tt6710474",e:"🥯",d:"A laundromat owner discovers she must connect with parallel universe versions of herself to save the world. The most wildly original film of the 2020s — and unexpectedly moving."},
+{t:"Oppenheimer",y:2023,k:"Movie",g:["Biography","Drama","History","Thriller"],r:8.9,c:"Cillian Murphy, Emily Blunt",id:"tt15398776",e:"☢️",d:"J. Robert Oppenheimer built the atomic bomb and watched the world it created come undone. Three hours of dense, gripping, morally complex cinema."},
+
+/* ── Action / Adventure ── */
+{t:"The Matrix",y:1999,k:"Movie",g:["Action","Sci-Fi","Thriller"],r:8.7,c:"Keanu Reeves, Laurence Fishburne, Carrie-Anne Moss",id:"tt0133093",e:"💊",d:"A computer programmer discovers that reality is a simulation controlled by machines. The Wachowskis changed action cinema forever — the bullet-time sequence is still iconic."},
+{t:"Gladiator",y:2000,k:"Movie",g:["Action","Adventure","Drama"],r:8.5,c:"Russell Crowe, Joaquin Phoenix",id:"tt0172495",e:"⚔️",d:"A betrayed Roman general becomes a gladiator and plots revenge against the corrupt emperor. Russell Crowe commands the screen — Are you not entertained?"},
+{t:"Mad Max: Fury Road",y:2015,k:"Movie",g:["Action","Adventure","Sci-Fi"],r:8.1,c:"Tom Hardy, Charlize Theron",id:"tt1392190",e:"🚗",d:"A woman commandeers a war rig across a post-apocalyptic wasteland to free enslaved wives. George Miller reinvented the action film at 70 — 90% practical effects, zero CGI nonsense."},
+{t:"Die Hard",y:1988,k:"Movie",g:["Action","Thriller"],r:8.2,c:"Bruce Willis, Alan Rickman",id:"tt0095016",e:"🎅",d:"A New York cop battles terrorists in a Los Angeles skyscraper on Christmas Eve. The template for every modern action movie. Yes it's a Christmas movie."},
+{t:"Heat",y:1995,k:"Movie",g:["Action","Crime","Drama","Thriller"],r:8.3,c:"Al Pacino, Robert De Niro, Val Kilmer",id:"tt0113277",e:"🏙️",d:"A veteran detective and a meticulous thief face off across Los Angeles. The coffee-shop scene — the first time Pacino and De Niro shared the screen — is one of cinema's great moments."},
+{t:"Casino Royale",y:2006,k:"Movie",g:["Action","Adventure","Thriller"],r:8.0,c:"Daniel Craig, Eva Green, Mads Mikkelsen",id:"tt0381061",e:"🃏",d:"James Bond earns his 007 status on a mission to bankrupt a terrorist financier at a high-stakes poker game. Craig's debut rebooted Bond as a vulnerable, genuinely dangerous human being."},
+{t:"Mission: Impossible – Fallout",y:2018,k:"Movie",g:["Action","Adventure","Thriller"],r:7.7,c:"Tom Cruise, Henry Cavill, Rebecca Ferguson",id:"tt4912910",e:"🪂",d:"Ethan Hunt races to stop a nuclear catastrophe while being hunted by the CIA. The HALO jump and bathroom fight are two of the greatest action sequences ever filmed."},
+{t:"John Wick",y:2014,k:"Movie",g:["Action","Crime","Thriller"],r:7.4,c:"Keanu Reeves, Michael Nyqvist",id:"tt2911666",e:"🐶",d:"A retired hitman goes on a rampage after his puppy is killed and his car stolen. The film that revived Keanu Reeves' career — and reinvented the action genre's choreography."},
+{t:"Kill Bill: Volume 1",y:2003,k:"Movie",g:["Action","Crime","Thriller"],r:8.2,c:"Uma Thurman, Lucy Liu, David Carradine",id:"tt0266697",e:"🗡️",d:"A former assassin wakes from a coma to seek revenge on the team that tried to kill her. Tarantino's most visceral, maximalist, pure-cinema spectacle."},
+{t:"Crouching Tiger, Hidden Dragon",y:2000,k:"Movie",g:["Action","Adventure","Drama","Romance"],r:7.8,c:"Chow Yun-fat, Michelle Yeoh, Zhang Ziyi",id:"tt0190332",e:"🐉",d:"Two warriors pursue a stolen sword and a fugitive in classical China, while a young noblewoman discovers she has a taste for adventure. Ang Lee's wuxia masterpiece."},
+{t:"1917",y:2019,k:"Movie",g:["Drama","History","War"],r:8.3,c:"George MacKay, Dean-Charles Chapman",id:"tt8579674",e:"🎖️",d:"Two British soldiers must cross enemy territory to deliver a message that could save 1,600 lives — filmed to appear as one continuous shot. Roger Deakins' cinematography is staggering."},
+{t:"Saving Private Ryan",y:1998,k:"Movie",g:["Drama","History","War"],r:8.6,c:"Tom Hanks, Matt Damon",id:"tt0120815",e:"🏳️",d:"After the D-Day landing, a squad is sent to find and bring home the last surviving brother of four servicemen. The 27-minute Omaha Beach sequence redefined war cinema."},
+{t:"Dunkirk",y:2017,k:"Movie",g:["Action","Drama","History","Thriller","War"],r:7.9,c:"Fionn Whitehead, Tom Hardy, Mark Rylance",id:"tt5013056",e:"⛵",d:"The miraculous WWII evacuation from three perspectives: land, sea, air. Nolan strips out dialogue and backstory — pure, suffocating cinema of survival."},
+{t:"Hacksaw Ridge",y:2016,k:"Movie",g:["Biography","Drama","History","War"],r:8.1,c:"Andrew Garfield, Vince Vaughn, Hugo Weaving",id:"tt2119532",e:"🏥",d:"The true story of Desmond Doss, who refused to carry a gun in WWII and still saved 75 lives on the bloodiest ridge in Okinawa. Gibson's most powerful film."},
+{t:"Top Gun: Maverick",y:2022,k:"Movie",g:["Action","Drama"],r:8.3,c:"Tom Cruise, Jennifer Connelly, Miles Teller",id:"tt1745960",e:"✈️",d:"Maverick returns to train a new squad for an impossible mission. A rare sequel that surpasses the original — jaw-dropping aerial sequences and genuine heart."},
+{t:"RRR",y:2022,k:"Movie",g:["Action","Adventure","Drama"],r:7.8,c:"Jr. NTR, Ram Charan",id:"tt8125484",e:"🔥",d:"Two legendary Indian freedom fighters form an unlikely bond before discovering they're on opposite sides. The Naatu Naatu sequence and action set pieces are genuinely insane."},
+{t:"Back to the Future",y:1985,k:"Movie",g:["Adventure","Comedy","Sci-Fi"],r:8.5,c:"Michael J. Fox, Christopher Lloyd",id:"tt0088763",e:"⚡",d:"A teenager is sent back to 1955 in a time-travelling DeLorean and must repair the timeline before he ceases to exist. The most perfectly constructed blockbuster screenplay."},
+{t:"The Avengers",y:2012,k:"Movie",g:["Action","Adventure","Sci-Fi"],r:8.0,c:"Robert Downey Jr., Chris Evans, Scarlett Johansson",id:"tt0848228",e:"🛡️",d:"Earth's mightiest heroes assemble to stop an alien invasion. Joss Whedon pulled off the impossible: a superhero ensemble that's genuinely fun from first frame to last."},
+{t:"Dune",y:2021,k:"Movie",g:["Action","Adventure","Drama","Sci-Fi"],r:8.0,c:"Timothée Chalamet, Zendaya, Oscar Isaac",id:"tt1160419",e:"🏜️",d:"A young nobleman must lead a desert people in a war for a planet that produces the most valuable substance in the universe. Villeneuve makes Herbert's epic feel real and urgent."},
+{t:"Ford v Ferrari",y:2019,k:"Movie",g:["Action","Biography","Drama","Sport"],r:8.1,c:"Matt Damon, Christian Bale",id:"tt1950186",e:"🏎️",d:"Carroll Shelby and driver Ken Miles battle corporate interference to build a car that can beat Ferrari at Le Mans. The racing sequences are some of the most thrilling ever put on film."},
+
+/* ── Sci-Fi ── */
+{t:"2001: A Space Odyssey",y:1968,k:"Movie",g:["Adventure","Sci-Fi"],r:8.3,c:"Keir Dullea, Gary Lockwood",id:"tt0062622",e:"🌌",d:"Humanity's evolutionary leap from ape to astronaut, watched over by a mysterious monolith. Kubrick's most ambitious film — still the most visually stunning sci-fi ever made."},
+{t:"Blade Runner 2049",y:2017,k:"Movie",g:["Action","Drama","Mystery","Sci-Fi","Thriller"],r:8.0,c:"Ryan Gosling, Harrison Ford, Ana de Armas",id:"tt1856101",e:"🌧️",d:"A new blade runner unearths a long-buried secret that could plunge society into chaos. Villeneuve's sequel is richer, quieter, and more beautiful than the original."},
+{t:"Arrival",y:2016,k:"Movie",g:["Drama","Mystery","Sci-Fi"],r:7.9,c:"Amy Adams, Jeremy Renner",id:"tt2543164",e:"🛸",d:"A linguist is recruited to communicate with alien spacecraft that have appeared around the world. The most emotionally devastating sci-fi film of this generation."},
+{t:"Ex Machina",y:2014,k:"Movie",g:["Drama","Mystery","Sci-Fi","Thriller"],r:7.7,c:"Domhnall Gleeson, Oscar Isaac, Alicia Vikander",id:"tt0470752",e:"🤖",d:"A programmer is invited to administer a Turing test to a humanoid AI. Alex Garland's debut feature is a cool, claustrophobic thriller about consciousness and manipulation."},
+{t:"The Martian",y:2015,k:"Movie",g:["Adventure","Drama","Sci-Fi"],r:8.0,c:"Matt Damon, Jessica Chastain",id:"tt3659388",e:"🌿",d:"An astronaut is left for dead on Mars and must use science and humour to survive long enough for a rescue. Matt Damon's most charismatic performance — optimism as a survival tool."},
+{t:"Gravity",y:2013,k:"Movie",g:["Adventure","Drama","Sci-Fi","Thriller"],r:7.7,c:"Sandra Bullock, George Clooney",id:"tt1454468",e:"🌍",d:"Two astronauts are stranded in orbit after their shuttle is destroyed. Cuarón's single-shot miracle sequences make this the most technically astonishing film of its era."},
+{t:"A Quiet Place",y:2018,k:"Movie",g:["Drama","Horror","Sci-Fi","Thriller"],r:7.5,c:"Emily Blunt, John Krasinski",id:"tt6644200",e:"🤫",d:"A family lives in near-total silence, hunted by creatures that attack any sound. Every noise is terrifying. Krasinski directs himself opposite his real wife."},
+
+/* ── Romance ── */
+{t:"Eternal Sunshine of the Spotless Mind",y:2004,k:"Movie",g:["Drama","Romance","Sci-Fi"],r:8.3,c:"Jim Carrey, Kate Winslet",id:"tt0338013",e:"🧠",d:"A man undergoes a procedure to erase his ex-girlfriend from his memory — and realizes mid-erasure that he doesn't want to forget. Charlie Kaufman's most romantic and heartbreaking script."},
+{t:"Before Sunrise",y:1995,k:"Movie",g:["Drama","Romance"],r:8.1,c:"Ethan Hawke, Julie Delpy",id:"tt0112471",e:"🌅",d:"An American and a French woman spend one night wandering Vienna and talking. Linklater's anti-plot masterpiece — two strangers becoming everything to each other in 14 hours."},
+{t:"(500) Days of Summer",y:2009,k:"Movie",g:["Comedy","Drama","Romance"],r:7.8,c:"Joseph Gordon-Levitt, Zooey Deschanel",id:"tt1022603",e:"☀️",d:"A greeting card writer falls for his boss's assistant — but this is not a love story. A brilliant, non-chronological examination of how we project love onto people who don't love us back."},
+{t:"La La Land",y:2016,k:"Movie",g:["Comedy","Drama","Music","Romance"],r:8.0,c:"Ryan Gosling, Emma Stone",id:"tt3783958",e:"🌟",d:"A jazz pianist and aspiring actress fall in love in Los Angeles while pursuing their dreams. Gorgeous and bittersweet — the ending stays with you for days."},
+{t:"The Notebook",y:2004,k:"Movie",g:["Drama","Romance"],r:7.8,c:"Ryan Gosling, Rachel McAdams",id:"tt0332280",e:"📓",d:"An old man reads a love story to an elderly woman — two young people from different worlds who fell desperately in love. The rain scene is iconic for a reason."},
+{t:"About Time",y:2013,k:"Movie",g:["Comedy","Drama","Fantasy","Romance"],r:7.8,c:"Domhnall Gleeson, Rachel McAdams, Bill Nighy",id:"tt2194499",e:"⏱️",d:"A man who can time travel learns that the best moments in life are simply the ordinary ones, fully noticed. A gentle, beautiful film."},
+{t:"Crazy, Stupid, Love",y:2011,k:"Movie",g:["Comedy","Drama","Romance"],r:7.4,c:"Steve Carell, Ryan Gosling, Emma Stone",id:"tt1570728",e:"❤️",d:"A middle-aged man whose wife asks for a divorce gets a makeover from a smooth-talking playboy who's falling for the wrong girl. A rom-com that genuinely earns its ending."},
+{t:"Pride & Prejudice",y:2005,k:"Movie",g:["Drama","Romance"],r:7.8,c:"Keira Knightley, Matthew Macfadyen",id:"tt0414387",e:"🌧️",d:"The Bennet sisters navigate class, money, and marriage in Regency England — and Elizabeth meets the insufferably attractive Mr Darcy. Wright's most beautiful film."},
+{t:"When Harry Met Sally",y:1989,k:"Movie",g:["Comedy","Drama","Romance"],r:7.7,c:"Billy Crystal, Meg Ryan",id:"tt0098635",e:"🥗",d:"Two friends debate whether men and women can be friends over twelve years. The restaurant scene is legendary — Nora Ephron's sharpest script."},
+{t:"Titanic",y:1997,k:"Movie",g:["Drama","Romance"],r:7.9,c:"Leonardo DiCaprio, Kate Winslet",id:"tt0120338",e:"🚢",d:"A young woman falls for a poor artist aboard the doomed ocean liner. Cameron's three-hour romantic disaster epic swept 11 Oscars — the chemistry between DiCaprio and Winslet is real."},
+{t:"Atonement",y:2007,k:"Movie",g:["Drama","Mystery","Romance","War"],r:7.8,c:"James McAvoy, Keira Knightley, Saoirse Ronan",id:"tt0783233",e:"✍️",d:"A young girl's lie tears apart two lovers' lives — and she spends the rest of hers trying to atone. Joe Wright's Dunkirk tracking shot alone is worth the price of admission."},
+{t:"Normal People",y:2020,k:"Series",g:["Drama","Romance"],r:8.0,c:"Daisy Edgar-Jones, Paul Mescal",id:"tt9059760",e:"🌸",d:"Two people from the same Irish town keep falling in and out of each other's lives. Daisy Edgar-Jones and Paul Mescal have some of the most authentic on-screen chemistry ever filmed."},
+
+/* ── Comedy ── */
+{t:"The Grand Budapest Hotel",y:2014,k:"Movie",g:["Adventure","Comedy","Crime","Drama"],r:8.1,c:"Ralph Fiennes, Tony Revolori",id:"tt2278388",e:"🏨",d:"A legendary concierge and his lobby boy get entangled in the theft of a famous painting and a murder mystery. Wes Anderson's most perfectly calibrated confection."},
+{t:"Groundhog Day",y:1993,k:"Movie",g:["Comedy","Fantasy","Romance"],r:8.0,c:"Bill Murray, Andie MacDowell",id:"tt0107048",e:"🦫",d:"A cynical weatherman relives the same small-town day over and over. Bill Murray's best performance — and a film whose philosophy gets richer every time you watch it."},
+{t:"Superbad",y:2007,k:"Movie",g:["Comedy"],r:7.6,c:"Jonah Hill, Michael Cera",id:"tt0829482",e:"🍺",d:"Two inseparable high-school best friends attempt to get alcohol for a party on their last night together before college. The funniest coming-of-age comedy since Ferris Bueller."},
+{t:"The Hangover",y:2009,k:"Movie",g:["Comedy"],r:7.7,c:"Bradley Cooper, Zach Galifianakis, Ed Helms",id:"tt1119646",e:"🐯",d:"Three groomsmen wake up in Las Vegas with no memory of the previous night and a missing groom. Comedy that genuinely earns its R-rating — and has one of cinema's best punchline endings."},
+{t:"Hera Pheri",y:2000,k:"Movie",g:["Comedy","Crime"],r:8.2,c:"Akshay Kumar, Suniel Shetty, Paresh Rawal",id:"tt0248126",e:"📞",d:"Three broke men accidentally receive a kidnapper's ransom call and hatch ridiculous schemes to profit from it. The most quotable Bollywood comedy ever made."},
+{t:"3 Idiots",y:2009,k:"Movie",g:["Comedy","Drama"],r:8.4,c:"Aamir Khan, R. Madhavan, Sharman Joshi",id:"tt1187043",e:"🎓",d:"Three engineering students challenge India's pressure-cooker education system. Laugh-out-loud funny and surprisingly heartfelt — one of Bollywood's most rewatched films."},
+{t:"Dil Chahta Hai",y:2001,k:"Movie",g:["Comedy","Drama","Romance"],r:8.1,c:"Aamir Khan, Saif Ali Khan, Akshaye Khanna",id:"tt0292490",e:"🎨",d:"Three inseparable friends navigate entirely different approaches to love after leaving college. The film that redefined cool in Bollywood."},
+{t:"Jab We Met",y:2007,k:"Movie",g:["Comedy","Drama","Romance"],r:7.9,c:"Shahid Kapoor, Kareena Kapoor",id:"tt1019452",e:"🚂",d:"A heartbroken man gets stranded with an irrepressible Punjabi girl who drags him on the adventure of his life. Kareena's Geet is iconic."},
+
+/* ── Animation ── */
+{t:"Spirited Away",y:2001,k:"Movie",g:["Animation","Adventure","Family","Fantasy"],r:8.6,c:"Daveigh Chase (voice)",id:"tt0245429",e:"🐉",d:"A 10-year-old girl works in a magical spirit bathhouse to rescue her parents turned into pigs. Miyazaki's dreamlike, inexhaustibly inventive masterpiece."},
+{t:"Your Name",y:2016,k:"Movie",g:["Animation","Drama","Fantasy","Romance"],r:8.4,c:"Ryunosuke Kamiki (voice)",id:"tt5311514",e:"🌠",d:"A girl in rural Japan and a boy in Tokyo mysteriously swap bodies — and begin to fall in love with someone they've never met. Gorgeous and heart-wrenching."},
+{t:"Princess Mononoke",y:1997,k:"Movie",g:["Animation","Adventure","Fantasy"],r:8.4,c:"Yoji Matsuda (voice), Yuriko Ishida (voice)",id:"tt0119698",e:"🐺",d:"A young prince becomes embroiled in an ancient war between humans and forest gods. Miyazaki's most epic film — environmentalism, violence, and moral complexity rarely seen in animation."},
+{t:"Howl's Moving Castle",y:2004,k:"Movie",g:["Animation","Adventure","Fantasy","Romance"],r:8.2,c:"Chieko Baisho (voice), Takuya Kimura (voice)",id:"tt0347149",e:"🏰",d:"A young milliner is cursed to live as an old woman and finds refuge in a wizard's enchanted moving castle. Miyazaki's most romantic film — visually overwhelming."},
+{t:"Grave of the Fireflies",y:1988,k:"Movie",g:["Animation","Drama","War"],r:8.5,c:"Tsutomu Tatsumi (voice)",id:"tt0095327",e:"🪲",d:"Two orphaned children struggle to survive in Japan during the firebombing of WWII. The most devastating animated film ever made — you will not recover quickly."},
+{t:"The Lion King",y:1994,k:"Movie",g:["Animation","Adventure","Drama","Family","Music"],r:8.5,c:"Matthew Broderick, James Earl Jones (voices)",id:"tt0110357",e:"🦁",d:"A young lion prince flees his kingdom after his uncle murders his father, only to learn what it means to be a king. The circle of life is never just about lions."},
+{t:"Up",y:2009,k:"Movie",g:["Animation","Adventure","Comedy","Drama","Family"],r:8.3,c:"Edward Asner, Christopher Plummer (voices)",id:"tt1049413",e:"🎈",d:"A 78-year-old man ties thousands of balloons to his house and flies to South America to fulfill his late wife's dream. The first eight minutes are the most emotionally packed in animated history."},
+{t:"Coco",y:2017,k:"Movie",g:["Animation","Adventure","Comedy","Family","Music"],r:8.4,c:"Anthony Gonzalez, Gael García Bernal (voices)",id:"tt2380307",e:"💀",d:"A young Mexican boy accidentally enters the Land of the Dead and must find his great-great-grandfather to return home. Pixar's most heartfelt film — Remember Me will destroy you."},
+{t:"Inside Out",y:2015,k:"Movie",g:["Animation","Adventure","Comedy","Drama","Family","Fantasy"],r:8.2,c:"Amy Poehler, Mindy Kaling (voices)",id:"tt2096673",e:"🎭",d:"The emotions inside an 11-year-old girl's head scramble to help her navigate a major life change. Pixar's most ingenious conceit — and a genuinely brilliant exploration of how sadness and joy co-exist."},
+{t:"WALL-E",y:2008,k:"Movie",g:["Animation","Adventure","Family","Romance","Sci-Fi"],r:8.4,c:"Ben Burtt (voice)",id:"tt0910970",e:"🤖",d:"A lonely trash-compacting robot falls in love with an exploring probe sent to the abandoned Earth. The first 40 minutes — nearly wordless — are the purest cinema Pixar ever made."},
+{t:"Finding Nemo",y:2003,k:"Movie",g:["Animation","Adventure","Comedy","Family"],r:8.2,c:"Albert Brooks, Ellen DeGeneres (voices)",id:"tt0266543",e:"🐠",d:"An overprotective clownfish crosses the ocean to find his son. P. Sherman, 42 Wallaby Way, Sydney — you will never forget this address."},
+
+/* ── Horror ── */
+{t:"The Shining",y:1980,k:"Movie",g:["Drama","Horror"],r:8.4,c:"Jack Nicholson, Shelley Duvall",id:"tt0081505",e:"🪓",d:"A writer takes his family to an isolated hotel for the winter and slowly goes mad. Kubrick's most terrifying film — every shot is calculated to unsettle you."},
+{t:"Get Out",y:2017,k:"Movie",g:["Horror","Mystery","Thriller"],r:7.7,c:"Daniel Kaluuya, Allison Williams",id:"tt5052448",e:"🏡",d:"A Black man visits his white girlfriend's family estate and senses something profoundly wrong beneath the surface. Jordan Peele's debut is both brilliant social satire and genuinely terrifying horror."},
+{t:"Hereditary",y:2018,k:"Movie",g:["Drama","Horror","Mystery","Thriller"],r:7.3,c:"Toni Collette, Alex Wolff, Gabriel Byrne",id:"tt7784604",e:"🪆",d:"After the death of her secretive mother, a woman begins uncovering disturbing family secrets. Ari Aster's debut is the most disturbing family drama you will ever see — Toni Collette is staggering."},
+{t:"Train to Busan",y:2016,k:"Movie",g:["Action","Horror","Thriller"],r:7.6,c:"Gong Yoo, Ma Dong-seok",id:"tt5700672",e:"🚄",d:"A father and daughter are trapped on a train to Busan as a zombie outbreak sweeps South Korea. The most emotionally relentless zombie film ever made — the father-daughter relationship is the real story."},
+{t:"Psycho",y:1960,k:"Movie",g:["Horror","Mystery","Thriller"],r:8.5,c:"Anthony Perkins, Janet Leigh",id:"tt0054215",e:"🚿",d:"A secretary on the run stops at a lonely motel run by a shy young man dominated by his mother. Hitchcock broke every rule — and invented modern horror."},
+{t:"Midsommar",y:2019,k:"Movie",g:["Drama","Horror","Mystery","Thriller"],r:7.1,c:"Florence Pugh, Jack Reynor",id:"tt8772262",e:"🌸",d:"A woman grieving a family tragedy travels to Sweden for a midsummer festival that turns increasingly sinister. Ari Aster's most divisive film — a breakup movie that happens to be a folk horror nightmare."},
+{t:"Stree",y:2018,k:"Movie",g:["Comedy","Horror","Mystery","Thriller"],r:7.6,c:"Rajkummar Rao, Shraddha Kapoor",id:"tt8102208",e:"👻",d:"A small town is terrorized annually by a female spirit who kidnaps men. A brilliant horror-comedy that works as genuine scares and sharp social satire."},
+{t:"Tumbbad",y:2018,k:"Movie",g:["Drama","Fantasy","Horror","Mystery","Thriller"],r:8.5,c:"Sohum Shah, Jyoti Malshe",id:"tt8239946",e:"🌧️",d:"A man's lifelong obsession with a cursed ancestral treasure spans generations of greed and horror. India's most visually extraordinary film — a fable about avarice unlike anything else in Indian cinema."},
+
+/* ── Bollywood / Indian ── */
+{t:"Dilwale Dulhania Le Jayenge",y:1995,k:"Movie",g:["Drama","Romance"],r:8.0,c:"Shah Rukh Khan, Kajol",id:"tt0112870",e:"🌾",d:"Two NRIs fall in love on a Eurotrip but her father has arranged her marriage. The film that defined Bollywood romance — still running in Mumbai theatres."},
+{t:"Dangal",y:2016,k:"Movie",g:["Action","Biography","Drama","Sport"],r:8.3,c:"Aamir Khan, Fatima Sana Shaikh",id:"tt5074352",e:"🏅",d:"A former wrestler trains his daughters to become world champions in a country that didn't believe women belonged in sport. One of the most satisfying sports films ever made."},
+{t:"Queen",y:2014,k:"Movie",g:["Adventure","Comedy","Drama","Romance"],r:8.2,c:"Kangana Ranaut",id:"tt3418812",e:"👑",d:"Left at the altar, a sheltered Delhi girl goes on her European honeymoon alone and discovers herself. Kangana Ranaut's performance is a revelation."},
+{t:"Zindagi Na Milegi Dobara",y:2011,k:"Movie",g:["Adventure","Comedy","Drama","Romance"],r:8.2,c:"Hrithik Roshan, Farhan Akhtar, Abhay Deol",id:"tt1707519",e:"🤿",d:"Three friends take a bachelor trip across Spain, each confronting the fears they've avoided. The film that made every Indian want to skydive over Barcelona."},
+{t:"Taare Zameen Par",y:2007,k:"Movie",g:["Drama","Family","Music"],r:8.4,c:"Darsheel Safary, Aamir Khan",id:"tt0986264",e:"🎨",d:"A dyslexic child drowning in school finds his champion in a new art teacher who sees the extraordinary kid others missed. A film that will make you call your parents."},
+{t:"Kuch Kuch Hota Hai",y:1998,k:"Movie",g:["Drama","Romance"],r:7.5,c:"Shah Rukh Khan, Kajol, Rani Mukerji",id:"tt0172684",e:"💌",d:"A college heartthrob revisits a friendship he neglected when he reads letters from his late wife. Pure, unapologetic Bollywood romance at its best."},
+{t:"Lagaan",y:2001,k:"Movie",g:["Adventure","Drama","Music","Romance","Sport"],r:8.1,c:"Aamir Khan, Gracy Singh, Rachel Shelley",id:"tt0169102",e:"🏏",d:"Villagers in colonial India bet their tax waiver on a cricket match against the British. Three hours and 44 minutes of pure cinema — the match sequence is endlessly exciting."},
+{t:"Rang De Basanti",y:2006,k:"Movie",g:["Drama","History","Music","Thriller"],r:8.1,c:"Aamir Khan, Siddharth, R. Madhavan",id:"tt0434215",e:"🌿",d:"A British filmmaker makes a documentary about freedom fighters — and the young actors they cast begin to mirror their subjects. The film that made a generation angry and proud."},
+{t:"Swades",y:2004,k:"Movie",g:["Drama"],r:8.2,c:"Shah Rukh Khan, Gayatri Joshi",id:"tt0402712",e:"🌍",d:"An NRI NASA scientist returns to India to bring his childhood nanny to America — and finds reasons to stay. Shah Rukh Khan's finest performance, bar none."},
+{t:"Gully Boy",y:2019,k:"Movie",g:["Drama","Music"],r:7.9,c:"Ranveer Singh, Alia Bhatt",id:"tt8507088",e:"🎤",d:"A young man from Dharavi finds his voice through Mumbai's underground rap scene. Ranveer Singh is electric — and the music genuinely slaps."},
+{t:"Andhadhun",y:2018,k:"Movie",g:["Crime","Mystery","Thriller"],r:8.3,c:"Ayushmann Khurrana, Tabu, Radhika Apte",id:"tt8108202",e:"🎹",d:"A blind pianist accidentally witnesses a murder and gets pulled deeper into a spiral of deception. Sriram Raghavan's razor-sharp thriller is the most fun you'll have with a dark film."},
+{t:"Talaash",y:2012,k:"Movie",g:["Crime","Drama","Mystery","Thriller"],r:7.3,c:"Aamir Khan, Kareena Kapoor, Rani Mukerji",id:"tt2197070",e:"🌃",d:"A Mumbai cop investigating a film star's mysterious death is haunted by his own grief. A slow-burn noir that pays off with one of Bollywood's greatest third-act reveals."},
+{t:"Kahaani",y:2012,k:"Movie",g:["Crime","Mystery","Thriller"],r:8.0,c:"Vidya Balan, Parambrata Chattopadhyay",id:"tt2117697",e:"🤰",d:"A pregnant woman arrives in Kolkata looking for her missing husband and gets drawn into a larger conspiracy. Vidya Balan is extraordinary — and the finale is immaculate."},
+{t:"Masaan",y:2015,k:"Movie",g:["Drama","Romance"],r:8.3,c:"Richa Chadha, Vicky Kaushal, Sanjay Mishra",id:"tt4635372",e:"🔥",d:"Two parallel stories of grief and shame in Varanasi, intertwined at the burning ghats. The most understated and quietly devastating Indian film of the decade."},
+{t:"Pink",y:2016,k:"Movie",g:["Crime","Drama","Thriller"],r:8.1,c:"Amitabh Bachchan, Taapsee Pannu",id:"tt5827006",e:"✊",d:"Three young women face harassment and criminal charges in Delhi — and find an unexpected ally in a retired lawyer. A searing film about consent and judgment."},
+{t:"Article 15",y:2019,k:"Movie",g:["Crime","Drama","Mystery","Thriller"],r:8.1,c:"Ayushmann Khurrana, Nassar",id:"tt10064954",e:"📜",d:"A young IPS officer uncovers the brutal caste-based realities behind a missing-girls case in rural UP. Anubhav Sinha's most unflinching and necessary film."},
+{t:"Sardar Udham",y:2021,k:"Movie",g:["Biography","Drama","History","Thriller"],r:8.5,c:"Vicky Kaushal, Shaun Scott",id:"tt10327986",e:"🔫",d:"The true story of Udham Singh's 21-year mission to avenge the Jallianwala Bagh massacre by assassinating Michael O'Dwyer. Vicky Kaushal is mesmerizing — the Jallianwala sequence is harrowing."},
+{t:"Shershaah",y:2021,k:"Movie",g:["Action","Biography","Drama","Romance","War"],r:8.5,c:"Sidharth Malhotra, Kiara Advani",id:"tt10697772",e:"🎖️",d:"The true story of Captain Vikram Batra, who led the recapture of strategic peaks in the Kargil War. The real events are more dramatic than any script — and the love story is genuinely beautiful."},
+{t:"KGF: Chapter 2",y:2022,k:"Movie",g:["Action","Crime","Drama"],r:8.3,c:"Yash, Sanjay Dutt",id:"tt10522350",e:"💎",d:"Rocky rises to control the world's most powerful gold mine while battling enemies on every front. Bigger, louder, and more intense than the original."},
+{t:"Bohemian Rhapsody",y:2018,k:"Movie",g:["Biography","Drama","Music"],r:7.9,c:"Rami Malek",id:"tt1727824",e:"🎤",d:"The story of Freddie Mercury and Queen, culminating in their legendary Live Aid performance. Rami Malek is completely astonishing."},
+
+/* ── Biographical / Inspirational ── */
+{t:"The Imitation Game",y:2014,k:"Movie",g:["Biography","Drama","History","Thriller","War"],r:8.0,c:"Benedict Cumberbatch, Keira Knightley",id:"tt2084970",e:"💻",d:"Alan Turing and a brilliant team secretly attempt to crack Nazi Germany's Enigma code — and Turing must also hide who he is. Cumberbatch at his most compelling."},
+{t:"The Big Short",y:2015,k:"Movie",g:["Biography","Comedy","Drama"],r:7.8,c:"Christian Bale, Steve Carell, Ryan Gosling",id:"tt1596363",e:"📉",d:"A handful of eccentric traders predicted the 2008 financial collapse and bet against the entire housing market. McKay makes incomprehensible economics feel like a thriller."},
+{t:"Moneyball",y:2011,k:"Movie",g:["Biography","Drama","Sport"],r:7.6,c:"Brad Pitt, Jonah Hill, Philip Seymour Hoffman",id:"tt1210166",e:"⚾",d:"An Oakland A's general manager uses data analytics to build a competitive team on a shoestring budget. Sports and statistics have never been this tense."},
+{t:"Gandhi",y:1982,k:"Movie",g:["Biography","Drama","History"],r:8.0,c:"Ben Kingsley, Candice Bergen",id:"tt0083987",e:"🕊️",d:"The life of Mahatma Gandhi from his formative years in South Africa to his assassination in 1948. Ben Kingsley disappears completely into one of cinema's most complete biographical performances."},
+
+/* ── Korean Cinema ── */
+{t:"Oldboy",y:2003,k:"Movie",g:["Action","Drama","Mystery","Thriller"],r:8.4,c:"Choi Min-sik, Yoo Ji-tae",id:"tt0364569",e:"🔨",d:"A man is mysteriously imprisoned for 15 years, then released — and given five days to find out why. Park Chan-wook's revenge masterpiece ends with one of cinema's most disturbing revelations."},
+{t:"Memories of Murder",y:2003,k:"Movie",g:["Crime","Drama","Mystery","Thriller"],r:8.1,c:"Song Kang-ho, Kim Sang-kyung",id:"tt0353969",e:"🌧️",d:"Two detectives investigate South Korea's first serial murders in a small town with no forensic resources. Bong Joon-ho's most humanistic film — the final shot is haunting."},
+
+/* ══════════ SERIES ══════════ */
+{t:"Breaking Bad",y:2008,k:"Series",g:["Crime","Drama","Thriller"],r:9.5,c:"Bryan Cranston, Aaron Paul",id:"tt0903747",e:"⚗️",d:"A chemistry teacher diagnosed with cancer cooks meth and slowly, irreversibly transforms into a monster. The greatest character arc in television history."},
+{t:"The Sopranos",y:1999,k:"Series",g:["Crime","Drama","Thriller"],r:9.2,c:"James Gandolfini, Edie Falco",id:"tt0141842",e:"🍝",d:"A New Jersey mob boss tries to balance his family life with running his criminal organization — in therapy. The show that made television a serious art form. The cut to black is still debated."},
+{t:"The Wire",y:2002,k:"Series",g:["Crime","Drama","Thriller"],r:9.3,c:"Dominic West, Idris Elba",id:"tt0306414",e:"📡",d:"The Baltimore drug trade seen from every angle simultaneously — dealers, cops, politicians, teachers, journalists. The most comprehensive portrait of a city ever put on television."},
+{t:"Scam 1992",y:2020,k:"Series",g:["Biography","Crime","Drama","History","Thriller"],r:9.3,c:"Pratik Gandhi, Shreya Dhanwanthary",id:"tt11032374",e:"📈",d:"Harshad Mehta exploited loopholes in the banking system to pull off a scam that rocked 1990s India. Pratik Gandhi is utterly magnetic in every scene."},
+{t:"Chernobyl",y:2019,k:"Series",g:["Drama","History","Thriller"],r:9.4,c:"Jared Harris, Stellan Skarsgård",id:"tt7366338",e:"☢️",d:"The true story of the 1986 nuclear disaster and the people who sacrificed everything to limit it. Five hours of the most gripping television ever made."},
+{t:"Aspirants",y:2021,k:"Series",g:["Comedy","Drama"],r:9.3,c:"Naveen Kasturia, Abhilash Thapliyal, Abhishek Devgan",id:"tt13742210",e:"📝",d:"Three UPSC aspirants navigate the pressure and camaraderie of Delhi's coaching institutes. TVF's most emotionally resonant series — the finale will wreck you."},
+{t:"TVF Pitchers",y:2015,k:"Series",g:["Comedy","Drama"],r:9.1,c:"Naveen Kasturia, Arunabh Kumar, Jitendra Kumar",id:"tt4742082",e:"💡",d:"Four friends quit their jobs to build a startup. Made on a shoestring budget and barely 5 episodes long — it's still the best portrait of entrepreneurial ambition Indian TV has produced."},
+{t:"Sherlock",y:2010,k:"Series",g:["Crime","Drama","Mystery","Thriller"],r:9.1,c:"Benedict Cumberbatch, Martin Freeman",id:"tt1475582",e:"🔍",d:"A consulting detective and his army doctor flatmate solve impossible cases in modern London. Cumberbatch and Freeman have the most electric screen partnership of their generation."},
+{t:"True Detective",y:2014,k:"Series",g:["Crime","Drama","Mystery","Thriller"],r:9.0,c:"Matthew McConaughey, Woody Harrelson",id:"tt2356777",e:"🌾",d:"Two detectives investigate a ritualistic murder in Louisiana — connected across 17 years. Season 1 is the greatest single season of any crime drama ever made."},
+{t:"Kota Factory",y:2019,k:"Series",g:["Comedy","Drama"],r:9.2,c:"Jitendra Kumar, Mayur More",id:"tt10016180",e:"📐",d:"A student arrives in Kota to prepare for IIT-JEE and navigates the pressure, loneliness, and unexpected friendships. Shot in black-and-white — every Indian student will recognize themselves."},
+{t:"Panchayat",y:2020,k:"Series",g:["Comedy","Drama","Family"],r:9.0,c:"Jitendra Kumar, Raghubir Yadav",id:"tt11763622",e:"🌿",d:"An engineering graduate becomes panchayat secretary in a remote UP village and slowly finds himself at home. The most wholesome Indian series ever made."},
+{t:"Better Call Saul",y:2015,k:"Series",g:["Crime","Drama","Thriller"],r:8.9,c:"Bob Odenkirk, Jonathan Banks, Rhea Seehorn",id:"tt3032476",e:"⚖️",d:"The transformation of Jimmy McGill into Saul Goodman. Many argue it surpasses Breaking Bad — Rhea Seehorn's Kim Wexler is one of the greatest TV characters ever written."},
+{t:"Succession",y:2018,k:"Series",g:["Drama","Thriller"],r:8.9,c:"Brian Cox, Jeremy Strong, Sarah Snook",id:"tt7660850",e:"💰",d:"A media dynasty patriarch dangles his succession over his scheming children. The funniest tragedy on television — every character is monstrous and sympathetic."},
+{t:"Fargo",y:2014,k:"Series",g:["Crime","Drama","Thriller"],r:8.9,c:"Martin Freeman, Billy Bob Thornton",id:"tt2802850",e:"❄️",d:"A meek insurance salesman's life is upended when a dangerous drifter arrives in small-town Minnesota. Noah Hawley makes the Coens' DNA his own — Billy Bob Thornton is ice-cold terrifying."},
+{t:"Fleabag",y:2016,k:"Series",g:["Comedy","Drama","Romance"],r:8.7,c:"Phoebe Waller-Bridge, Andrew Scott",id:"tt5687612",e:"💥",d:"A chaotic, funny, deeply wounded woman breaks the fourth wall to share her messy life and an unexpected love for a priest. Only 12 episodes — watch it in one sitting."},
+{t:"The Bear",y:2022,k:"Series",g:["Comedy","Drama"],r:8.6,c:"Jeremy Allen White, Ebon Moss-Bachrach",id:"tt14452776",e:"🍽️",d:"A fine-dining chef runs his family's Chicago sandwich shop after his brother's death. The most stressful and nourishing show on television."},
+{t:"Peaky Blinders",y:2013,k:"Series",g:["Crime","Drama","Thriller","War"],r:8.8,c:"Cillian Murphy, Helen McCrory",id:"tt2442560",e:"🎩",d:"A gangster family in post-WWI Birmingham rises to national criminal power. Cillian Murphy as Tommy Shelby is one of the most compelling characters in TV history."},
+{t:"The Crown",y:2016,k:"Series",g:["Biography","Drama","History"],r:8.7,c:"Claire Foy, Olivia Colman, Matt Smith",id:"tt4786824",e:"👑",d:"The reign of Queen Elizabeth II from her marriage to the present day. The most expensive series ever made at the time — and it earns every penny."},
+{t:"Mindhunter",y:2017,k:"Series",g:["Crime","Drama","Thriller"],r:8.6,c:"Jonathan Groff, Holt McCallany, Anna Torv",id:"tt5290382",e:"🧠",d:"FBI agents in the late 70s begin interviewing convicted serial killers to understand and catch future ones. Fincher directs the early episodes — the most gripping procedural on Netflix."},
+{t:"Stranger Things",y:2016,k:"Series",g:["Drama","Fantasy","Horror","Mystery","Sci-Fi","Thriller"],r:8.7,c:"Millie Bobby Brown, Finn Wolfhard",id:"tt4574334",e:"🔦",d:"When a boy disappears, his friends encounter a psychic girl and a gate to a terrifying alternate dimension. The ultimate 80s nostalgia trip wrapped in a genuinely scary story."},
+{t:"Dark",y:2017,k:"Series",g:["Crime","Drama","Mystery","Sci-Fi","Thriller"],r:8.7,c:"Louis Hofmann, Oliver Masucci",id:"tt5753856",e:"🕳️",d:"A missing child sends a German town spiralling through time — a conspiracy spanning centuries. The most mind-bending show ever made. Keep a notebook."},
+{t:"Ozark",y:2017,k:"Series",g:["Crime","Drama","Thriller"],r:8.4,c:"Jason Bateman, Laura Linney",id:"tt5071412",e:"💵",d:"A financial planner moves his family to the Ozarks to launder money for a drug cartel. Bateman directs and stars — think Breaking Bad but with a married couple doing it together."},
+{t:"Narcos",y:2015,k:"Series",g:["Biography","Crime","Drama","Thriller"],r:8.8,c:"Pedro Pascal, Wagner Moura, Boyd Holbrook",id:"tt4507836",e:"🌿",d:"The rise and fall of Pablo Escobar and the DEA agents hunting him. Wagner Moura's Escobar is one of the most charismatic and terrifying characters in prestige TV."},
+{t:"Westworld",y:2016,k:"Series",g:["Drama","Mystery","Sci-Fi","Thriller","Western"],r:8.9,c:"Evan Rachel Wood, Anthony Hopkins, Ed Harris",id:"tt0475784",e:"🤖",d:"Hosts in a Wild West theme park begin to achieve consciousness. Season 1 is the most ambitious, perfectly constructed sci-fi series since Lost — a puzzle that rewards deep attention."},
+{t:"Black Mirror",y:2011,k:"Series",g:["Drama","Mystery","Sci-Fi","Thriller"],r:8.7,c:"Various",id:"tt2085059",e:"📱",d:"Standalone episodes exploring the dark side of technology and society. No other anthology show has made audiences as anxious — or more thoughtful — about the future."},
+{t:"Severance",y:2022,k:"Series",g:["Drama","Mystery","Sci-Fi","Thriller"],r:8.7,c:"Adam Scott, Patricia Arquette, John Turturro",id:"tt11280740",e:"🪪",d:"Employees undergo a procedure to surgically divide their work and personal memories. Apple TV+'s most acclaimed show — a slow-burn metaphor for work-life balance that becomes genuinely terrifying."},
+{t:"Ted Lasso",y:2020,k:"Series",g:["Comedy","Drama","Sport"],r:8.8,c:"Jason Sudeikis, Hannah Waddingham, Brett Goldstein",id:"tt10986410",e:"🍪",d:"An optimistic American college football coach is hired to manage an English Premier League club despite knowing nothing about soccer. The kindest, most surprising comedy on television."},
+{t:"Schitt's Creek",y:2015,k:"Series",g:["Comedy","Drama"],r:8.5,c:"Eugene Levy, Catherine O'Hara, Dan Levy",id:"tt3526078",e:"💐",d:"A wealthy family loses everything and must relocate to a small town they once bought as a joke. A show that starts as satire and slowly reveals itself to be one of TV's great love stories."},
+{t:"The Office (US)",y:2005,k:"Series",g:["Comedy"],r:9.0,c:"Steve Carell, John Krasinski",id:"tt0386676",e:"📎",d:"A documentary crew follows the deluded manager of a Scranton paper company. The greatest workplace comedy ever made — gets more emotional with every rewatch."},
+{t:"Friends",y:1994,k:"Series",g:["Comedy","Romance"],r:8.9,c:"Jennifer Aniston, Courteney Cox, Lisa Kudrow",id:"tt0108778",e:"☕",d:"Six friends in New York navigate love and careers over a decade. The most rewatched sitcom in history — you can start at any episode and feel at home."},
+{t:"Parks and Recreation",y:2009,k:"Series",g:["Comedy"],r:8.6,c:"Amy Poehler, Nick Offerman, Aziz Ansari",id:"tt1266020",e:"🌳",d:"A deeply enthusiastic parks department employee tries to build a community park in a small Indiana town. The most purely joyful comedy on television — Leslie Knope is a hero for our times."},
+{t:"Brooklyn Nine-Nine",y:2013,k:"Series",g:["Comedy","Crime"],r:8.4,c:"Andy Samberg, Andre Braugher",id:"tt2467372",e:"🚓",d:"A hilarious and immature detective and his no-nonsense boss work at a Brooklyn precinct. The most consistently funny network comedy of its decade — and secretly the most progressive."},
+{t:"How I Met Your Mother",y:2005,k:"Series",g:["Comedy","Romance"],r:8.3,c:"Josh Radnor, Neil Patrick Harris, Cobie Smulders",id:"tt0460649",e:"🍻",d:"A man tells his children the incredibly long story of how he met their mother. The most structurally inventive network sitcom ever made — the journey is the destination."},
+{t:"Game of Thrones",y:2011,k:"Series",g:["Action","Adventure","Drama","Fantasy","Thriller","War"],r:9.2,c:"Emilia Clarke, Kit Harington, Peter Dinklage",id:"tt0944947",e:"🐲",d:"Noble families wage war for the Iron Throne while an ancient evil stirs. The most epic fantasy series ever made — the first six seasons are some of the best television ever produced."},
+{t:"Shogun",y:2024,k:"Series",g:["Action","Adventure","Drama","History","Romance","War"],r:8.6,c:"Hiroyuki Sanada, Cosmo Jarvis, Anna Sawai",id:"tt2788316",e:"⛩️",d:"An English navigator becomes embroiled in feudal Japan's war for power after being shipwrecked. Swept the Emmys — 2024's most acclaimed new show."},
+{t:"The Last of Us",y:2023,k:"Series",g:["Action","Adventure","Drama","Horror","Sci-Fi","Thriller"],r:8.8,c:"Pedro Pascal, Bella Ramsey",id:"tt3581920",e:"🍄",d:"A hardened smuggler escorts humanity's last hope across a post-apocalyptic America. Episode 3 is a standalone masterpiece. The most devastating game adaptation ever made."},
+{t:"Squid Game",y:2021,k:"Series",g:["Action","Drama","Mystery","Thriller"],r:8.0,c:"Lee Jung-jae, Park Hae-soo",id:"tt10919420",e:"🟩",d:"Hundreds of desperate people compete in deadly children's games for a massive prize. Sharp social satire wrapped in visceral tension — the show that kept the world up at night."},
+{t:"House of the Dragon",y:2022,k:"Series",g:["Action","Adventure","Drama","Fantasy"],r:8.4,c:"Matt Smith, Paddy Considine, Emma D'Arcy",id:"tt11198330",e:"🔥",d:"The Targaryen civil war, two centuries before Game of Thrones. A more focused, character-driven epic than its parent show — and the dragons are better."},
+{t:"Mirzapur",y:2018,k:"Series",g:["Action","Crime","Drama","Thriller"],r:8.5,c:"Pankaj Tripathi, Ali Fazal",id:"tt8080204",e:"🔫",d:"Two brothers from UP get pulled into the brutal world of the region's most powerful crime lord. Pankaj Tripathi's Kaleen Bhaiya is one of Indian TV's most chilling villains."},
+{t:"Sacred Games",y:2018,k:"Series",g:["Action","Crime","Drama","Mystery","Thriller"],r:8.6,c:"Nawazuddin Siddiqui, Saif Ali Khan",id:"tt5823234",e:"💀",d:"A Mumbai cop receives a call from a gangster offering to save the city — with 25 days to act. India's first and still most ambitious Netflix original."},
+{t:"Paatal Lok",y:2020,k:"Series",g:["Crime","Drama","Mystery","Thriller"],r:8.1,c:"Jaideep Ahlawat, Neeraj Kabi",id:"tt10370834",e:"🌑",d:"A lowly inspector investigating an assassination attempt uncovers a web that reaches from the gutter to the highest levels of power. Jaideep Ahlawat is a revelation."},
+{t:"Family Man",y:2019,k:"Series",g:["Action","Crime","Drama","Thriller"],r:8.7,c:"Manoj Bajpayee, Samantha Ruth Prabhu",id:"tt9174558",e:"🕵️",d:"A middle-class intelligence officer tries to protect the nation while struggling to be a good husband and father. Manoj Bajpayee is the finest screen actor in India right now."},
+{t:"Delhi Crime",y:2019,k:"Series",g:["Crime","Drama","Mystery","Thriller"],r:8.5,c:"Shefali Shah, Rasika Dugal",id:"tt9692804",e:"👮",d:"Based on the 2012 Delhi gang rape case, this follows the police investigation in the days after. Shefali Shah's Vartika Chaturvedi is an extraordinary portrait of leadership under pressure."},
+{t:"Money Heist",y:2017,k:"Series",g:["Action","Crime","Drama","Mystery","Thriller"],r:8.2,c:"Álvaro Morte, Úrsula Corberó",id:"tt6468322",e:"🔴",d:"A mastermind recruits a crew to hold the Spanish Mint hostage in the most ambitious heist in history. The most-watched non-English series on Netflix."},
+{t:"Sex Education",y:2019,k:"Series",g:["Comedy","Drama","Romance"],r:8.3,c:"Asa Butterfield, Gillian Anderson, Ncuti Gatwa",id:"tt7767422",e:"🏫",d:"A teenager whose mum is a sex therapist sets up an underground advice clinic at school. Funny, inclusive, and genuinely thoughtful about teenagers and identity."},
+{t:"Wednesday",y:2022,k:"Series",g:["Comedy","Crime","Fantasy","Horror","Mystery","Thriller"],r:8.1,c:"Jenna Ortega, Gwendoline Christie",id:"tt13443470",e:"🖤",d:"Wednesday Addams solves a murder mystery at her supernatural boarding school. Jenna Ortega completely owns the role — her solo dance scene is pure character expression."},
+{t:"Crash Landing on You",y:2019,k:"Series",g:["Drama","Romance"],r:8.7,c:"Hyun Bin, Son Ye-jin",id:"tt10799642",e:"🪂",d:"A South Korean heiress accidentally lands in North Korea and falls in love with a military officer. The most globally beloved K-drama ever made — genuinely funny and deeply romantic."},
+{t:"The Mandalorian",y:2019,k:"Series",g:["Action","Adventure","Sci-Fi"],r:8.7,c:"Pedro Pascal, Giancarlo Esposito",id:"tt8111088",e:"⚔️",d:"A lone bounty hunter in the outer reaches of the galaxy discovers a mysterious child he must protect. The best thing to happen to Star Wars since The Empire Strikes Back — and Baby Yoda is real."},
+{t:"Andor",y:2022,k:"Series",g:["Action","Adventure","Drama","Sci-Fi"],r:8.4,c:"Diego Luna, Stellan Skarsgård, Faye Marsay",id:"tt9253284",e:"⭐",d:"The years before Rogue One — how a petty criminal slowly becomes a revolutionary. The most adult, morally complex Star Wars content ever made. Tony Gilroy reinvented prestige TV in space."},
+{t:"The Boys",y:2019,k:"Series",g:["Action","Comedy","Crime","Drama","Sci-Fi"],r:8.7,c:"Karl Urban, Jack Quaid, Antony Starr",id:"tt1190634",e:"💥",d:"A group of vigilantes fights back against superheroes who abuse their powers. The most savage satire of corporate culture and celebrity since Network — Antony Starr's Homelander is genuinely frightening."},
+
+/* ── International Cinema ── */
+{t:"Amélie",y:2001,k:"Movie",g:["Comedy","Romance"],r:8.3,c:"Audrey Tautou, Mathieu Kassovitz",id:"tt0211915",e:"🌿",d:"A shy Montmartre waitress decides to improve the lives of everyone around her while pursuing her own love story. Jean-Pierre Jeunet's most enchanting film — Paris never looked this magical."},
+{t:"The Intouchables",y:2011,k:"Movie",g:["Biography","Comedy","Drama"],r:8.5,c:"François Cluzet, Omar Sy",id:"tt1675434",e:"🖐️",d:"A paralyzed French aristocrat hires a young man from the projects as his carer — and they become unlikely friends. The best-performing French film in history. Omar Sy is a force of nature."},
+{t:"Cinema Paradiso",y:1988,k:"Movie",g:["Drama","Romance"],r:8.5,c:"Philippe Noiret, Salvatore Cascio",id:"tt0095765",e:"🎞️",d:"A famous director looks back on his childhood in a Sicilian village and the projectionist who was like a father to him. The most nostalgic and tender love letter to cinema ever made."},
+{t:"The Lives of Others",y:2006,k:"Movie",g:["Drama","Mystery","Thriller"],r:8.4,c:"Ulrich Mühe, Martina Gedeck",id:"tt0405094",e:"🎧",d:"A Stasi officer surveilling a playwright in East Berlin begins to be moved by what he hears. The greatest German film of the 21st century — quietly devastating."},
+{t:"A Separation",y:2011,k:"Movie",g:["Drama"],r:8.3,c:"Peyman Moaadi, Leila Hatami",id:"tt1832382",e:"⚖️",d:"An Iranian couple's decision to separate sets off an avalanche of consequences for two families. Asghar Farhadi's Best Foreign Film winner is a masterclass in moral complexity — nobody is simply right or wrong."},
+{t:"Capernaum",y:2018,k:"Movie",g:["Drama"],r:8.4,c:"Zain Al Rafeea, Yordanos Shiferaw",id:"tt8267604",e:"🧒",d:"A 12-year-old Lebanese boy sues his parents for bringing him into a life of poverty and neglect. Nadine Labaki's film is gut-wrenching and alive — Zain Al Rafeea's performance is extraordinary."},
+{t:"The Handmaiden",y:2016,k:"Movie",g:["Drama","Mystery","Romance","Thriller"],r:8.1,c:"Kim Min-hee, Kim Tae-ri",id:"tt4016934",e:"✂️",d:"A pickpocket is hired to be a Japanese heiress's maid as part of a con — but nothing is what it seems. Park Chan-wook's most sensuous and twisty film. Watch it without knowing anything."},
+{t:"I Saw the Devil",y:2010,k:"Movie",g:["Action","Crime","Thriller"],r:7.8,c:"Lee Byung-hun, Choi Min-sik",id:"tt1548906",e:"😈",d:"A special agent hunts and tortures his fiancée's serial killer — but the line between hunter and monster dissolves. Kim Jee-woon's most extreme and morally complex film."},
+{t:"Burning",y:2018,k:"Movie",g:["Drama","Mystery","Thriller"],r:7.5,c:"Yoo Ah-in, Steven Yeun, Jeon Jong-seo",id:"tt7282468",e:"🔥",d:"A young man becomes obsessed with a mysterious woman and her enigmatic new friend. Lee Chang-dong's slow, hypnotic thriller never reveals its hand — it stays with you for days."},
+{t:"Bicycle Thieves",y:1948,k:"Movie",g:["Drama"],r:8.3,c:"Lamberto Maggiorani, Enzo Staiola",id:"tt0040522",e:"🚲",d:"A poor man's bicycle — his only means of work — is stolen in post-war Rome, and he searches for it with his young son. De Sica's Italian neo-realist masterpiece. The ending is perfect."},
+{t:"Wild Strawberries",y:1957,k:"Movie",g:["Drama","Romance"],r:8.1,c:"Victor Sjöström, Bibi Andersson",id:"tt0050986",e:"🍓",d:"An elderly professor on a road trip to receive an honorary degree revisits memories and dreams from his life. Bergman's most accessible film — tender where his others are austere."},
+{t:"Stalker",y:1979,k:"Movie",g:["Drama","Sci-Fi"],r:8.1,c:"Aleksandr Kaydanovskiy, Anatoliy Solonitsyn",id:"tt0079944",e:"🌿",d:"A guide leads a writer and a professor into a mysterious forbidden zone where one's deepest wish is supposedly granted. Tarkovsky's most meditative film — a journey into the human soul."},
+{t:"Wings of Desire",y:1987,k:"Movie",g:["Drama","Fantasy","Romance"],r:8.1,c:"Bruno Ganz, Solveig Dommartin",id:"tt0093191",e:"😇",d:"An angel watches over Berlin and falls in love with a mortal trapeze artist. Wim Wenders' most beautiful film — Bruno Ganz makes you believe in angels."},
+
+/* ── More Bollywood ── */
+{t:"Sholay",y:1975,k:"Movie",g:["Action","Adventure","Comedy","Crime","Drama","Western"],r:8.2,c:"Dharmendra, Amitabh Bachchan, Hema Malini",id:"tt0073545",e:"🔥",d:"Two petty criminals are hired by a retired police officer to catch a ruthless dacoit. The greatest Hindi film ever made — 50 years later, Jai and Veeru still define Bollywood friendship."},
+{t:"Mughal-e-Azam",y:1960,k:"Movie",g:["Drama","History","Music","Romance","War"],r:8.2,c:"Dilip Kumar, Madhubala, Prithviraj Kapoor",id:"tt0054055",e:"👑",d:"The Mughal emperor Akbar wages war against his own son Prince Salim over the slave girl Anarkali. The most expensive Indian film of its era — still magnificent 65 years later."},
+{t:"Anand",y:1971,k:"Movie",g:["Drama"],r:8.2,c:"Rajesh Khanna, Amitabh Bachchan",id:"tt0131325",e:"😊",d:"A terminally ill man lives every day with infectious joy, leaving his mark on the doctor trying to save him. Rajesh Khanna's finest performance — Zindagi badi honi chahiye, lambi nahi."},
+{t:"Gangs of Wasseypur",y:2012,k:"Movie",g:["Action","Crime","Drama","Thriller"],r:8.2,c:"Manoj Bajpayee, Nawazuddin Siddiqui, Richa Chadha",id:"tt1954470",e:"💀",d:"A multi-generational blood feud in the coal mines of Dhanbad spanning five decades. Anurag Kashyap's five-hour opus is the most ambitious Indian crime saga ever filmed."},
+{t:"Barfi!",y:2012,k:"Movie",g:["Comedy","Drama","Romance"],r:8.1,c:"Ranbir Kapoor, Priyanka Chopra, Ileana D'Cruz",id:"tt2188109",e:"🎩",d:"A deaf-mute man and an autistic woman navigate love and friendship in 1970s Darjeeling. Anurag Basu's most charming film — Ranbir Kapoor has never been better."},
+{t:"Piku",y:2015,k:"Movie",g:["Comedy","Drama"],r:8.0,c:"Amitabh Bachchan, Deepika Padukone, Irrfan Khan",id:"tt3863552",e:"🚗",d:"A strong-willed architect road-trips from Delhi to Kolkata with her hypochondriac father. The best-written adult comedy Bollywood has produced in years — Irrfan Khan is irreplaceable."},
+{t:"Bajrangi Bhaijaan",y:2015,k:"Movie",g:["Action","Adventure","Comedy","Drama"],r:8.0,c:"Salman Khan, Harshaali Malhotra, Kareena Kapoor",id:"tt3863052",e:"🐒",d:"A devoted Hanuman bhakt tries to reunite a mute Pakistani girl with her family. The film that made Salman Khan's career meaningful — the India-Pakistan border crossing is unforgettable."},
+{t:"Neerja",y:2016,k:"Movie",g:["Biography","Crime","Drama","Thriller"],r:7.8,c:"Sonam Kapoor, Shabana Azmi",id:"tt4655162",e:"✈️",d:"The true story of 23-year-old Neerja Bhanot, who saved 360 passengers during a hijacking at the cost of her own life. Sonam Kapoor's most powerful performance."},
+{t:"Raazi",y:2018,k:"Movie",g:["Drama","Thriller"],r:7.9,c:"Alia Bhatt, Vicky Kaushal",id:"tt7763000",e:"🕵️",d:"An Indian girl married into a Pakistani military family to spy for RAW in 1971. Alia Bhatt's most restrained and devastating performance — the final scene is extraordinary."},
+{t:"Chhichhore",y:2019,k:"Movie",g:["Comedy","Drama"],r:8.3,c:"Sushant Singh Rajput, Shraddha Kapoor",id:"tt9078020",e:"🏆",d:"A father tells his hospitalized son the story of his college 'loser squad' to teach him that failure is not the end. Nitesh Tiwari's most emotionally complete film — the finale will make you call your friends."},
+{t:"Section 375",y:2019,k:"Movie",g:["Crime","Drama","Thriller"],r:8.1,c:"Akshaye Khanna, Richa Chadha",id:"tt9234618",e:"⚖️",d:"A hotshot defence lawyer and a public prosecutor argue opposite sides of a rape case. A taut, intelligent legal thriller about law, truth, and what a courtroom is actually for."},
+{t:"Thappad",y:2020,k:"Movie",g:["Drama"],r:7.9,c:"Taapsee Pannu, Pavail Gulati",id:"tt10892428",e:"✋",d:"A woman seeks divorce after her husband slaps her at a party — just once. Anubhav Sinha's most quiet and devastating film about the everyday violence of 'acceptable' behaviour."},
+{t:"83",y:2021,k:"Movie",g:["Biography","Drama","Sport"],r:7.9,c:"Ranveer Singh, Deepika Padukone",id:"tt11616332",e:"🏏",d:"India's greatest sporting upset — the 1983 Cricket World Cup victory against all odds under Kapil Dev. Ranveer Singh is fully transformed. Every Indian will tear up at the final over."},
+{t:"Laapataa Ladies",y:2024,k:"Movie",g:["Comedy","Drama"],r:7.9,c:"Nitanshi Goel, Pratibha Ranta, Sparsh Shrivastava",id:"tt19915908",e:"🧕",d:"Two brides get mixed up on a train and their husbands search desperately for the right wife. Kiran Rao's gentle, sharp comedy about rural women discovering themselves."},
+{t:"Mard Ko Dard Nahi Hota",y:2018,k:"Movie",g:["Action","Comedy","Drama"],r:8.2,c:"Abhimanyu Dassani, Radhika Madan",id:"tt7687304",e:"🥋",d:"A boy born without the ability to feel pain grows up to be a martial arts hero. One of the most original Indian action comedies ever — the action choreography is genuinely spectacular."},
+{t:"Kapoor & Sons",y:2016,k:"Movie",g:["Drama"],r:7.7,c:"Fawad Khan, Sidharth Malhotra, Alia Bhatt",id:"tt4637328",e:"👨‍👩‍👦",d:"Two estranged brothers return home to their ailing grandfather and old fractures resurface. The most honest Indian family drama in years — and Rishi Kapoor is extraordinary."},
+{t:"Rockstar",y:2011,k:"Movie",g:["Drama","Music","Romance"],r:7.7,c:"Ranbir Kapoor, Nargis Fakhri",id:"tt2071013",e:"🎸",d:"A Delhi boy transforms his heartbreak into artistic genius and becomes a rock legend. A.R. Rahman's score is perhaps his greatest since Dil Se — Ranbir Kapoor's most raw performance."},
+{t:"Dil Dhadakne Do",y:2015,k:"Movie",g:["Comedy","Drama"],r:7.3,c:"Priyanka Chopra, Ranveer Singh, Anil Kapoor",id:"tt3104754",e:"🛳️",d:"A wealthy dysfunctional family's truths surface during a Mediterranean cruise. Zoya Akhtar's sharpest examination of privilege, gender, and what families perform for the world."},
+
+/* ── More Series ── */
+{t:"Band of Brothers",y:2001,k:"Series",g:["Drama","History","War"],r:9.4,c:"Damian Lewis, Ron Livingston, Tom Hanks",id:"tt0185906",e:"🎖️",d:"Easy Company of the 506th Parachute Infantry Regiment, from D-Day to the end of WWII. The most immersive war series ever made — every episode directed by someone different, every one excellent."},
+{t:"The Queen's Gambit",y:2020,k:"Series",g:["Drama"],r:8.6,c:"Anya Taylor-Joy, Thomas Brodie-Sangster",id:"tt10048342",e:"♟️",d:"An orphaned chess prodigy battles addiction and isolation on her way to the top of the Cold War chess world. Anya Taylor-Joy commands every frame — the limited series of the decade."},
+{t:"Arcane",y:2021,k:"Series",g:["Animation","Action","Adventure","Drama","Fantasy","Sci-Fi"],r:9.0,c:"Hailee Steinfeld, Ella Purnell (voices)",id:"tt11126994",e:"⚡",d:"Two sisters on opposite sides of a class conflict in a steampunk city. The best video game adaptation ever made — and arguably the best animated series of the 21st century."},
+{t:"Mr. Robot",y:2015,k:"Series",g:["Crime","Drama","Sci-Fi","Thriller"],r:8.5,c:"Rami Malek, Christian Slater, Carly Chaikin",id:"tt4158110",e:"💻",d:"A cybersecurity engineer with social anxiety is recruited by an underground hacker group to destroy corporate debt. The most technically accurate hacking show ever made — and genuinely mind-bending."},
+{t:"Yellowstone",y:2018,k:"Series",g:["Crime","Drama","Mystery","Thriller","Western"],r:8.7,c:"Kevin Costner, Luke Grimes, Kelly Reilly",id:"tt4236770",e:"🐴",d:"A family of ranchers fight for their land against developers, government, and a Native American reservation. Kelly Reilly's Beth Dutton is one of the great characters in American TV."},
+{t:"Mad Men",y:2007,k:"Series",g:["Drama"],r:8.6,c:"Jon Hamm, Elisabeth Moss, January Jones",id:"tt0804503",e:"🥃",d:"The golden age of advertising in 1960s New York, centred on the enigmatic, self-invented Don Draper. Matthew Weiner's study of ambition, identity, and the emptiness of success."},
+{t:"Twin Peaks",y:1990,k:"Series",g:["Crime","Drama","Mystery","Thriller"],r:8.8,c:"Kyle MacLachlan, Sheryl Lee",id:"tt0098936",e:"🌲",d:"FBI Agent Dale Cooper investigates the murder of a homecoming queen in a Pacific Northwest logging town. Lynch's greatest work for television — and still the strangest, most original show ever made."},
+{t:"The Americans",y:2013,k:"Series",g:["Crime","Drama","Mystery","Thriller"],r:8.4,c:"Keri Russell, Matthew Rhys",id:"tt2149175",e:"🕵️",d:"Two KGB agents posing as a married couple in 1980s Washington DC. The most underrated prestige drama of its era — the marriage at the centre is one of TV's most complex relationships."},
+{t:"Hannibal",y:2013,k:"Series",g:["Crime","Drama","Horror","Mystery","Thriller"],r:8.5,c:"Hugh Dancy, Mads Mikkelsen",id:"tt2243973",e:"🍽️",d:"FBI profiler Will Graham hunts serial killers with the help of psychiatrist Hannibal Lecter. Bryan Fuller's most visually extravagant series — Mads Mikkelsen's Lecter is the definitive version."},
+{t:"Barry",y:2018,k:"Series",g:["Action","Comedy","Crime","Drama","Thriller"],r:8.4,c:"Bill Hader, Henry Winkler",id:"tt5765882",e:"🎭",d:"A hitman tries to leave his profession behind to become an actor in LA. Bill Hader's most personal work — simultaneously the funniest and most violent show on television."},
+{t:"Big Little Lies",y:2017,k:"Series",g:["Crime","Drama","Mystery","Thriller"],r:8.4,c:"Reese Witherspoon, Nicole Kidman, Shailene Woodley",id:"tt3920596",e:"🌊",d:"Three women in a Monterey beach community are connected to a murder. Jean-Marc Vallée and HBO at their most stylish — Kidman's performance is the best of her career."},
+{t:"The Handmaid's Tale",y:2017,k:"Series",g:["Drama","Sci-Fi","Thriller"],r:8.4,c:"Elisabeth Moss, Joseph Fiennes, Yvonne Strahovski",id:"tt5834204",e:"🔴",d:"A totalitarian Christian theocracy enslaves fertile women as 'handmaids' for breeding. Elisabeth Moss is riveting — and the world-building is terrifyingly plausible."},
+{t:"Atlanta",y:2016,k:"Series",g:["Comedy","Drama"],r:8.5,c:"Donald Glover, Brian Tyree Henry, LaKeith Stanfield",id:"tt4288182",e:"🎵",d:"An Ivy League dropout manages his cousin's rap career in Atlanta. Donald Glover's most personal work — formally inventive, funny, and quietly radical. Season 2 is perfection."},
+{t:"Killing Eve",y:2018,k:"Series",g:["Action","Crime","Drama","Mystery","Thriller"],r:8.2,c:"Sandra Oh, Jodie Comer",id:"tt7016936",e:"🗡️",d:"A security officer becomes obsessed with tracking down a psychopathic assassin — who becomes equally obsessed with her. Jodie Comer's Villanelle is one of the great TV creations of the decade."},
+{t:"White Lotus",y:2021,k:"Series",g:["Comedy","Drama","Mystery","Thriller"],r:7.9,c:"Murray Bartlett, Jennifer Coolidge, Alexandra Daddario",id:"tt13274445",e:"🌺",d:"Guests and staff at a Hawaiian resort over one week — a comedy of privilege that turns darkly sharp. Mike White's most wicked writing. Season 2 in Sicily is even better."},
+{t:"Beef",y:2023,k:"Series",g:["Comedy","Crime","Drama"],r:8.4,c:"Steven Yeun, Ali Wong",id:"tt14403178",e:"🚗",d:"A minor road-rage incident between two strangers spirals into all-consuming obsession. Lee Sung Jin's most unhinged creation — and somehow, in its final episode, the most moving thing on Netflix."},
+{t:"Baby Reindeer",y:2024,k:"Series",g:["Crime","Drama","Thriller"],r:8.2,c:"Richard Gadd, Jessica Gunning",id:"tt17260210",e:"🦌",d:"A struggling comedian is stalked by a woman who becomes obsessed with him — while hiding his own past trauma. Richard Gadd wrote, stars in, and based this on his own life. Absolutely harrowing."},
+{t:"Ripley",y:2024,k:"Series",g:["Crime","Drama","Mystery","Thriller"],r:8.2,c:"Andrew Scott, Johnny Flynn",id:"tt13966962",e:"🖼️",d:"Tom Ripley cons, steals, and kills his way through 1960s Italy. Shot entirely in black and white — Andrew Scott's most chilling performance, and some of the most beautiful television ever made."},
+{t:"Fallout",y:2024,k:"Series",g:["Action","Adventure","Comedy","Drama","Sci-Fi"],r:8.5,c:"Ella Purnell, Walton Goggins, Aaron Moten",id:"tt12637874",e:"☢️",d:"A vault dweller ventures into the post-nuclear wasteland of Los Angeles. Amazon's most confident genre swing — genuinely funny, genuinely brutal, and the best video game adaptation on TV."},
+{t:"Rocket Boys",y:2022,k:"Series",g:["Biography","Drama","History"],r:9.0,c:"Jim Sarbh, Ishwak Singh",id:"tt14491744",e:"🚀",d:"The parallel journeys of Homi Bhabha and Vikram Sarabhai building India's nuclear and space programmes. Jim Sarbh's Bhabha is a towering performance — India's finest historical series."},
+{t:"Bandish Bandits",y:2020,k:"Series",g:["Drama","Music","Romance"],r:8.6,c:"Ritwik Bhowmik, Shreya Chaudhry",id:"tt12168776",e:"🎵",d:"A classical musician and a pop star fall in love while their musical worlds collide in Jodhpur. The most joyful Indian series about music — the performances are incredible."},
+{t:"Yeh Meri Family",y:2018,k:"Series",g:["Comedy","Drama","Family"],r:9.1,c:"Mona Singh, Akarsh Khurana",id:"tt9173192",e:"📺",d:"A middle-class family in 1990s Jaipur, seen through the eyes of the youngest kid. TVF's most nostalgic series — every Indian who grew up in the 90s will recognize every frame."},
+{t:"Flames",y:2018,k:"Series",g:["Comedy","Drama","Romance"],r:8.9,c:"Ritvik Sahore, Tanya Maniktala",id:"tt8703948",e:"❤️",d:"Two Delhi school kids with a complicated relationship navigate class 10 boards and first love. TVF's most tender and accurate portrait of adolescence — the chemistry is completely real."},
+{t:"Downton Abbey",y:2010,k:"Series",g:["Drama","History","Romance"],r:8.7,c:"Hugh Bonneville, Maggie Smith, Michelle Dockery",id:"tt1606375",e:"🏰",d:"An aristocratic English family and their servants navigate the early 20th century. Maggie Smith's Dowager Countess alone is worth the entire series — witty, warm, and endlessly rewatchable."},
+{t:"Lost",y:2004,k:"Series",g:["Adventure","Drama","Fantasy","Mystery","Sci-Fi","Thriller"],r:8.3,c:"Matthew Fox, Evangeline Lilly, Terry O'Quinn",id:"tt0411008",e:"✈️",d:"Survivors of a plane crash are stranded on a mysterious island with supernatural secrets. The most audacious and bingeworthy show of the 2000s — the journey is extraordinary, even if the destination divides."},
+{t:"House of Cards (US)",y:2013,k:"Series",g:["Drama"],r:8.7,c:"Kevin Spacey, Robin Wright",id:"tt1856010",e:"🃏",d:"A ruthless congressman and his equally cunning wife scheme their way to the presidency. The show that launched Netflix's prestige era — Frank Underwood breaking the fourth wall is still thrilling."},
+{t:"Dexter",y:2006,k:"Series",g:["Crime","Drama","Mystery","Thriller"],r:8.6,c:"Michael C. Hall, Jennifer Carpenter",id:"tt0773262",e:"🩸",d:"A Miami blood-spatter analyst moonlights as a vigilante serial killer targeting murderers. Michael C. Hall's most precise, committed performance — seasons 1–4 are some of the best TV ever made."},
+{t:"Pachinko",y:2022,k:"Series",g:["Drama","History","Romance"],r:8.5,c:"Yuh-Jung Youn, Lee Min-ho, Minha Kim",id:"tt2776878",e:"🌸",d:"Four generations of a Korean family from Japanese colonial rule to 1980s Osaka. Apple TV+'s most ambitious series — intercutting time periods, languages, and decades with stunning confidence."},
+];
+
+
+/* ════════════════════════════════════════════════════
+   GENRE COLORS
+════════════════════════════════════════════════════ */
+const GC = {
+  Action:{c:"#7B2018",b:"rgba(123,32,24,.09)"},Adventure:{c:"#8B5C08",b:"rgba(139,92,8,.09)"},
+  Animation:{c:"#1A6B3A",b:"rgba(26,107,58,.09)"},Biography:{c:"#4A2D6B",b:"rgba(74,45,107,.09)"},
+  Comedy:{c:"#A8700E",b:"rgba(168,112,14,.09)"},Crime:{c:"#5A1A1A",b:"rgba(90,26,26,.09)"},
+  Drama:{c:"#1A4A6B",b:"rgba(26,74,107,.09)"},Family:{c:"#6B4A0A",b:"rgba(107,74,10,.09)"},
+  Fantasy:{c:"#1A4A5A",b:"rgba(26,74,90,.09)"},History:{c:"#5A3A10",b:"rgba(90,58,16,.09)"},
+  Horror:{c:"#3A1010",b:"rgba(58,16,16,.09)"},Music:{c:"#5A1A5A",b:"rgba(90,26,90,.09)"},
+  Mystery:{c:"#3A1A4A",b:"rgba(58,26,74,.09)"},Romance:{c:"#7B1A3A",b:"rgba(123,26,58,.09)"},
+  "Sci-Fi":{c:"#0A1A4A",b:"rgba(10,26,74,.09)"},Sport:{c:"#1A4A0A",b:"rgba(26,74,10,.09)"},
+  Thriller:{c:"#1A0A3A",b:"rgba(26,10,58,.09)"},War:{c:"#3A2A10",b:"rgba(58,42,16,.09)"},
+  Western:{c:"#5A3A10",b:"rgba(90,58,16,.09)"},
+};
+const PG = {
+  Action:"linear-gradient(135deg,#3D1A0A,#7B2018)",
+  Adventure:"linear-gradient(135deg,#2A1A08,#8B5C08)",
+  Animation:"linear-gradient(135deg,#0A2A1A,#1A6B3A)",
+  Biography:"linear-gradient(135deg,#1A0A2A,#4A2D6B)",
+  Comedy:"linear-gradient(135deg,#2A1A00,#A8700E)",
+  Crime:"linear-gradient(135deg,#0A0A0A,#3D1A0A)",
+  Drama:"linear-gradient(135deg,#0A1A2A,#1A4A6B)",
+  Fantasy:"linear-gradient(135deg,#1A0A2A,#0A3D4A)",
+  History:"linear-gradient(135deg,#1A1008,#4A3010)",
+  Horror:"linear-gradient(135deg,#050505,#1A0A0A)",
+  Music:"linear-gradient(135deg,#1A001A,#4A0A4A)",
+  Mystery:"linear-gradient(135deg,#0A0A14,#2A0A2A)",
+  Romance:"linear-gradient(135deg,#2A0A14,#7B1A3A)",
+  "Sci-Fi":"linear-gradient(135deg,#060A14,#0A1A3D)",
+  Sport:"linear-gradient(135deg,#0A1A08,#1A4A0A)",
+  Thriller:"linear-gradient(135deg,#050514,#1A0A2A)",
+  War:"linear-gradient(135deg,#141008,#3D3018)",
+};
+function posterGrad(genres){for(const g of genres)if(PG[g])return PG[g];return"linear-gradient(135deg,#1A1208,#3A2810)";}
+
+/* ════════════════════════════════════════════════════
+   MOOD → GENRE MAP
+════════════════════════════════════════════════════ */
+const MOOD_G = {
+  "Happy & Lighthearted":["Comedy","Animation","Family"],
+  "Romantic":["Romance","Drama"],
+  "Sad / Emotional":["Drama"],
+  "Thrilled / Tense":["Thriller","Crime","Mystery"],
+  "Adventurous":["Adventure","Action"],
+  "Scared / Horror":["Horror","Thriller"],
+  "Nostalgic":["Drama","Romance","History","Music"],
+  "Inspired":["Biography","Drama","Sport","History"],
+  "Relaxed / Cozy":["Comedy","Romance","Animation","Family"],
+  "Laugh-out-loud Funny":["Comedy"],
+  "Mind-bending":["Sci-Fi","Mystery","Thriller"],
+  "Action-pumped":["Action","Adventure"],
+};
+
+/* ════════════════════════════════════════════════════
+   RECOMMENDATION ENGINE
+════════════════════════════════════════════════════ */
+function localRecs(persons){
+  const w={};
+  persons.forEach(p=>{
+    (MOOD_G[p.mood]||[]).forEach(g=>w[g]=(w[g]||0)+2);
+    if(p.genre){
+      const m={"Biographical":"Biography","Musical":"Music","Sci-Fi":"Sci-Fi","Historical":"History","Superhero":"Action"}[p.genre]||p.genre;
+      w[m]=(w[m]||0)+3;
+    }
+  });
+  const yf=persons.map(p=>+p.yearFrom).filter(Boolean);
+  const yt=persons.map(p=>+p.yearTo).filter(Boolean);
+  const yFrom=yf.length?Math.min(...yf):1950, yTo=yt.length?Math.max(...yt):2025;
+  const tp=persons.map(p=>p.type).filter(Boolean);
+  const wM=!tp.length||tp.some(t=>t==="Movie"||t==="Either");
+  const wS=!tp.length||tp.some(t=>t==="Series"||t==="Either");
+  const actors=persons.map(p=>p.actor).filter(Boolean).map(a=>a.toLowerCase());
+
+  const scored=DB
+    .filter(m=>m.y>=yFrom&&m.y<=yTo&&(m.k==="Movie"?wM:wS))
+    .map(m=>{
+      let gs=0; m.g.forEach(g=>gs+=(w[g]||0));
+      let ab=0; actors.forEach(a=>{if((m.c||"").toLowerCase().includes(a))ab+=5;});
+      return{...m,_score:m.r*(1+gs*.2)+ab};
+    }).sort((a,b)=>b._score-a._score);
+
+  const seen=new Set(), picks=[];
+  for(const m of scored){
+    const k=m.g.slice().sort().join(",");
+    if(!seen.has(k)||picks.length<3){picks.push(m);seen.add(k);}
+    if(picks.length>=6)break;
+  }
+  for(const m of scored){if(picks.length>=6)break;if(!picks.includes(m))picks.push(m);}
+  return picks.slice(0,6).map(m=>({...m,why:buildWhy(m,persons)}));
+}
+
+function buildWhy(m,persons){
+  const matched=[];
+  persons.forEach(p=>{
+    const mg=MOOD_G[p.mood]||[];
+    if(mg.some(g=>m.g.includes(g)))matched.push(p.name||"Someone");
+    if(p.actor&&m.c&&m.c.toLowerCase().includes(p.actor.toLowerCase()))
+      matched.push(`${p.name||"Someone"} (fan of ${p.actor})`);
+  });
+  const base=`Rated ${m.r.toFixed(1)}/10 on IMDB.`;
+  if(matched.length)return`Chosen for ${[...new Set(matched)].slice(0,2).join(" & ")}'s mood. ${base}`;
+  return`A great pick for the group. ${base}`;
+}
+
+/* ════════════════════════════════════════════════════
+   PERSON CARDS
+════════════════════════════════════════════════════ */
+const MOODS=["","Happy & Lighthearted","Romantic","Sad / Emotional","Thrilled / Tense","Adventurous","Scared / Horror","Nostalgic","Inspired","Relaxed / Cozy","Laugh-out-loud Funny","Mind-bending","Action-pumped"];
+const GENRES_UI=["","Action","Adventure","Animation","Biographical","Comedy","Crime","Documentary","Drama","Fantasy","Historical","Horror","Musical","Mystery","Romance","Sci-Fi","Superhero","Thriller","War","Western"];
+const TYPES=["","Movie","Series"];
+const ORDINALS=["","I","II","III","IV","V","VI","VII"];
+let pc=0;
+
+function addPerson(defaultName=""){
+  pc++;
+  const id=`p${pc}`, n=pc;
+  const div=document.createElement("div");
+  div.className="pcard"; div.id=id;
+  div.innerHTML=`
+    <div class="pcard-top">
+      <span class="pcard-num">${ORDINALS[n]||n}.</span>
+      <span class="pcard-name" id="${id}-nm">${defaultName||`Person ${n}`}</span>
+      <button class="pcard-del" onclick="document.getElementById('${id}').remove()" title="Remove">✕</button>
+    </div>
+    <div class="pcard-body">
+      <div class="field f-full">
+        <label>Name</label>
+        <input type="text" placeholder="e.g. Kiran" data-f="name" value="${defaultName}"
+          oninput="document.getElementById('${id}-nm').textContent=this.value||'Person ${n}'"/>
+      </div>
+      <div class="field">
+        <label>Mood right now</label>
+        <select data-f="mood">${MOODS.map(m=>`<option value="${m}">${m||"— pick a mood —"}</option>`).join("")}</select>
+      </div>
+      <div class="field">
+        <label>Movie or Series?</label>
+        <select data-f="type">${TYPES.map(t=>`<option value="${t}">${t||"— no preference —"}</option>`).join("")}</select>
+      </div>
+      <div class="field">
+        <label>Genre</label>
+        <select data-f="genre">${GENRES_UI.map(g=>`<option value="${g}">${g||"— any genre —"}</option>`).join("")}</select>
+      </div>
+      <div class="field">
+        <label>Favourite Actor / Director</label>
+        <input type="text" placeholder="e.g. Shah Rukh Khan" data-f="actor"/>
+      </div>
+      <div class="field f-full">
+        <label>Release Year Range</label>
+        <div class="year-row">
+          <input type="number" placeholder="From" min="1900" max="2025" data-f="yearFrom"/>
+          <span class="year-sep">—</span>
+          <input type="number" placeholder="To" min="1900" max="2025" data-f="yearTo"/>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById("persons-list").appendChild(div);
+  if(!defaultName) div.querySelector("[data-f='name']").focus();
+}
+
+function getPersons(){
+  return[...document.querySelectorAll(".pcard")].map(card=>{
+    const g=f=>card.querySelector(`[data-f="${f}"]`)?.value?.trim()||"";
+    return{name:g("name")||"Someone",mood:g("mood"),genre:g("genre"),type:g("type"),actor:g("actor"),yearFrom:g("yearFrom"),yearTo:g("yearTo")};
+  });
+}
+
+/* ════════════════════════════════════════════════════
+   FIND MOVIES
+════════════════════════════════════════════════════ */
+function findMovies(){
+  const persons=getPersons();
+  if(!persons.length){alert("Add at least one person!");return;}
+  ["find-btn-desk","find-btn-mob"].forEach(id=>{
+    const b=document.getElementById(id);
+    if(b){b.disabled=true;b.innerHTML=`<span class="spin"></span> Finding…`;}
+  });
+  document.getElementById("results").innerHTML=`<div class="loading-bar"><span class="spin"></span> Searching for the perfect match…</div>`;
+  setTimeout(()=>{
+    const movies=localRecs(persons);
+    ["find-btn-desk","find-btn-mob"].forEach(id=>{
+      const b=document.getElementById(id);
+      if(b){b.disabled=false;b.innerHTML=`Find Our Movie &rarr;`;}
+    });
+    renderResults(movies,persons);
+  },400);
+}
+
+function renderResults(movies,persons){
+  const el=document.getElementById("results");
+  const names=persons.map(p=>p.name).join(" & ");
+  if(!movies.length){
+    el.innerHTML=`<div class="no-res"><big>📽</big>No matches found. Try widening the year range or removing the genre filter.</div>`;
+    return;
+  }
+  el.innerHTML=`
+    <div class="res-intro">
+      <h2>Our Picks</h2>
+      <span class="res-for">— for ${names}</span>
+      <span class="res-count">${movies.length} Selections</span>
+    </div>
+    <div class="movies-grid" id="grid"></div>`;
+  const grid=document.getElementById("grid");
+  movies.forEach((m,i)=>{
+    const tc=m.k==="Series"?"tag-series":"tag-movie";
+    const c=document.createElement("div");
+    c.className="mcard"; c.style.animationDelay=`${i*.07}s`;
+    c.innerHTML=`
+      <div class="mcard-poster">
+        <div class="mcard-poster-fallback" style="background:${posterGrad(m.g)}">${m.e||"🎬"}</div>
+      </div>
+      <span class="mcard-num">No. ${String(i+1).padStart(2,"0")}</span>
+      <div class="mcard-body">
+        <div class="mcard-title-row">
+          <div class="mcard-title">${m.t}</div>
+          <div class="mcard-rating">★ ${m.r.toFixed(1)}</div>
+        </div>
+        <div class="mcard-tags">
+          <span class="tag tag-year">${m.y}</span>
+          <span class="tag ${tc}">${m.k}</span>
+        </div>
+        <div class="mcard-why">${m.why}</div>
+        ${m.c?`<div class="mcard-cast">${m.c}</div>`:""}
+        <button class="mcard-more" onclick="openMov(${i},event)">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.2"/><path d="M6 5.5v3M6 4v.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          What's this about?
+        </button>
+      </div>`;
+    grid.appendChild(c);
+  });
+  window._movies=movies;
+  el.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+/* ════════════════════════════════════════════════════
+   MODAL
+════════════════════════════════════════════════════ */
+function openMov(idx,e){
+  if(e)e.stopPropagation();
+  const m=window._movies[idx]; if(!m)return;
+  const pg=posterGrad(m.g);
+  document.getElementById("mbox-poster").innerHTML=
+    `<div class="mbox-poster-fallback" style="background:${pg}">${m.e||"🎬"}</div>`;
+  document.getElementById("mbox-genre-lbl").textContent=m.g[0]||"Film";
+  document.getElementById("mbox-title").textContent=m.t;
+  const tc=m.k==="Series"?"tag-series":"tag-movie";
+  document.getElementById("mbox-meta").innerHTML=
+    `<span class="tag tag-year">${m.y}</span><span class="tag ${tc}">${m.k}</span><span class="mbox-rating">★ ${m.r.toFixed(1)} / 10</span>`;
+  document.getElementById("mbox-why").innerHTML=`<strong>Why this for you?</strong>${m.why}`;
+  document.getElementById("mbox-desc").textContent=m.d||"A must-watch pick for your group.";
+  document.getElementById("mbox-cast").textContent=m.c||"See IMDB for full cast.";
+  const genreEl=document.getElementById("mbox-genres");
+  genreEl.innerHTML="";
+  m.g.forEach(g=>{
+    const cfg=GC[g]||{c:"#6A5238",b:"rgba(106,82,56,.09)"};
+    const s=document.createElement("span");
+    s.className="mg";
+    s.style.cssText=`color:${cfg.c};border-color:${cfg.c}55;background:${cfg.b};`;
+    s.textContent=g; genreEl.appendChild(s);
+  });
+  document.getElementById("mbox-link").href=`https://www.imdb.com/title/${m.id}/`;
+  document.getElementById("mov").classList.add("open");
+  document.body.style.overflow="hidden";
+}
+function closeMov(e){if(e.target===document.getElementById("mov"))closeMovDirect();}
+function closeMovDirect(){document.getElementById("mov").classList.remove("open");document.body.style.overflow="";}
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeMovDirect();});
+let ty=0;
+document.getElementById("mbox").addEventListener("touchstart",e=>{ty=e.touches[0].clientY;},{passive:true});
+document.getElementById("mbox").addEventListener("touchmove",e=>{if(e.touches[0].clientY-ty>80)closeMovDirect();},{passive:true});
+
+/* ── Init ── */
+addPerson();
+addPerson();
+</script>
+</body>
+</html>
