@@ -3,691 +3,1031 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bhavesh — Portfolio</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <title>Sacred Green - Your Plant Companion from Hindu Wisdom</title>
   <style>
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Nunito:wght@300;400;500;600&display=swap');
 
     :root {
-      --bg:        #09090f;
-      --bg2:       #0e0e18;
-      --surface:   #13131f;
-      --surface2:  #1a1a2e;
-      --border:    rgba(255,255,255,.07);
-      --text:      #e8e8f5;
-      --muted:     #6b6b8a;
-      --pink:      #f857a6;
-      --blue:      #57c7f8;
-      --purple:    #c957f8;
-      --green:     #4de8a1;
-      --orange:    #ff9a44;
-      --yellow:    #f9f047;
+      --lavender-50: #faf5ff;
+      --lavender-100: #f3e8ff;
+      --lavender-200: #e9d5ff;
+      --lavender-300: #d8b4fe;
+      --lavender-400: #c084fc;
+      --lavender-500: #a855f7;
+      --lavender-600: #9333ea;
+      --lavender-700: #7e22ce;
+      --sage: #7c9e7a;
+      --sage-light: #a8c5a5;
+      --sage-dark: #4a6b47;
+      --warm-cream: #fdf6f0;
+      --text-dark: #2d1b4e;
+      --text-mid: #5b4a7a;
+      --text-light: #8b7aaa;
+      --gold: #c9a84c;
+      --gold-light: #e8d5a3;
     }
 
-    html.light {
-      --bg:      #f5f5fa;
-      --bg2:     #eeeef6;
-      --surface: #ffffff;
-      --surface2:#f0f0f8;
-      --border:  rgba(0,0,0,.08);
-      --text:    #111118;
-      --muted:   #6b6b8a;
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
-    html.light body::before { display: none; }
-    html.light .blob { opacity: .06; }
-    html.light nav { background: rgba(245,245,250,.9); }
-
-    html { scroll-behavior: smooth; }
 
     body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 30%, #e9f5f0 60%, #f5f0ff 100%);
+      min-height: 100vh;
+      color: var(--text-dark);
       overflow-x: hidden;
+    }
+
+    /* Floating petals background */
+    .bg-decoration {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .petal {
+      position: absolute;
+      opacity: 0.12;
+      animation: float linear infinite;
+    }
+
+    .petal svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(-60px) rotate(0deg); opacity: 0; }
+      10% { opacity: 0.12; }
+      90% { opacity: 0.08; }
+      100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+    }
+
+    /* Header */
+    header {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 3rem 1.5rem 2rem;
+      background: linear-gradient(180deg, rgba(168,85,247,0.08) 0%, transparent 100%);
+    }
+
+    .header-icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.75rem;
+      display: block;
+    }
+
+    header h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 600;
+      color: var(--lavender-700);
+      letter-spacing: 0.02em;
+      line-height: 1.2;
+      margin-bottom: 0.5rem;
+    }
+
+    header h1 span {
+      color: var(--sage-dark);
+      font-style: italic;
+    }
+
+    .header-sub {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      color: var(--text-mid);
+      font-style: italic;
+      margin-bottom: 1.25rem;
+      font-weight: 300;
+    }
+
+    .header-desc {
+      max-width: 640px;
+      margin: 0 auto;
+      font-size: clamp(0.85rem, 2vw, 0.95rem);
+      color: var(--text-light);
+      line-height: 1.7;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      margin: 2rem auto;
+      max-width: 400px;
+    }
+
+    .divider-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--lavender-300), transparent);
+    }
+
+    .divider-symbol {
+      color: var(--lavender-400);
+      font-size: 1.1rem;
+    }
+
+    /* Main layout */
+    main {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 1.25rem 4rem;
+    }
+
+    /* Question section */
+    .question-section {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .question-section h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.4rem, 3.5vw, 1.9rem);
+      color: var(--text-dark);
+      margin-bottom: 0.75rem;
+      font-weight: 500;
+    }
+
+    .question-section p {
+      font-size: 0.9rem;
+      color: var(--text-light);
+      font-style: italic;
+    }
+
+    /* Issue cards grid */
+    .issues-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr));
+      gap: 1rem;
+      margin-bottom: 3rem;
+    }
+
+    .issue-card {
+      background: rgba(255,255,255,0.65);
+      backdrop-filter: blur(8px);
+      border: 1.5px solid var(--lavender-200);
+      border-radius: 16px;
+      padding: 1.2rem 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .issue-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--lavender-100), transparent);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      border-radius: inherit;
+    }
+
+    .issue-card:hover {
+      border-color: var(--lavender-400);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(168,85,247,0.15);
+    }
+
+    .issue-card:hover::before {
+      opacity: 1;
+    }
+
+    .issue-card.active {
+      border-color: var(--lavender-500);
+      background: rgba(168,85,247,0.08);
+      box-shadow: 0 8px 24px rgba(168,85,247,0.2);
+      transform: translateY(-3px);
+    }
+
+    .issue-card.active::before {
+      opacity: 1;
+    }
+
+    .issue-emoji {
+      font-size: 1.8rem;
+      display: block;
+      margin-bottom: 0.5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .issue-label {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-mid);
+      position: relative;
+      z-index: 1;
+      line-height: 1.3;
+    }
+
+    .issue-tag {
+      display: inline-block;
+      margin-top: 0.35rem;
+      font-size: 0.72rem;
+      color: var(--text-light);
+      font-style: italic;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Plant result */
+    .result-section {
+      display: none;
+      animation: fadeSlideUp 0.6s ease forwards;
+    }
+
+    .result-section.visible {
+      display: block;
+    }
+
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-card {
+      background: rgba(255,255,255,0.8);
+      backdrop-filter: blur(12px);
+      border: 1.5px solid var(--lavender-200);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 16px 48px rgba(126,34,206,0.1);
+    }
+
+    .result-header {
+      background: linear-gradient(135deg, var(--lavender-600) 0%, var(--lavender-500) 50%, var(--sage) 100%);
+      padding: 2rem 2rem 1.5rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .plant-icon-large {
+      font-size: 3.5rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .plant-intro {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .prescribed-for {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 0.3rem;
+    }
+
+    .plant-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.8rem, 5vw, 2.6rem);
+      font-weight: 600;
+      color: white;
+      line-height: 1.1;
+      margin-bottom: 0.3rem;
+    }
+
+    .plant-name-hindi {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      color: rgba(255,255,255,0.8);
+      font-style: italic;
+    }
+
+    .plant-scientific {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.6);
+      margin-top: 0.2rem;
+      font-style: italic;
+    }
+
+    .deity-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 50px;
+      padding: 0.35rem 0.85rem;
+      font-size: 0.8rem;
+      color: white;
+      margin-top: 0.75rem;
+    }
+
+    .result-body {
+      padding: 2rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 680px) {
+      .result-body {
+        grid-template-columns: 1fr;
+        padding: 1.25rem;
+      }
+
+      .result-header {
+        padding: 1.5rem 1.25rem 1.25rem;
+      }
+    }
+
+    .result-block {
+      background: rgba(250,245,255,0.7);
+      border: 1px solid var(--lavender-100);
+      border-radius: 16px;
+      padding: 1.4rem;
+    }
+
+    .result-block.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .block-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--lavender-700);
+      margin-bottom: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .block-title .icon {
+      font-size: 1rem;
+    }
+
+    .block-text {
+      font-size: 0.9rem;
+      line-height: 1.75;
+      color: var(--text-mid);
+    }
+
+    .block-text p + p {
+      margin-top: 0.75rem;
+    }
+
+    .care-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .care-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      font-size: 0.87rem;
+      color: var(--text-mid);
+      line-height: 1.5;
+    }
+
+    .care-list li .dot {
+      width: 6px;
+      height: 6px;
+      background: var(--sage);
+      border-radius: 50%;
+      margin-top: 0.45rem;
+      flex-shrink: 0;
+    }
+
+    .verse-block {
+      background: linear-gradient(135deg, rgba(168,85,247,0.06), rgba(124,158,122,0.06));
+      border-left: 3px solid var(--lavender-400);
+      padding: 1rem 1.25rem;
+      border-radius: 0 12px 12px 0;
+      margin-top: 0.75rem;
+    }
+
+    .verse-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1rem;
+      font-style: italic;
+      color: var(--text-mid);
       line-height: 1.6;
     }
 
-    /* ─── Noise texture overlay ─── */
-    body::before {
-      content: '';
-      position: fixed; inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 0;
+    .verse-source {
+      font-size: 0.75rem;
+      color: var(--text-light);
+      margin-top: 0.4rem;
     }
 
-    /* ─── Blobs ─── */
-    .blob {
-      position: fixed; border-radius: 50%;
-      filter: blur(100px); opacity: .15;
-      animation: drift 12s ease-in-out infinite alternate;
-      pointer-events: none; z-index: 0;
-    }
-    .b1 { width:500px;height:500px;background:var(--pink);  top:-150px;left:-150px; }
-    .b2 { width:450px;height:450px;background:var(--blue);  bottom:-100px;right:-100px;animation-delay:-6s; }
-    .b3 { width:350px;height:350px;background:var(--purple);top:50%;left:55%;animation-delay:-3s; }
-    @keyframes drift {
-      from { transform: translate(0,0) scale(1); }
-      to   { transform: translate(50px,40px) scale(1.15); }
+    .source-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
     }
 
-    /* ─── Nav ─── */
-    nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      padding: 0 5%;
-      height: 64px;
-      display: flex; align-items: center; justify-content: space-between;
-      background: rgba(9,9,15,.75);
-      backdrop-filter: blur(16px);
-      border-bottom: 1px solid var(--border);
+    .source-item {
+      font-size: 0.8rem;
+      color: var(--text-light);
+      line-height: 1.5;
+      padding-left: 0.75rem;
+      border-left: 2px solid var(--lavender-300);
     }
-    .nav-logo {
-      font-weight: 800; font-size: 1.1rem;
-      background: linear-gradient(90deg, var(--pink), var(--blue));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text;
-      text-decoration: none;
-    }
-    .nav-links { display: flex; gap: 28px; list-style: none; }
-    .nav-links a {
-      color: var(--muted); text-decoration: none; font-size: .88rem;
-      font-weight: 500; transition: color .2s;
-    }
-    .nav-links a:hover { color: var(--text); }
 
-    /* ─── Sections ─── */
-    section { position: relative; z-index: 1; }
+    .ritual-block {
+      background: linear-gradient(135deg, rgba(201,168,76,0.08), rgba(232,213,163,0.08));
+      border: 1px solid rgba(201,168,76,0.25);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-top: 0.75rem;
+    }
 
-    /* ─── Hero ─── */
-    #hero {
-      min-height: 100vh;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
+    .ritual-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    .ritual-text {
+      font-size: 0.87rem;
+      color: var(--text-mid);
+      line-height: 1.6;
+    }
+
+    /* Reset button */
+    .reset-btn {
+      display: block;
+      margin: 2rem auto 0;
+      padding: 0.75rem 2rem;
+      background: transparent;
+      border: 1.5px solid var(--lavender-400);
+      color: var(--lavender-600);
+      border-radius: 50px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      letter-spacing: 0.05em;
+    }
+
+    .reset-btn:hover {
+      background: var(--lavender-100);
+      transform: translateY(-1px);
+    }
+
+    /* Disclaimer */
+    .disclaimer {
       text-align: center;
-      padding: 80px 5% 60px;
-    }
-    .hero-badge {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 6px 16px; border-radius: 99px;
-      border: 1px solid rgba(248,87,166,.3);
-      background: rgba(248,87,166,.07);
-      font-size: .82rem; font-weight: 500; color: var(--pink);
-      margin-bottom: 28px;
-      animation: fadeUp .8s ease both;
-    }
-    .hero-badge span { width:8px;height:8px;background:var(--pink);border-radius:50%;animation:pulse 2s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.3} }
-
-    .hero-name {
-      font-size: clamp(3.5rem, 10vw, 8rem);
-      font-weight: 900; letter-spacing: -.04em; line-height: 1;
-      background: linear-gradient(135deg, var(--pink) 0%, #ff5858 25%, var(--orange) 50%, var(--blue) 75%, var(--purple) 100%);
-      background-size: 200% auto;
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-      animation: shine 5s linear infinite, fadeUp .9s ease .1s both;
-      margin-bottom: 20px;
-    }
-    @keyframes shine { to { background-position: 200% center; } }
-
-    .hero-title {
-      font-size: clamp(1rem, 2.5vw, 1.3rem);
-      font-weight: 400; color: var(--muted);
-      margin-bottom: 16px;
-      animation: fadeUp .9s ease .2s both;
-    }
-    .hero-title strong { color: var(--text); font-weight: 600; }
-
-    .hero-bio {
-      max-width: 560px; font-size: 1rem;
-      color: var(--muted); line-height: 1.75;
-      animation: fadeUp .9s ease .3s both;
-      margin-bottom: 36px;
+      font-size: 0.78rem;
+      color: var(--text-light);
+      margin-top: 3rem;
+      padding: 1.25rem;
+      background: rgba(255,255,255,0.4);
+      border-radius: 12px;
+      line-height: 1.7;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
-    .hero-actions {
-      display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
-      animation: fadeUp .9s ease .4s both;
-      margin-bottom: 56px;
-    }
-    .btn {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 11px 24px; border-radius: 10px; font-size: .92rem;
-      font-weight: 600; text-decoration: none; cursor: pointer;
-      transition: opacity .2s, transform .15s;
-    }
-    .btn:hover { opacity: .85; transform: translateY(-2px); }
-    .btn-primary {
-      background: linear-gradient(135deg, var(--pink), #c23f80);
-      color: #fff; border: none;
-    }
-    .btn-ghost {
-      background: var(--surface); color: var(--text);
-      border: 1px solid var(--border);
-    }
-
+    /* Scroll indicator for mobile */
     .scroll-hint {
-      display: flex; flex-direction: column; align-items: center; gap: 8px;
-      color: var(--muted); font-size: .8rem;
-      animation: fadeUp 1s ease .6s both;
-    }
-    .scroll-line {
-      width: 1px; height: 48px;
-      background: linear-gradient(to bottom, var(--muted), transparent);
-      animation: scrollLine 2s ease-in-out infinite;
-    }
-    @keyframes scrollLine { 0%,100%{transform:scaleY(1);opacity:.6}50%{transform:scaleY(.6);opacity:.2} }
-
-    @keyframes fadeUp {
-      from { opacity:0;transform:translateY(28px); }
-      to   { opacity:1;transform:translateY(0); }
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--text-light);
+      margin-top: -1.5rem;
+      margin-bottom: 1.5rem;
+      font-style: italic;
+      display: none;
     }
 
-    /* ─── Section headings ─── */
-    .section-wrap { padding: 90px 5%; max-width: 1100px; margin: 0 auto; }
-    .section-label {
-      font-size: .75rem; font-weight: 700; letter-spacing: .14em;
-      text-transform: uppercase; color: var(--pink); margin-bottom: 10px;
-    }
-    .section-title {
-      font-size: clamp(1.8rem, 4vw, 2.8rem);
-      font-weight: 800; letter-spacing: -.03em; margin-bottom: 12px;
-    }
-    .section-sub {
-      color: var(--muted); font-size: 1rem; max-width: 520px; margin-bottom: 48px;
+    @media (max-width: 500px) {
+      .scroll-hint { display: block; }
     }
 
-    /* ─── Skills ─── */
-    .skills-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 16px;
-    }
-    .skill-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px; padding: 22px;
-      transition: border-color .2s, transform .2s;
-    }
-    .skill-card:hover { border-color: rgba(248,87,166,.3); transform: translateY(-3px); }
-    .skill-icon { font-size: 1.8rem; margin-bottom: 10px; }
-    .skill-name { font-weight: 700; font-size: 1rem; margin-bottom: 6px; }
-    .skill-desc { font-size: .84rem; color: var(--muted); line-height: 1.55; }
-    .skill-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
-    .stag {
-      padding: 3px 10px; border-radius: 99px; font-size: .75rem;
-      font-weight: 600; background: var(--surface2); color: var(--muted);
-      border: 1px solid var(--border);
-    }
-
-    /* ─── Projects ─── */
-    .projects-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 20px;
-    }
-    .project-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px; overflow: hidden;
-      display: flex; flex-direction: column;
-      transition: border-color .2s, transform .2s, box-shadow .2s;
-    }
-    .project-card:hover {
-      border-color: rgba(87,199,248,.25);
-      transform: translateY(-4px);
-      box-shadow: 0 20px 50px rgba(0,0,0,.4);
-    }
-    .project-banner {
-      height: 140px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 3rem; position: relative; overflow: hidden;
-    }
-    .project-banner::after {
-      content: ''; position: absolute; inset: 0;
-      background: linear-gradient(to bottom, transparent 40%, var(--surface));
-    }
-    .project-body { padding: 20px; flex: 1; display: flex; flex-direction: column; }
-    .project-type {
-      font-size: .72rem; font-weight: 700; letter-spacing: .1em;
-      text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
-    }
-    .project-name { font-size: 1.15rem; font-weight: 700; margin-bottom: 8px; }
-    .project-desc { font-size: .87rem; color: var(--muted); line-height: 1.6; flex: 1; }
-    .project-footer {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border);
-    }
-    .tech-stack { display: flex; flex-wrap: wrap; gap: 6px; }
-    .tech-tag {
-      padding: 3px 9px; border-radius: 6px; font-size: .72rem;
-      font-weight: 600; background: var(--surface2); color: var(--muted);
-    }
-    .project-link {
-      display: inline-flex; align-items: center; gap: 6px;
-      color: var(--blue); text-decoration: none; font-size: .82rem;
-      font-weight: 600; white-space: nowrap;
-      transition: opacity .15s;
-    }
-    .project-link:hover { opacity: .7; }
-    .project-link.disabled { color: var(--muted); pointer-events: none; }
-
-    /* ─── Excel work ─── */
-    .excel-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 16px;
-    }
-    .excel-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px; padding: 22px;
-      display: flex; gap: 16px;
-      transition: border-color .2s, transform .2s;
-    }
-    .excel-card:hover { border-color: rgba(77,232,161,.3); transform: translateY(-3px); }
-    .excel-icon {
-      width: 48px; height: 48px; border-radius: 10px;
-      background: linear-gradient(135deg, #1d6f42, #21a366);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.4rem; flex-shrink: 0;
-    }
-    .excel-name { font-weight: 700; font-size: .95rem; margin-bottom: 5px; }
-    .excel-desc { font-size: .83rem; color: var(--muted); line-height: 1.5; }
-    .excel-link {
-      display: inline-flex; align-items: center; gap: 5px;
-      margin-top: 10px; font-size: .8rem; font-weight: 600;
-      color: var(--green); text-decoration: none; transition: opacity .15s;
-    }
-    .excel-link:hover { opacity: .7; }
-
-    /* ─── About / Interests ─── */
-    .about-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 40px;
-      align-items: start;
-    }
-    .about-text p { color: var(--muted); margin-bottom: 14px; font-size: .97rem; line-height: 1.75; }
-    .about-text p strong { color: var(--text); }
-    .interest-tags { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
-    .itag {
-      display: inline-flex; align-items: center; gap: 7px;
-      padding: 8px 16px; border-radius: 99px; font-size: .88rem; font-weight: 600;
-      background: var(--surface2); border: 1px solid var(--border);
-      transition: transform .2s, border-color .2s;
-    }
-    .itag:hover { transform: translateY(-3px); border-color: rgba(255,255,255,.2); }
-
-    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    .stat-card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 12px; padding: 18px 20px;
-    }
-    .stat-num { font-size: 2rem; font-weight: 800; }
-    .stat-label { font-size: .8rem; color: var(--muted); margin-top: 2px; }
-
-    /* ─── Contact ─── */
-    #contact { background: var(--bg2); }
-    .contact-inner {
-      max-width: 700px; margin: 0 auto;
-      text-align: center; padding: 90px 5%;
-    }
-    .contact-links { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; margin-top: 32px; }
-    .clink {
-      display: inline-flex; align-items: center; gap: 10px;
-      padding: 12px 24px; border-radius: 10px;
-      border: 1px solid var(--border); background: var(--surface);
-      color: var(--text); text-decoration: none; font-weight: 600; font-size: .92rem;
-      transition: border-color .2s, transform .2s;
-    }
-    .clink:hover { border-color: rgba(248,87,166,.4); transform: translateY(-2px); }
-    .clink-icon { font-size: 1.2rem; }
-
-    /* ─── Footer ─── */
     footer {
-      text-align: center; padding: 28px;
-      color: var(--muted); font-size: .82rem;
-      border-top: 1px solid var(--border);
-      position: relative; z-index: 1;
-    }
-    footer a { color: var(--pink); text-decoration: none; }
-
-    /* ─── Divider ─── */
-    .divider {
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--border), transparent);
-      margin: 0 5%;
+      text-align: center;
+      padding: 2rem 1rem;
+      font-size: 0.78rem;
+      color: var(--text-light);
+      position: relative;
+      z-index: 1;
     }
 
-    /* ─── Scrollbar ─── */
-    ::-webkit-scrollbar { width: 5px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 99px; }
+    /* Responsive tweaks */
+    @media (max-width: 420px) {
+      .issues-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
 
-    /* ─── Responsive ─── */
-    @media (max-width: 768px) {
-      .nav-links { display: none; }
-      .about-grid { grid-template-columns: 1fr; }
-      .stat-grid { grid-template-columns: 1fr 1fr; }
-
-      #hero { padding: 100px 6% 60px; }
-      .hero-actions { flex-direction: column; align-items: center; }
-      .hero-actions .btn { width: 100%; max-width: 280px; justify-content: center; }
-
-      .section-wrap { padding: 60px 6%; }
-
-      .skills-grid { grid-template-columns: 1fr; }
-      .projects-grid { grid-template-columns: 1fr; }
-      .excel-grid { grid-template-columns: 1fr; }
-
-      .contact-links { flex-direction: column; align-items: center; }
-      .clink { width: 100%; max-width: 300px; justify-content: center; }
-
-      .summary-grid { grid-template-columns: 1fr 1fr; }
-
-      .form-row { grid-template-columns: 1fr; }
+    @media (min-width: 900px) {
+      .issues-grid {
+        grid-template-columns: repeat(5, 1fr);
+      }
     }
   </style>
 </head>
 <body>
 
-<!-- Blobs -->
-<div class="blob b1"></div>
-<div class="blob b2"></div>
-<div class="blob b3"></div>
+  <!-- Background petals -->
+  <div class="bg-decoration" id="bgDecoration"></div>
 
-<!-- Nav -->
-<nav>
-  <a class="nav-logo" href="#hero">BVS</a>
-  <ul class="nav-links">
-    <li><a href="#skills">Skills</a></li>
-    <li><a href="#projects">Projects</a></li>
-    <li><a href="#excel">Analysis</a></li>
-    <li><a href="#about">About</a></li>
-    <li><a href="#contact">Contact</a></li>
-  </ul>
-  <button id="themeToggle" aria-label="Toggle theme" style="background:var(--surface);border:1px solid var(--border);color:var(--text);width:38px;height:38px;border-radius:50%;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;transition:all .2s;">🌙</button>
-</nav>
-
-<!-- Hero -->
-<section id="hero">
-  <div class="hero-badge">
-    <span></span> Open to opportunities
-  </div>
-  <h1 class="hero-name">Bhavesh</h1>
-  <p class="hero-title"><strong>Finance &amp; Technology</strong> — Builder · Explorer</p>
-  <p class="hero-bio">
-    Curious mind who bridges financial analysis and technology. I build tools that turn data into decisions — from stock screeners to health trackers.
-  </p>
-  <div class="hero-actions">
-    <a class="btn btn-primary" href="#projects">View My Work</a>
-    <a class="btn btn-ghost" href="Bhavesh_Shah.pdf" download>Download CV ↓</a>
-    <a class="btn btn-ghost" href="https://github.com/vbhavesh19-spec" target="_blank">GitHub ↗</a>
-  </div>
-  <div class="scroll-hint">
-    <div class="scroll-line"></div>
-    Scroll to explore
-  </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- Skills -->
-<section id="skills">
-  <div class="section-wrap">
-    <div class="section-label">What I bring</div>
-    <h2 class="section-title">Skills &amp; Expertise</h2>
-    <p class="section-sub">A blend of financial acumen and technical skills — built through hands-on projects.</p>
-    <div class="skills-grid">
-      <div class="skill-card">
-        <div class="skill-icon">📊</div>
-        <div class="skill-name">Financial Analysis</div>
-        <div class="skill-desc">P&amp;L modeling, equity research, 10-year financial trend analysis, ratio analysis and valuation frameworks.</div>
-        <div class="skill-tags">
-          <span class="stag">Excel</span><span class="stag">Financial Modeling</span><span class="stag">Equity</span>
-        </div>
-      </div>
-      <div class="skill-card">
-        <div class="skill-icon">📈</div>
-        <div class="skill-name">Stock &amp; Market Analysis</div>
-        <div class="skill-desc">Technical screening of Nifty 500 stocks, options strategies, backtesting, and live market data pipelines.</div>
-        <div class="skill-tags">
-          <span class="stag">NSE</span><span class="stag">Technical Analysis</span><span class="stag">Options</span>
-        </div>
-      </div>
-      <div class="skill-card">
-        <div class="skill-icon">🛠️</div>
-        <div class="skill-name">Product Development</div>
-        <div class="skill-desc">Building end-to-end digital products — from idea to working tool. Focused on usability, clean interfaces, and solving real problems.</div>
-        <div class="skill-tags">
-          <span class="stag">Product Thinking</span><span class="stag">Prototyping</span><span class="stag">UI/UX</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- Projects -->
-<section id="projects">
-  <div class="section-wrap">
-    <div class="section-label">Things I've built</div>
-    <h2 class="section-title">Projects</h2>
-    <p class="section-sub">Real tools I use myself — from tracking health to screening stocks.</p>
-    <div class="projects-grid">
-
-      <div class="project-card">
-        <div class="project-banner" style="background:linear-gradient(135deg,#060a12,#0d1b3e)">📈</div>
-        <div class="project-body">
-          <div class="project-type">Fintech · Dashboard</div>
-          <div class="project-name">NSE Stock Screener</div>
-          <div class="project-desc">A full-featured stock market dashboard for Nifty 500 — technical screening, options analysis, live charts, backtesting engine, and market alerts. Built as a production-grade tool.</div>
-          <div class="project-footer">
-            <div class="tech-stack">
-              <span class="tech-tag">Python</span>
-              <span class="tech-tag">Flask</span>
-              <span class="tech-tag">Chart.js</span>
-              <span class="tech-tag">Upstox API</span>
-            </div>
-            <a class="project-link" href="stock-screener/index.html">Live Demo →</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="project-card">
-        <div class="project-banner" style="background:linear-gradient(135deg,#0a1628,#1a2942)">🏥</div>
-        <div class="project-body">
-          <div class="project-type">Health Tech · Dashboard</div>
-          <div class="project-name">Medical Tracker</div>
-          <div class="project-desc">A family health management dashboard — track medications, appointments, health metrics, and documents across multiple family members. Clean sidebar-driven UI.</div>
-          <div class="project-footer">
-            <div class="tech-stack">
-              <span class="tech-tag">Python</span>
-              <span class="tech-tag">Flask</span>
-              <span class="tech-tag">Bootstrap 5</span>
-              <span class="tech-tag">Chart.js</span>
-            </div>
-            <a class="project-link" href="medical-tracker/index.html">Live Demo →</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="project-card">
-        <div class="project-banner" style="background:linear-gradient(135deg,#0f0f13,#1a1a2e)">💸</div>
-        <div class="project-body">
-          <div class="project-type">Finance Tool · Web App</div>
-          <div class="project-name">Expense Tracker</div>
-          <div class="project-desc">A multi-category personal finance tracker with income/expense logging, monthly summaries, visual bar charts, and persistent local storage. Zero dependencies, runs offline.</div>
-          <div class="project-footer">
-            <div class="tech-stack">
-              <span class="tech-tag">HTML</span>
-              <span class="tech-tag">CSS</span>
-              <span class="tech-tag">JavaScript</span>
-            </div>
-            <a class="project-link" href="expense-tracker/index.html">Live Demo →</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="project-card">
-        <div class="project-banner" style="background:linear-gradient(135deg,#1a1a0a,#2e2410)">🌐</div>
-        <div class="project-body">
-          <div class="project-type">Web · Personal Branding</div>
-          <div class="project-name">Personal Profile Page</div>
-          <div class="project-desc">A minimal, animated personal landing page with dark/light mode, gradient animations, and floating tag interests. Built with pure CSS animations — no frameworks.</div>
-          <div class="project-footer">
-            <div class="tech-stack">
-              <span class="tech-tag">HTML</span>
-              <span class="tech-tag">CSS Animations</span>
-              <span class="tech-tag">JS</span>
-            </div>
-            <a class="project-link" href="my-page/index.html">Live Demo →</a>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- Excel / Analysis Work -->
-<section id="excel">
-  <div class="section-wrap">
-    <div class="section-label">Data &amp; Analysis</div>
-    <h2 class="section-title">Financial Modelling</h2>
-    <p class="section-sub">Excel-based financial analysis covering real listed companies and market data.</p>
-    <div class="excel-grid">
-
-      <div class="excel-card">
-        <div class="excel-icon">📑</div>
-        <div>
-          <div class="excel-name">Zomato Financial Analysis</div>
-          <div class="excel-desc">In-depth Excel model covering Zomato's financials — revenue breakdown, margin trends, unit economics, and key growth metrics.</div>
-          <a class="excel-link" href="20250120_Zomato.xlsx" download>Download Excel ↓</a>
-          <div style="font-size:.75rem;color:var(--muted);margin-top:6px">🔒 Password protected — <a href="mailto:vbhavesh19@gmail.com" style="color:var(--green);text-decoration:none;font-weight:600">contact me</a> to get access</div>
-        </div>
-      </div>
-
-      <div class="excel-card">
-        <div class="excel-icon">📊</div>
-        <div>
-          <div class="excel-name">More Analysis Coming Soon</div>
-          <div class="excel-desc">Additional financial models — sector deep-dives, P&amp;L breakdowns, and valuation frameworks — will be published here.</div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- About -->
-<section id="about">
-  <div class="section-wrap">
-    <div class="section-label">The person behind the work</div>
-    <h2 class="section-title">About Me</h2>
-    <div class="about-grid">
-      <div class="about-text">
-        <p>I'm <strong>Bhavesh</strong> — someone who genuinely enjoys building things. Whether it's a financial model in Excel or a full-stack web app, I like understanding how systems work and making them better.</p>
-        <p>My interest in <strong>markets and finance</strong> led me to build tools I actually use — a stock screener that tracks Nifty 500 in real time, financial models for companies like Zomato, and an expense tracker for day-to-day clarity.</p>
-        <p>Outside of work, you'll find me on a badminton court, on a trail somewhere, or halfway through writing something I'll probably never publish.</p>
-        <div class="interest-tags">
-          <span class="itag">🏸 Racquet Sports</span>
-          <span class="itag">🥾 Trekking</span>
-          <span class="itag">🏃 Marathon Running</span>
-          <span class="itag">✍️ Writing</span>
-          <span class="itag">🕺 Dancing</span>
-          <span class="itag">🌍 Exploring</span>
-        </div>
-      </div>
-
-      <div style="display:flex;flex-direction:column;gap:16px;">
-
-        <!-- Work Experience -->
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;">
-          <div style="font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;">Work Experience</div>
-          <div style="margin-bottom:14px;">
-            <div style="font-weight:700;font-size:.95rem;">London Stock Exchange Group</div>
-            <div style="font-size:.82rem;color:var(--muted);margin-top:2px;">Business Analyst — Investment Banking</div>
-          </div>
-          <div>
-            <div style="font-weight:700;font-size:.95rem;">TresVista Financial Services</div>
-            <div style="font-size:.82rem;color:var(--muted);margin-top:2px;">Research and Investment Analyst</div>
-          </div>
-        </div>
-
-        <!-- Education -->
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;">
-          <div style="font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;">Education</div>
-          <div style="display:flex;align-items:center;gap:14px;">
-            <div>
-              <div style="font-weight:700;font-size:.95rem;">NMIMS University</div>
-              <div style="font-size:.82rem;color:var(--muted);margin-top:2px;">BBA Finance (2022)</div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Contact -->
-<section id="contact">
-  <div class="contact-inner">
-    <div class="section-label" style="text-align:center">Get in touch</div>
-    <h2 class="section-title" style="text-align:center;font-size:clamp(1.8rem,4vw,2.6rem)">Let's Connect</h2>
-    <p style="color:var(--muted);font-size:1rem;max-width:440px;margin:0 auto">
-      Whether it's a job opportunity, a collaboration, or just to talk markets — I'm always open for a conversation.
+  <header>
+    <span class="header-icon">🪴</span>
+    <h1>Sacred <span>Green</span></h1>
+    <p class="header-sub">A plant for every ache the mind carries</p>
+    <p class="header-desc">
+      In Hindu tradition, plants are not mere decoration. They are living presences
+      - each carrying a deity's blessing, an ancient remedy, and a story older than
+      written memory. Tell us what weighs on you.
     </p>
-    <div class="contact-links">
-      <a class="clink" href="https://github.com/vbhavesh19-spec" target="_blank">
-        <span class="clink-icon">🐙</span> GitHub
-      </a>
-      <a class="clink" href="Bhavesh_Shah.pdf" download>
-        <span class="clink-icon">📄</span> Download CV
-      </a>
-      <a class="clink" href="mailto:vbhavesh19@gmail.com">
-        <span class="clink-icon">✉️</span> vbhavesh19@gmail.com
-      </a>
-      <a class="clink" href="tel:+919869912061">
-        <span class="clink-icon">📞</span> +91 98699 12061
-      </a>
-      <a class="clink" href="https://www.linkedin.com/in/bhavesh-vinod-shah-71aa00152/" target="_blank">
-        <span class="clink-icon">💼</span> LinkedIn
-      </a>
+    <div class="divider">
+      <div class="divider-line"></div>
+      <span class="divider-symbol">✦</span>
+      <div class="divider-line"></div>
     </div>
-  </div>
-</section>
+  </header>
 
-<footer>
-  Built by <a href="#">Bhavesh</a> · <a href="https://github.com/vbhavesh19-spec" target="_blank">github.com/vbhavesh19-spec</a>
-</footer>
+  <main>
+    <section class="question-section">
+      <h2>What does your mind feel most often?</h2>
+      <p>Select the experience that resonates with you right now</p>
+    </section>
 
-<script>
-  const toggle = document.getElementById('themeToggle');
-  const prefer = window.matchMedia('(prefers-color-scheme: light)');
+    <div class="issues-grid" id="issuesGrid">
+      <!-- Rendered by JS -->
+    </div>
 
-  function applyTheme(light) {
-    document.documentElement.classList.toggle('light', light);
-    toggle.textContent = light ? '🌙' : '☀️';
-    localStorage.setItem('theme', light ? 'light' : 'dark');
-  }
+    <p class="scroll-hint">Scroll down after selecting to see your plant</p>
 
-  // On load: use saved preference, else use OS preference
-  const saved = localStorage.getItem('theme');
-  applyTheme(saved ? saved === 'light' : prefer.matches);
+    <section class="result-section" id="resultSection">
+      <div class="result-card" id="resultCard">
+        <!-- Rendered by JS -->
+      </div>
+      <button class="reset-btn" onclick="resetSelection()">Choose a different feeling</button>
+    </section>
 
-  toggle.addEventListener('click', () => {
-    applyTheme(!document.documentElement.classList.contains('light'));
-  });
+    <div class="disclaimer">
+      <strong>A gentle note:</strong> This guide is rooted in Ayurvedic wisdom, Hindu scripture, and evidence-informed botanical research. Plants are companions, not cures. If you are experiencing a mental health crisis, please reach out to a qualified professional or iCall India at 9152987821.
+    </div>
+  </main>
 
-  // Follow OS preference changes if no manual override
-  prefer.addEventListener('change', e => {
-    if (!localStorage.getItem('theme')) applyTheme(e.matches);
-  });
-</script>
+  <footer>
+    Rooted in the Charaka Samhita, Valmiki Ramayana, Bhagavad Gita, Rigveda, Vishnu Purana, Shiva Purana, Markandeya Purana, and peer-reviewed pharmacological and ethnobotanical research. Specific chapter and verse numbers are cited only where verified. For deep scriptural study, consult the original Sanskrit texts or a qualified Vedic scholar.
+  </footer>
+
+  <script>
+    const issues = [
+      {
+        id: 'anxiety',
+        emoji: '🌀',
+        label: 'Anxiety & Restlessness',
+        tag: 'racing thoughts, dread',
+        plant: {
+          name: 'Tulsi',
+          hindi: 'Tulasi',
+          scientific: 'Ocimum tenuiflorum',
+          deity: 'Goddess Tulasi, beloved of Vishnu',
+          icon: '🌿',
+          color: '#059669',
+          why: `Anxiety in Ayurveda is a Vata imbalance - wind-like energy running ungrounded through the mind. Tulsi is classified as a "medhya rasayana" (a brain tonic) in the Charaka Samhita, the foundational Ayurvedic text. It contains eugenol, rosmarinic acid, and ursolic acid. A comprehensive review by Marc Maurice Cohen (2014, Journal of Ayurveda and Integrative Medicine) documents Tulsi's adaptogenic properties - its ability to help the body resist psychological and physiological stress by normalising cortisol and supporting the HPA (hypothalamic-pituitary-adrenal) axis, the body's central stress-response pathway.`,
+          story: `Tulsi's origin is told in the Brahma Vaivarta Purana. Vrinda, a devoted wife, was transformed into the Tulasi plant after her husband Jalandhar's death in battle. Her faithfulness was so profound that Vishnu declared her sacred above all plants and said he resides wherever Tulasi grows. This is why Tulasi appears in nearly every Hindu home's courtyard - her presence is believed to purify both air and thought. The Vishnu Purana also affirms her status as the most auspicious of all plants, beloved of Vishnu.`,
+          care: [
+            'Needs at least 4-6 hours of bright indirect sunlight',
+            'Water daily in summer, every 2 days in winter - keep soil moist but not waterlogged',
+            'Pinch flower buds to keep the plant bushy and leaf production high',
+            'Place near an east-facing window for morning sun',
+            'Avoid air conditioner drafts - she dislikes cold, stale air',
+          ],
+          ritual: `Offer a little water at sunrise each morning while setting an intention for the day. The act of daily care itself - bending, touching soil, noticing new leaves - is a grounding ritual that interrupts the anxiety spiral.`,
+          verse: `"Yatra Tulasi tatra sarvam" - Where Tulasi is, everything auspicious follows.`,
+          verseSource: 'Traditional saying recorded across Vaishnava literature',
+          sources: [
+            'Charaka Samhita - Tulasi classified among medhya rasayana (brain tonic) herbs',
+            'Cohen MM (2014) - Tulsi - Ocimum sanctum: A herb for all reasons. Journal of Ayurveda and Integrative Medicine, 5(4)',
+            'Brahma Vaivarta Purana and Vishnu Purana - origin and sanctity of Tulasi',
+          ],
+        },
+      },
+      {
+        id: 'depression',
+        emoji: '🌧️',
+        label: 'Low Mood & Depression',
+        tag: 'sadness, numbness, no joy',
+        plant: {
+          name: 'Brahmi',
+          hindi: 'Brahmi / Mandukparni',
+          scientific: 'Bacopa monnieri',
+          deity: 'Saraswati, Goddess of wisdom and mental clarity',
+          icon: '🌱',
+          color: '#7e22ce',
+          why: `Depression manifests in Ayurveda as Kapha imbalance - heaviness, stagnation, and withdrawal. Brahmi is documented in the Charaka Samhita as one of the primary "medhya" (mind-supporting) herbs. Its active compounds, the bacosides, have neuroprotective and antioxidant effects. Two published clinical trials are worth noting: Stough et al. (2001, Psychopharmacology) found significant improvements in memory and cognitive performance, and Calabrese et al. (2008, Journal of Alternative and Complementary Medicine) documented reduced anxiety and depression scores in older adults after 12 weeks of use.`,
+          story: `Brahmi takes its name directly from Brahman - the universal consciousness. Saraswati, goddess of learning, is closely associated with this plant, and traditional accounts describe sages consuming it to sharpen memory before long Vedic recitations. In Hindu thought, depression is linked to Tamas - the quality of inertia and dullness - and Brahmi is considered a Sattvic herb that gently lifts the mind toward clarity. Its very name is an invocation of the highest intelligence.`,
+          care: [
+            'Thrives in shallow water pots or very moist soil - it is a semi-aquatic plant',
+            'Keep in bright indirect light; tolerates some shade',
+            'Water heavily and consistently; never let it fully dry out',
+            'Excellent in a small water tray on a windowsill',
+            'Spreads easily - a good sign of a happy plant',
+          ],
+          ritual: `Make a small cup of Brahmi tea three mornings a week. Sit in silence for five minutes while it steeps. This is not productivity - it is an intentional pause, which is what depression most resists.`,
+          verse: `Brahmi is described in the Charaka Samhita as "medhya" - that which supports the mind - and "smritiprada" - that which restores memory.`,
+          verseSource: 'Charaka Samhita, medhya rasayana classification',
+          sources: [
+            'Charaka Samhita - Brahmi among the four primary medhya rasayana herbs',
+            'Stough C et al. (2001) - The chronic effects of an extract of Bacopa monniera on cognitive function in healthy human subjects. Psychopharmacology, 156(4)',
+            'Calabrese C et al. (2008) - Effects of a standardized Bacopa monnieri extract on cognitive performance, anxiety, and depression in the elderly. Journal of Alternative and Complementary Medicine',
+          ],
+        },
+      },
+      {
+        id: 'insomnia',
+        emoji: '🌙',
+        label: 'Insomnia & Sleep Trouble',
+        tag: 'can\'t sleep, wired at night',
+        plant: {
+          name: 'Ashwagandha',
+          hindi: 'Ashwagandha',
+          scientific: 'Withania somnifera',
+          deity: 'Shiva, lord of stillness and inner silence',
+          icon: '🌾',
+          color: '#92400e',
+          why: `The species name "somnifera" literally means sleep-inducing - the plant was named for this quality. Ashwagandha contains withanolides and triethylene glycol. A double-blind, randomised, placebo-controlled trial by Langade et al. (2019, PLOS One) specifically on insomnia found significant improvements in sleep quality, sleep onset latency, and morning alertness. In Ayurveda it is the foremost Vata-pacifying herb, and insomnia is understood as a Vata disorder - excess mental activity that cannot release into rest.`,
+          story: `Ashwagandha means "smell of horse" in Sanskrit - referring to its earthy scent and its reputed ability to grant horse-like vitality and stamina. Both the Charaka Samhita and the Sushruta Samhita place it among the most powerful rasayanas (rejuvenating substances). Shiva, who sits in perpetual meditation on Mount Kailash, is associated with this plant because it embodies tapas - disciplined, effortful stillness. Forest sages (rishis) were described as consuming it to sustain long periods of silent meditation.`,
+          care: [
+            'Place in a sunny window - it loves direct sun for 4+ hours',
+            'Water sparingly, only when top inch of soil is dry - it is drought-tolerant',
+            'Use well-draining sandy or loamy potting mix',
+            'Grows well in a deep pot as roots spread downward',
+            'Avoid overwatering - root rot is the primary risk',
+          ],
+          ritual: `Mix half a teaspoon of Ashwagandha root powder in warm milk with a pinch of cardamom and a little honey. Drink 30 minutes before sleep. This preparation - Ashwagandha Ksheerapaka - is a classical method described in Ayurvedic texts for its sleep-supporting properties.`,
+          verse: `Ashwagandha is described as "balya" (strength-giving) and "rasayana" (that which restores the essence of the body) across both the Charaka Samhita and the Sushruta Samhita.`,
+          verseSource: 'Charaka Samhita and Sushruta Samhita - rasayana classification',
+          sources: [
+            'Langade D et al. (2019) - Efficacy and Safety of Ashwagandha (Withania somnifera) Root Extract in Insomnia and Anxiety: A Double-blind, Randomized, Placebo-controlled Study. PLOS One, 14(9)',
+            'Charaka Samhita and Sushruta Samhita - Ashwagandha as a primary rasayana herb',
+          ],
+        },
+      },
+      {
+        id: 'loneliness',
+        emoji: '🌊',
+        label: 'Loneliness & Disconnection',
+        tag: 'isolated, unseen, empty',
+        plant: {
+          name: 'Lotus',
+          hindi: 'Kamal / Padma',
+          scientific: 'Nelumbo nucifera',
+          deity: 'Lakshmi, Brahma, and Vishnu - the three pillars of existence',
+          icon: '🪷',
+          color: '#db2777',
+          why: `Loneliness is in part a loss of felt meaning and connection to something larger. The Lotus is the most symbolically rich plant in Hinduism and carries a psychologically potent quality: its extraordinary beauty emerges from murky water. Bratman et al. (2015, PNAS) found that spending time in nature significantly reduced rumination - the repetitive, self-focused thinking most closely associated with loneliness and depression. Caring for a living plant with visible beauty, like the lotus, extends this benefit indoors.`,
+          story: `At the moment of creation, Brahma sat upon a golden lotus that emerged from Vishnu's navel as he reclined on the cosmic ocean - a story told in the Vishnu Purana. Lakshmi is always depicted standing on a lotus, serene above the mud below. The Bhagavad Gita (Chapter 5, Verse 10) uses the lotus as a direct metaphor: "brahmany adhaya karmani... lipyate na sa papena padma-patram ivambhasa" - one who acts without attachment is untouched, like water on a lotus leaf. The teaching is directly relevant to loneliness: you are not defined by the water you float in.`,
+          care: [
+            'Needs a wide, shallow container with still water - 15-25cm depth',
+            'Full sun for at least 6 hours is non-negotiable for blooming',
+            'Use heavy clay or loam soil, not regular potting mix',
+            'Change water partially every 1-2 weeks to prevent stagnation',
+            'Tubers grow horizontally - use a wide pot, not a deep one',
+          ],
+          ritual: `Each morning, observe one new thing about your lotus - a new bud, a leaf unfolding, a change in the water. Write it in a notebook. This practice of noticing trains the mind to locate beauty in the present, which is the antidote to loneliness's future-dread and past-grief.`,
+          verse: `"Lipyate na sa papena padma-patram ivambhasa" - He is not stained by sin, like a lotus leaf untouched by water.`,
+          verseSource: 'Bhagavad Gita, Chapter 5, Verse 10',
+          sources: [
+            'Bhagavad Gita, Chapter 5, Verse 10 - lotus leaf as metaphor for non-attachment',
+            'Vishnu Purana - Brahma seated on the lotus at creation',
+            'Bratman GN et al. (2015) - Nature experience reduces rumination and subgenual prefrontal cortex activation. PNAS, 112(28)',
+          ],
+        },
+      },
+      {
+        id: 'grief',
+        emoji: '🍂',
+        label: 'Grief & Loss',
+        tag: 'mourning, pain, absence',
+        plant: {
+          name: 'Bel / Bilva',
+          hindi: 'Bel',
+          scientific: 'Aegle marmelos',
+          deity: 'Shiva, the lord of transformation and dissolution',
+          icon: '🌳',
+          color: '#0f766e',
+          why: `Grief in Ayurveda is linked to Pitta and Vata imbalance - fire of pain and wind of fragmentation. The Bilva tree is sacred to Shiva, the deity who governs endings, transformation, and the passage from one state to another. Its trifoliate leaves - three leaflets on a single stem - are understood to represent the three states of existence: creation, preservation, and dissolution. Ayurvedic literature classifies Bilva fruit as having calming properties and it is used in preparations for digestive and nervous ailments. Being near this tree carries the philosophical invitation to accept impermanence.`,
+          story: `The Shiva Purana contains multiple accounts of the sacred importance of Bilva leaves. In one well-known story, a hunter who unknowingly plucked Bilva leaves and dropped them onto a Shiva linga while resting in the tree overnight received Shiva's grace - the message being that even unconscious contact with what is sacred can begin healing. Parvati, Shiva's consort, is also associated with the Bilva tree, and the Shiva Purana describes it as her favourite. Grief in Hindu cosmology is not a failure - it is a form of dissolution that precedes renewal.`,
+          care: [
+            'Hardy tree that can grow in a large pot or small garden container',
+            'Needs full sun - at least 6 hours of direct light',
+            'Water moderately; tolerates some drought once established',
+            'Use well-draining soil; avoid waterlogged conditions',
+            'Very slow growing indoors - patience is itself the lesson',
+          ],
+          ritual: `On difficult days, sit beside the Bel plant. Place three of its trifoliate leaves in your palm. Hold them and name three things that the person or situation you are grieving gave you. This transforms grief from absence into inheritance - a form of intentional remembrance.`,
+          verse: `"Om Tryambakam yajamahe sugandhim pushtivardhanam, urvarukamiva bandhanan mrityor mukshiya mamritat" - We worship the three-eyed Shiva who nourishes all life; may he liberate us from death as the cucumber is freed from the vine.`,
+          verseSource: 'Mahamrityunjaya Mantra, Rigveda 7.59.12',
+          sources: [
+            'Rigveda 7.59.12 - Mahamrityunjaya Mantra, one of the oldest verses in the Vedic canon',
+            'Shiva Purana - sacred status of Bilva leaves and their connection to Shiva worship',
+          ],
+        },
+      },
+      {
+        id: 'anger',
+        emoji: '🔥',
+        label: 'Anger & Irritability',
+        tag: 'short fuse, frustration, rage',
+        plant: {
+          name: 'Chandan / Sandalwood',
+          hindi: 'Chandan',
+          scientific: 'Santalum album',
+          deity: 'Vishnu - the preserver, the calm within the storm',
+          icon: '🪵',
+          color: '#92400e',
+          why: `Anger is understood in Ayurveda as Pitta excess - fire and heat accumulating in the mind. Sandalwood is the most widely documented Pitta-pacifying substance in Ayurvedic pharmacology, as described in the Charaka Samhita. Its primary active compound, alpha-santalol, has been studied for its effect on the autonomic nervous system. Multiple peer-reviewed studies (searchable on PubMed under "santalol autonomic") document that sandalwood fragrance decreases physiological arousal and increases feelings of calm - a finding that aligns directly with its Ayurvedic classification as Pitta-pacifying.`,
+          story: `Vishnu is anointed with chandan paste in temples across India - a practice documented throughout the Vishnu Purana. Priests grind fresh sandalwood on a stone each morning in a slow, circular, meditative motion. The theological reasoning is significant: Vishnu is the preserver of the universe, and preservation requires non-reactivity - the capacity to absorb disturbance without transmitting it. The sandalwood tree carries this quality physically: when cut, it cools the blade. This is the most famous metaphor in Sanskrit literature for non-retaliatory dignity.`,
+          care: [
+            'Can be grown as a small potted tree indoors in a 12-inch deep container',
+            'Needs bright, direct sunlight for at least 5-6 hours',
+            'Sandalwood is hemi-parasitic - it benefits from a host plant nearby (lemongrass works well)',
+            'Water moderately; well-draining soil is essential',
+            'Grow it slowly; do not over-fertilise',
+          ],
+          ritual: `When you feel anger rising, take a sandalwood incense stick, light it, and watch only the smoke for two minutes without speaking. The Bhagavad Gita (Chapter 2, verses 54-72) describes the "sthitaprajna" - the person of steady wisdom - as one whose mind is not disturbed even when surrounded by disturbance. The sandalwood smoke is a physical anchor for that quality.`,
+          verse: `Chandan is described in Ayurvedic texts as "sheeta" (cooling) and "pittahara" (that which removes Pitta), a quality unmatched among all aromatic substances.`,
+          verseSource: 'Charaka Samhita - Dravyaguna (properties of substances)',
+          sources: [
+            'Charaka Samhita - sandalwood classified as pittahara (Pitta-removing) and sheeta (cooling)',
+            'Alpha-santalol (sandalwood) aromatherapy research: search "santalol autonomic nervous system" on PubMed - multiple peer-reviewed studies document calming effects on physiological arousal',
+            'Vishnu Purana - ritual anointing of Vishnu with sandalwood paste',
+            'Bhagavad Gita, Chapter 2, Verses 54-72 - description of the sthitaprajna (person of steady wisdom)',
+          ],
+        },
+      },
+      {
+        id: 'confidence',
+        emoji: '🪞',
+        label: 'Low Self-Worth',
+        tag: 'self-doubt, not enough, shame',
+        plant: {
+          name: 'Ashoka Tree',
+          hindi: 'Ashoka / Saraca',
+          scientific: 'Saraca asoca',
+          deity: 'Sita, embodiment of unshakeable inner dignity',
+          icon: '🌺',
+          color: '#b45309',
+          why: `The word Ashoka means "without sorrow" in Sanskrit - from "a" (without) and "shoka" (grief, shame). In Ayurvedic classification, Saraca asoca is a "Hridya" herb - one that supports the heart, understood as the seat of emotional wellbeing. Its bark contains flavonoids, tannins, and glycosides, and it has been documented in ethnopharmacological reviews and the Journal of Ethnopharmacology for its role in traditional Indian medicine. Its deepest significance, however, is not pharmacological - it is the tree beneath which Sita sat, and did not break.`,
+          story: `When Sita was held captive in Lanka's Ashoka Vatika (the garden of Ashoka trees) - described in detail in the Valmiki Ramayana, Sundara Kanda - she sat beneath these trees for nearly a year. She refused Ravana's advances with no army, no power, and no rescue in sight. When Hanuman found her and offered to carry her back, she declined - insisting that Rama must come himself to uphold dharma. Her dignity was never dependent on rescue or validation. The Ashoka trees witnessed this. They are the trees that held her and did not let her forget who she was.`,
+          care: [
+            'Can be grown as an ornamental indoor plant in a large container',
+            'Needs bright indirect light or partial shade - tolerates indoor light well',
+            'Water regularly to keep soil consistently moist',
+            'Use rich, loamy soil with good drainage',
+            'Grows slowly but steadily - a plant of patience and persistence',
+          ],
+          ritual: `Each morning before you look at your phone, stand near the Ashoka plant for one minute. Say your own name aloud once. This is not an affirmation exercise - it is simple acknowledgement. The act of existing before the world's input is what Sita embodied in the Ashoka grove.`,
+          verse: `Ashoka is described in classical Ayurvedic texts as "shoka nashana" - that which destroys grief - reflecting both its Sanskrit etymology and its role as a Hridya (heart-supporting) herb.`,
+          verseSource: 'Classical Ayurvedic nighantu (herbal lexicon) tradition',
+          sources: [
+            'Valmiki Ramayana, Sundara Kanda - Sita in the Ashoka Vatika of Lanka',
+            'Charaka Samhita - Saraca asoca (Ashoka) as a Hridya herb',
+            'Journal of Ethnopharmacology - multiple studies document Saraca asoca bark properties; search "Saraca asoca" on PubMed for current research',
+          ],
+        },
+      },
+      {
+        id: 'burnout',
+        emoji: '🕯️',
+        label: 'Burnout & Exhaustion',
+        tag: 'depleted, empty, can\'t go on',
+        plant: {
+          name: 'Shatavari',
+          hindi: 'Shatavari',
+          scientific: 'Asparagus racemosus',
+          deity: 'Aditi, the infinite mother, source of all renewal',
+          icon: '🌿',
+          color: '#16a34a',
+          why: `Burnout is a Vata-Pitta collapse - the body has depleted its reserves and the nervous system cannot regulate itself. Shatavari is the foremost "ojas" (vital essence) building herb in Ayurvedic medicine, documented in the Charaka Samhita as a primary rasayana for restoration. A review by Bopana and Saxena (2007, Journal of Ethnopharmacology) documents its ethno-pharmacological role and antioxidant properties. The name itself is instructive: it means "she who possesses a hundred husbands," a reference not to romance but to the plant's extraordinary capacity for sustained renewal.`,
+          story: `Aditi is the Vedic mother of all gods - she who never exhausts, who gives without diminishing. The Rigveda contains numerous hymns addressed to her (notably in Book 1), describing her as the embodiment of infinite space and the source from which all vitality flows. In Ayurvedic tradition, Shatavari is associated with Aditi because both represent the principle that the capacity to give is not finite if the source is properly tended. The Dhanvantari Nighantu, a classical Ayurvedic herbal lexicon, describes Shatavari as "pushtivardhana" - that which builds the vital stores of the body.`,
+          care: [
+            'Grows as a climbing vine - provide a small trellis or stake indoors',
+            'Bright indirect light; protect from harsh afternoon direct sun',
+            'Water moderately; allow top soil to dry slightly between watering',
+            'Use nutrient-rich potting mix with good drainage',
+            'The feathery leaves make it beautiful even as a decorative plant',
+          ],
+          ritual: `Before sleep, mix half a teaspoon of Shatavari root powder in warm milk or almond milk with a pinch of cardamom. Do not read or scroll while drinking it. Burnout is not fixed by doing more - it is restored by receiving without producing.`,
+          verse: `Shatavari is described in classical Ayurvedic nighantus (herbal lexicons) as "pushtivardhana" - that which builds and sustains the body's vital stores. The exact term appears across multiple Ayurvedic texts; consult a practising Ayurvedic physician for primary-source confirmation.`,
+          verseSource: 'Classical Ayurvedic nighantu tradition',
+          sources: [
+            'Charaka Samhita - Shatavari as rasayana and ojas-building herb',
+            'Bopana N and Saxena S (2007) - Asparagus racemosus: ethnopharmacological evaluation and conservation needs. Journal of Ethnopharmacology',
+            'Rigveda, Book 1, Hymn 89 - hymn to Aditi',
+            'Note: "pushtivardhana" classification appears in Ayurvedic nighantus; for the specific primary text, consult a Sanskrit Ayurvedic scholar',
+          ],
+        },
+      },
+      {
+        id: 'overthinking',
+        emoji: '🌪️',
+        label: 'Overthinking & Mental Noise',
+        tag: 'can\'t stop thinking, obsessive',
+        plant: {
+          name: 'Shankhpushpi',
+          hindi: 'Shankhpushpi',
+          scientific: 'Convolvulus pluricaulis',
+          deity: 'Saraswati - clarity, discernment, and silence between words',
+          icon: '🌸',
+          color: '#2563eb',
+          why: `Overthinking is Vata running without direction - the mind producing thought faster than it can process. Shankhpushpi is documented in the Charaka Samhita among the four primary medhya (mind-supporting) herbs, specifically noted for "buddhi-vardhana" (improving clarity of understanding). Its active alkaloids include shankhapushpine and convolvine. A pharmacological review by Sethiya et al. (2009) documents its cholinergic activity - the same neural pathway involved in memory consolidation and attention regulation.`,
+          story: `The name Shankhpushpi means "conch-flowered plant" - its blossoms resemble the conch shell (shankha), which in Hindu iconography represents the primordial sound of OM: the vibration that quiets all other vibrations. Saraswati, goddess of knowledge, is depicted holding a veena (instrument of ordered sound) precisely because wisdom is not noise - it is signal selected from chaos. Traditional Ayurvedic practice records Shankhpushpi being used to support students before periods of intense learning, and its association with Saraswati reflects the belief that her grace makes clarity possible where confusion once lived.`,
+          care: [
+            'Compact ground-cover plant - grows beautifully in shallow wide pots',
+            'Full to partial sunlight; at least 4 hours of direct sun',
+            'Water moderately - let soil dry slightly between watering',
+            'Spreads as a creeper - beautiful trailing over a pot edge',
+            'Flowers are small, white or blue - enchanting at close observation',
+          ],
+          ritual: `When overthinking spirals begin, go to the plant and water it slowly and deliberately. Count to four as you pour, pause, count to four as the water settles. This is a breath-pacing technique embedded in a physical act - the pot receives your scattered attention and reflects it back as quietness.`,
+          verse: `Shankhpushpi is listed in the Charaka Samhita as one of four primary medhya rasayana herbs - those which specifically support the mind's ability to think clearly, remember accurately, and remain undisturbed.`,
+          verseSource: 'Charaka Samhita - medhya rasayana classification',
+          sources: [
+            'Charaka Samhita - Shankhpushpi among the four primary medhya rasayana herbs',
+            'Sethiya NK et al. (2009) - Phytochemical and pharmacological review of Convolvulus pluricaulis. Published in peer-reviewed pharmacological literature; consult PubMed for current access',
+          ],
+        },
+      },
+      {
+        id: 'fear',
+        emoji: '🌑',
+        label: 'Fear & Hypervigilance',
+        tag: 'always on edge, unsafe, PTSD',
+        plant: {
+          name: 'Neem',
+          hindi: 'Neem / Nimba',
+          scientific: 'Azadirachta indica',
+          deity: 'Goddess Durga / Mariamman - the fierce protector',
+          icon: '🌿',
+          color: '#166534',
+          why: `Fear and hypervigilance involve a nervous system that has learned to scan constantly for threat. Neem is the most widely documented "raksha" (protective) plant in Hindu tradition. Its primary bioactive compounds - azadirachtin and nimbidin - have well-documented anti-inflammatory and antimicrobial properties. Its pharmacological properties are extensively documented in peer-reviewed literature - searching "Azadirachta indica nimbidin" on PubMed returns dozens of studies confirming its anti-inflammatory, antimicrobial, and neuroprotective activity. Beyond the physical, the practice of tending a neem plant - known across generations as a protector - can itself create a felt sense of boundary and safety.`,
+          story: `In South India and across the Deccan, the goddess Mariamman is worshipped through neem. During the Pongal and Ugadi festivals, fresh neem leaves are tied above doors - a protection ritual practised continuously for centuries. The Markandeya Purana's Devi Mahatmya, also incorporated into the Devi Bhagavata Purana, describes Durga emerging from the combined energy of all the gods to defeat Mahishasura, the buffalo demon who could not be killed by any single power. Neem is Durga's earthly emblem: bitter, fierce, and deeply purifying. For those whose fear is rooted in violation or loss of safety, neem carries the message that protection does not require permission - it is inherent.`,
+          care: [
+            'Needs maximum sunlight - ideally a south-facing window',
+            'Water deeply but infrequently; drought-tolerant once established',
+            'Well-draining sandy soil is essential; avoid clay-heavy mix',
+            'Can grow large - prune regularly to keep it container-sized',
+            'Very hardy and resistant to pests - a low-maintenance companion',
+          ],
+          ritual: `In South Indian homes, fresh neem leaves are tied above the entrance during Ugadi (the Telugu and Kannada new year) as a traditional protective gesture. Recreate this in small form - place a few neem leaves in a small bowl near your door. The act of setting a threshold, even symbolically, teaches the nervous system that protection is possible and that you are allowed to define what enters your space.`,
+          verse: `Neem is described in classical Ayurvedic texts as "sarvaroganivarani" - capable of addressing all ailments - and "raksha" - a protector. It is among the most cited trees in Indian botanical and medical literature.`,
+          verseSource: 'Classical Ayurvedic literature - Charaka Samhita and Sushruta Samhita',
+          sources: [
+            'Charaka Samhita and Sushruta Samhita - Neem (Nimba) as raksha and sarvaroganivarani',
+            'Neem pharmacological research: search "Azadirachta indica azadirachtin nimbidin" on PubMed - extensive peer-reviewed literature documents its antimicrobial and anti-inflammatory properties',
+            'Markandeya Purana, Devi Mahatmya (Chapters 81-93) - origin story of Durga; neem worship in the Mariamman tradition of South India',
+          ],
+        },
+      },
+    ];
+
+    function renderIssueCards() {
+      const grid = document.getElementById('issuesGrid');
+      grid.innerHTML = issues.map(issue => `
+        <div class="issue-card" data-id="${issue.id}" onclick="selectIssue('${issue.id}')">
+          <span class="issue-emoji">${issue.emoji}</span>
+          <div class="issue-label">${issue.label}</div>
+          <span class="issue-tag">${issue.tag}</span>
+        </div>
+      `).join('');
+    }
+
+    function selectIssue(id) {
+      // Clear active states
+      document.querySelectorAll('.issue-card').forEach(c => c.classList.remove('active'));
+
+      // Activate selected
+      const card = document.querySelector(`[data-id="${id}"]`);
+      if (card) card.classList.add('active');
+
+      const issue = issues.find(i => i.id === id);
+      if (!issue) return;
+
+      renderResult(issue);
+
+      const resultSection = document.getElementById('resultSection');
+      resultSection.classList.add('visible');
+
+      // Smooth scroll
+      setTimeout(() => {
+        resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+
+    function renderResult(issue) {
+      const p = issue.plant;
+      const card = document.getElementById('resultCard');
+
+      card.innerHTML = `
+        <div class="result-header" style="background: linear-gradient(135deg, ${p.color}dd 0%, ${p.color}99 60%, var(--sage) 100%);">
+          <div class="plant-icon-large">${p.icon}</div>
+          <div class="plant-intro">
+            <div class="prescribed-for">Your plant companion for</div>
+            <div class="plant-name">${p.name}</div>
+            <div class="plant-name-hindi">${p.hindi}</div>
+            <div class="plant-scientific">${p.scientific}</div>
+            <div class="deity-badge">✦ Sacred to ${p.deity}</div>
+          </div>
+        </div>
+        <div class="result-body">
+          <div class="result-block full-width">
+            <div class="block-title"><span class="icon">🧠</span> Why this plant, for this feeling</div>
+            <div class="block-text"><p>${p.why}</p></div>
+          </div>
+
+          <div class="result-block">
+            <div class="block-title"><span class="icon">📖</span> The story behind it</div>
+            <div class="block-text"><p>${p.story}</p></div>
+            <div class="verse-block">
+              <div class="verse-text">"${p.verse}"</div>
+              <div class="verse-source">-- ${p.verseSource}</div>
+            </div>
+          </div>
+
+          <div class="result-block">
+            <div class="block-title"><span class="icon">🌿</span> How to care for it</div>
+            <ul class="care-list">
+              ${p.care.map(c => `<li><span class="dot"></span>${c}</li>`).join('')}
+            </ul>
+            <div class="ritual-block">
+              <div class="ritual-title">Daily ritual</div>
+              <div class="ritual-text">${p.ritual}</div>
+            </div>
+          </div>
+
+          <div class="result-block full-width">
+            <div class="block-title"><span class="icon">📚</span> Sources</div>
+            <div class="source-list">
+              ${p.sources.map(s => `<div class="source-item">${s}</div>`).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function resetSelection() {
+      document.querySelectorAll('.issue-card').forEach(c => c.classList.remove('active'));
+      const resultSection = document.getElementById('resultSection');
+      resultSection.classList.remove('visible');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Generate floating petals
+    function createPetals() {
+      const container = document.getElementById('bgDecoration');
+      const petalPaths = [
+        `<svg viewBox="0 0 40 50" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="20" cy="30" rx="10" ry="18" fill="#a855f7"/></svg>`,
+        `<svg viewBox="0 0 30 40" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="15" cy="22" rx="8" ry="15" fill="#7c9e7a"/></svg>`,
+        `<svg viewBox="0 0 25 35" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="12" cy="18" rx="7" ry="13" fill="#c084fc"/></svg>`,
+      ];
+
+      for (let i = 0; i < 14; i++) {
+        const petal = document.createElement('div');
+        petal.className = 'petal';
+        const size = 18 + Math.random() * 20;
+        petal.style.cssText = `
+          left: ${Math.random() * 100}%;
+          top: -60px;
+          width: ${size}px;
+          height: ${size * 1.4}px;
+          animation-duration: ${12 + Math.random() * 18}s;
+          animation-delay: ${-Math.random() * 20}s;
+        `;
+        petal.innerHTML = petalPaths[Math.floor(Math.random() * petalPaths.length)];
+        container.appendChild(petal);
+      }
+    }
+
+    renderIssueCards();
+    createPetals();
+  </script>
 </body>
 </html>
