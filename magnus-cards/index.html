@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>MagnusCards ⭐</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+
+    :root {
+      --bg: #FFFDF8;
+      --shadow: 0 6px 24px rgba(0,0,0,.10);
+      --r: 22px;
+    }
+
+    html, body {
+      height: 100%; font-family: 'Nunito', sans-serif;
+      background: var(--bg); color: #1a1a1a;
+      overscroll-behavior: none; -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Screens ──────────────────────────────────────────────────── */
+    .screen { display: none; min-height: 100dvh; }
+    .screen.active { display: flex; flex-direction: column; }
+
+    /* ══════════════════════════════════════════════════════════════
+       HOME SCREEN
+    ══════════════════════════════════════════════════════════════ */
+    #homeScreen { background: var(--bg); }
+
+    .home-header {
+      background: linear-gradient(135deg, #FF6B9D, #FF9A5C);
+      padding: 28px 20px 24px;
+      text-align: center; color: white;
+      padding-top: max(28px, env(safe-area-inset-top));
+    }
+    .home-logo { font-size: 44px; line-height: 1; }
+    .home-title { font-size: 30px; font-weight: 900; margin-top: 6px; letter-spacing: -.5px; }
+    .home-sub { font-size: 15px; font-weight: 700; opacity: .85; margin-top: 4px; }
+
+    /* Category filter */
+    .cat-scroll {
+      display: flex; gap: 10px; overflow-x: auto;
+      padding: 16px 18px 8px;
+      scrollbar-width: none;
+    }
+    .cat-scroll::-webkit-scrollbar { display: none; }
+    .cat-pill {
+      flex-shrink: 0; padding: 8px 16px;
+      border: none; border-radius: 99px;
+      font: 800 13px 'Nunito',sans-serif;
+      cursor: pointer; transition: transform .12s, opacity .12s;
+      white-space: nowrap;
+    }
+    .cat-pill:active { transform: scale(.94); }
+    .cat-pill.active { box-shadow: 0 3px 12px rgba(0,0,0,.18); }
+
+    /* Cards grid */
+    .cards-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 14px; padding: 10px 16px 32px;
+    }
+    .act-card {
+      border-radius: 20px; padding: 20px 14px 16px;
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      cursor: pointer; transition: transform .14s, box-shadow .14s;
+      box-shadow: 0 4px 14px rgba(0,0,0,.10);
+      text-align: center; border: none;
+    }
+    .act-card:active { transform: scale(.95); box-shadow: 0 2px 6px rgba(0,0,0,.10); }
+    .act-icon { font-size: 48px; line-height: 1; }
+    .act-name { font-size: 14px; font-weight: 800; line-height: 1.3; color: #1a1a1a; }
+    .act-cat-tag { font-size: 11px; font-weight: 700; opacity: .6; }
+
+    /* ══════════════════════════════════════════════════════════════
+       STEP SCREEN
+    ══════════════════════════════════════════════════════════════ */
+    #stepScreen { background: var(--bg); }
+
+    .step-topbar {
+      display: flex; align-items: center; gap: 12px;
+      padding: 16px 18px;
+      padding-top: max(16px, env(safe-area-inset-top));
+    }
+    .back-btn {
+      width: 42px; height: 42px; border-radius: 50%; border: none;
+      background: #F0EEF5; font-size: 20px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: transform .1s;
+    }
+    .back-btn:active { transform: scale(.92); }
+    .step-act-title { font-size: 17px; font-weight: 900; line-height: 1.2; flex: 1; }
+    .step-counter-badge {
+      flex-shrink: 0; padding: 6px 12px; border-radius: 99px;
+      font: 800 12px 'Nunito',sans-serif; color: white;
+    }
+
+    /* Progress dots */
+    .progress-dots {
+      display: flex; gap: 6px; justify-content: center;
+      padding: 0 20px 14px;
+    }
+    .dot {
+      height: 8px; border-radius: 99px;
+      background: #E0E0E0; transition: width .3s, background .3s;
+      min-width: 8px;
+    }
+    .dot.active { width: 24px !important; }
+    .dot.done   { background: #ccc; }
+
+    /* The big picture card */
+    .picture-card-wrap {
+      padding: 0 16px; flex: 1; display: flex; align-items: stretch;
+    }
+    .picture-card {
+      width: 100%; border-radius: 28px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 0; padding: 24px 20px 28px;
+      box-shadow: 0 8px 36px rgba(0,0,0,.13);
+      animation: cardSlide .3s ease;
+      min-height: 300px;
+    }
+    @keyframes cardSlide {
+      from { opacity: 0; transform: translateX(60px) scale(.97); }
+      to   { opacity: 1; transform: none; }
+    }
+    .picture-card.back-slide { animation: cardSlideBack .3s ease; }
+    @keyframes cardSlideBack {
+      from { opacity: 0; transform: translateX(-60px) scale(.97); }
+      to   { opacity: 1; transform: none; }
+    }
+    .card-picture { font-size: 96px; line-height: 1.1; text-align: center; filter: drop-shadow(0 4px 8px rgba(0,0,0,.12)); }
+    .card-text {
+      margin-top: 20px; font-size: 20px; font-weight: 800; text-align: center;
+      line-height: 1.45; color: #1a1a1a; max-width: 300px;
+    }
+
+    /* Read aloud */
+    .read-aloud-btn {
+      margin: 14px auto 0; display: flex; align-items: center; gap: 6px;
+      background: rgba(0,0,0,.08); border: none; border-radius: 99px;
+      padding: 8px 16px; font: 700 13px 'Nunito',sans-serif; color: #444;
+      cursor: pointer; transition: background .15s;
+    }
+    .read-aloud-btn:active { background: rgba(0,0,0,.14); }
+    .read-aloud-btn.speaking { background: rgba(0,0,0,.14); }
+
+    /* Navigation */
+    .step-nav {
+      padding: 14px 16px max(20px, env(safe-area-inset-bottom));
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .next-btn {
+      width: 100%; padding: 18px; border: none; border-radius: 18px;
+      font: 900 20px 'Nunito',sans-serif; color: white; cursor: pointer;
+      box-shadow: 0 6px 20px rgba(0,0,0,.18); transition: transform .1s, box-shadow .1s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .next-btn:active { transform: scale(.97); box-shadow: 0 3px 10px rgba(0,0,0,.14); }
+    .prev-link {
+      background: none; border: none; font: 700 14px 'Nunito',sans-serif;
+      color: #aaa; cursor: pointer; text-align: center; padding: 4px;
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       COMPLETE SCREEN
+    ══════════════════════════════════════════════════════════════ */
+    #completeScreen {
+      align-items: center; justify-content: center; gap: 20px;
+      text-align: center; padding: 40px 24px;
+    }
+    .complete-stars { font-size: 56px; animation: popIn .6s ease; }
+    @keyframes popIn { 0%{transform:scale(.3)}70%{transform:scale(1.18)}100%{transform:scale(1)} }
+    .complete-title { font-size: 34px; font-weight: 900; }
+    .complete-sub { font-size: 17px; color: #666; font-weight: 700; line-height: 1.5; max-width: 280px; }
+    .complete-activity { font-size: 20px; font-weight: 900; }
+    .complete-btns { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 340px; }
+    .btn-again {
+      padding: 16px; border: none; border-radius: 16px; color: white;
+      font: 800 16px 'Nunito',sans-serif; cursor: pointer; transition: transform .1s;
+    }
+    .btn-again:active { transform: scale(.97); }
+    .btn-home {
+      padding: 14px; background: #F0EEF5; border: none; border-radius: 16px;
+      font: 800 15px 'Nunito',sans-serif; color: #555; cursor: pointer; transition: transform .1s;
+    }
+    .btn-home:active { transform: scale(.97); }
+
+    /* Confetti */
+    .confetti { position: fixed; pointer-events: none; border-radius: 3px; animation: cfFall 1.3s ease-out forwards; }
+    @keyframes cfFall { 0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0} }
+
+    @media (min-width: 480px) {
+      .cards-grid { grid-template-columns: 1fr 1fr 1fr; }
+      .card-text { font-size: 22px; }
+      .card-picture { font-size: 110px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ HOME ════════════════════════════════════════════════════════════════ -->
+<div class="screen active" id="homeScreen">
+  <div class="home-header">
+    <div class="home-logo">⭐</div>
+    <div class="home-title">MagnusCards</div>
+    <div class="home-sub">Tap a card to learn what to do!</div>
+  </div>
+
+  <div class="cat-scroll" id="catScroll"></div>
+  <div class="cards-grid" id="cardsGrid"></div>
+</div>
+
+<!-- ══ STEP ════════════════════════════════════════════════════════════════ -->
+<div class="screen" id="stepScreen">
+  <div class="step-topbar">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <div class="step-act-title" id="stepActTitle"></div>
+    <div class="step-counter-badge" id="stepBadge"></div>
+  </div>
+
+  <div class="progress-dots" id="progressDots"></div>
+
+  <div class="picture-card-wrap">
+    <div class="picture-card" id="pictureCard">
+      <div class="card-picture" id="cardPicture"></div>
+      <div class="card-text"    id="cardText"></div>
+    </div>
+  </div>
+
+  <button class="read-aloud-btn" id="readAloudBtn" onclick="readAloud()">
+    🔊 <span>Read it to me</span>
+  </button>
+
+  <div class="step-nav">
+    <button class="next-btn" id="nextBtn" onclick="nextStep()">
+      <span id="nextLabel">Next</span> <span id="nextArrow">→</span>
+    </button>
+    <button class="prev-link" id="prevBtn" onclick="prevStep()">← Go back</button>
+  </div>
+</div>
+
+<!-- ══ COMPLETE ═════════════════════════════════════════════════════════════ -->
+<div class="screen" id="completeScreen">
+  <div class="complete-stars">⭐⭐⭐</div>
+  <div class="complete-title">Amazing!</div>
+  <div class="complete-activity" id="completeActivity"></div>
+  <div class="complete-sub">You followed every step!<br>You're doing a wonderful job! 🎉</div>
+  <div class="complete-btns">
+    <button class="btn-again" id="btnAgain" onclick="tryAgain()">Do it again ↩</button>
+    <button class="btn-home"                onclick="goHome()">← Back to all cards</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════════════════════════════════════
+
+const CATS = {
+  care:   { name: '🫶 Daily Care',    color: '#29B6F6', dark: '#0277BD', bg: '#E1F5FE' },
+  food:   { name: '🍎 Food & Eating', color: '#FFA726', dark: '#E65100', bg: '#FFF3E0' },
+  world:  { name: '🌍 Out & About',   color: '#66BB6A', dark: '#1B5E20', bg: '#E8F5E9' },
+  school: { name: '🏫 At School',     color: '#FFCA28', dark: '#F57F17', bg: '#FFFDE7' },
+  social: { name: '🤝 Social Skills', color: '#AB47BC', dark: '#4A148C', bg: '#F3E5F5' },
+  safety: { name: '🦺 Stay Safe',     color: '#EF5350', dark: '#B71C1C', bg: '#FFEBEE' },
+  fun:    { name: '🎉 Fun Time',       color: '#EC407A', dark: '#880E4F', bg: '#FCE4EC' },
+};
+
+const SCENARIOS = [
+  // ── DAILY CARE ────────────────────────────────────────────────────────
+  { id:'brush', cat:'care', icon:'🦷', title:'Brush Your Teeth', steps:[
+    {e:'🦷', t:'Get your toothbrush from the cup.'},
+    {e:'🪥', t:'Put a tiny bit of toothpaste on the brush — just the size of a pea!'},
+    {e:'💧', t:'Wet the brush with a little water from the tap.'},
+    {e:'😁', t:'Brush the front of your top teeth. Go in small circles.'},
+    {e:'😬', t:'Now brush the front of your bottom teeth.'},
+    {e:'🔄', t:'Brush the inside and the biting parts of ALL your teeth.'},
+    {e:'👅', t:'Gently brush your tongue too!'},
+    {e:'🌊', t:'Spit out the toothpaste and rinse your mouth with water.'},
+    {e:'🌟', t:'Rinse your brush and put it away. Your teeth are sparkling clean!'},
+  ]},
+  { id:'hands', cat:'care', icon:'🙌', title:'Wash Your Hands', steps:[
+    {e:'🚿', t:'Turn on the tap so the water is warm — not too hot!'},
+    {e:'🙌', t:'Wet both your hands all the way up to your wrists.'},
+    {e:'🧴', t:'Put some soap on your hands. A squirt about the size of a coin.'},
+    {e:'🫧', t:'Rub your hands together. Scrub between your fingers and your thumbs!'},
+    {e:'⏱️', t:'Keep scrubbing for 20 seconds — that\'s about the time to sing "Happy Birthday" twice.'},
+    {e:'💧', t:'Rinse all the soap off under the running water.'},
+    {e:'🧻', t:'Dry your hands well with a clean towel.'},
+    {e:'✅', t:'Great job! Clean hands keep you and others healthy!'},
+  ]},
+  { id:'dress', cat:'care', icon:'👕', title:'Get Dressed', steps:[
+    {e:'🌤️', t:'Look outside or ask a grown-up — is it hot, cold, or rainy today?'},
+    {e:'👗', t:'Choose clothes that feel right for the weather.'},
+    {e:'🩲', t:'Put on your underwear first.'},
+    {e:'👕', t:'Put on your top — head through the big hole, arms through the arm holes.'},
+    {e:'👖', t:'Put on your trousers or skirt. One leg at a time!'},
+    {e:'🧦', t:'Put on your socks.'},
+    {e:'👟', t:'Put on your shoes. Remember to do up the laces or velcro!'},
+    {e:'🪞', t:'Take a look in the mirror. You look great!'},
+  ]},
+  { id:'shower', cat:'care', icon:'🚿', title:'Have a Shower', steps:[
+    {e:'🌡️', t:'Tell a grown-up you\'re going to shower.'},
+    {e:'🚿', t:'Turn on the shower. Let the water warm up before you get in.'},
+    {e:'🛁', t:'Step in carefully — hold onto the wall if needed.'},
+    {e:'💧', t:'Wet your hair and body all over.'},
+    {e:'🧴', t:'Use shampoo on your hair. Rub it in and make bubbles!'},
+    {e:'🫧', t:'Rinse all the shampoo out until the water runs clear.'},
+    {e:'🧼', t:'Use soap or shower gel to wash your body — arms, tummy, legs, feet!'},
+    {e:'💧', t:'Rinse all the soap off your body.'},
+    {e:'🚿', t:'Turn off the shower.'},
+    {e:'🧸', t:'Grab your towel and dry yourself all over — even between your toes!'},
+    {e:'🌟', t:'Get dressed and you\'re ready to go. Amazing job!'},
+  ]},
+  { id:'bed', cat:'care', icon:'🛏️', title:'Make Your Bed', steps:[
+    {e:'😴', t:'Get out of bed and stand next to it.'},
+    {e:'🌅', t:'Pull the sheet up to the top of the mattress.'},
+    {e:'🛏️', t:'Pull your duvet or blanket up to the top — make it nice and smooth.'},
+    {e:'🪨', t:'Straighten the duvet so it hangs the same on both sides.'},
+    {e:'🧸', t:'Place your pillow at the top. Put any stuffed animals on the pillow!'},
+    {e:'✨', t:'Step back and look — your room already looks so much tidier!'},
+  ]},
+  { id:'bagpack', cat:'care', icon:'🎒', title:'Pack Your School Bag', steps:[
+    {e:'📋', t:'Ask a grown-up or check your timetable — what do you need today?'},
+    {e:'📚', t:'Find your books and notebooks for today and put them in.'},
+    {e:'✏️', t:'Make sure your pencil case is in your bag.'},
+    {e:'🍱', t:'Pack your lunchbox if you\'re taking one.'},
+    {e:'💧', t:'Put your water bottle in your bag.'},
+    {e:'🧥', t:'Get your coat or jacket ready if you need one.'},
+    {e:'🎒', t:'Zip up your bag and put it by the door so it\'s ready tomorrow!'},
+    {e:'✅', t:'All packed! You won\'t forget a thing!'},
+  ]},
+
+  // ── FOOD & EATING ─────────────────────────────────────────────────────
+  { id:'sandwich', cat:'food', icon:'🥪', title:'Make a Sandwich', steps:[
+    {e:'🍞', t:'Get two slices of bread and put them on a plate.'},
+    {e:'🧈', t:'Use a butter knife to spread butter or mayo on one side of each slice. Ask a grown-up to help with the knife.'},
+    {e:'🧀', t:'Put your filling on one slice — cheese, ham, or whatever you like!'},
+    {e:'🥬', t:'Add any extras — lettuce, tomato, cucumber.'},
+    {e:'🥪', t:'Put the second slice of bread on top to close the sandwich.'},
+    {e:'✂️', t:'Ask a grown-up to cut it in half if you like.'},
+    {e:'😋', t:'Your sandwich is ready. Enjoy!'},
+  ]},
+  { id:'cereal', cat:'food', icon:'🥣', title:'Make Breakfast Cereal', steps:[
+    {e:'🥣', t:'Get a bowl and put it on the table.'},
+    {e:'🥣', t:'Open the cereal box and pour some cereal into the bowl. Don\'t fill it too full!'},
+    {e:'🥛', t:'Pour milk slowly over the cereal.'},
+    {e:'🥄', t:'Get a spoon from the drawer.'},
+    {e:'😋', t:'Sit down and enjoy your breakfast!'},
+    {e:'🧹', t:'When you\'re done, put your bowl and spoon in the sink.'},
+  ]},
+  { id:'drink', cat:'food', icon:'🥤', title:'Pour a Drink', steps:[
+    {e:'🥤', t:'Choose a cup or glass and put it on a flat surface like the table.'},
+    {e:'🧃', t:'Hold the bottle or carton with two hands.'},
+    {e:'💧', t:'Tip it slowly over the cup — go slowly so it doesn\'t splash!'},
+    {e:'🛑', t:'Stop when the cup is about ¾ full — not all the way to the top!'},
+    {e:'🧃', t:'Put the bottle or carton back in the fridge.'},
+    {e:'🥤', t:'Carry your drink carefully using two hands. Enjoy!'},
+  ]},
+  { id:'table', cat:'food', icon:'🍽️', title:'Set the Table', steps:[
+    {e:'🧹', t:'Make sure the table is clean. Wipe it if needed.'},
+    {e:'🍽️', t:'Put one plate in front of each seat.'},
+    {e:'🥄', t:'Put a knife and fork next to each plate — knife on the right, fork on the left.'},
+    {e:'🥄', t:'Add a spoon if needed, on the outside of the knife.'},
+    {e:'🥤', t:'Put a glass or cup at the top right of each plate.'},
+    {e:'🧻', t:'Fold a paper napkin and put it on or next to each plate.'},
+    {e:'✅', t:'The table is set! Give yourself a high five — you\'re so helpful!'},
+  ]},
+  { id:'restaurant', cat:'food', icon:'🍴', title:'Eat at a Restaurant', steps:[
+    {e:'🚪', t:'Walk in with your grown-up and wait to be shown to your table.'},
+    {e:'🪑', t:'Sit down and put your napkin on your lap.'},
+    {e:'📖', t:'Look at the menu. Ask a grown-up to read it to you if you need.'},
+    {e:'🤔', t:'Choose what you\'d like to eat. Pick your favourite thing!'},
+    {e:'🙋', t:'When the waiter comes, it\'s okay to say your order yourself. Use a polite voice!'},
+    {e:'⏳', t:'Wait patiently while your food is being made. You can chat or draw!'},
+    {e:'😋', t:'When your food arrives, say "Thank you!" Then enjoy your meal.'},
+    {e:'🙂', t:'Eat nicely — no talking with food in your mouth!'},
+    {e:'👏', t:'When you\'re done, say "Thank you for the lovely food" before you leave.'},
+  ]},
+
+  // ── OUT & ABOUT ───────────────────────────────────────────────────────
+  { id:'bus', cat:'world', icon:'🚌', title:'Ride a Bus', steps:[
+    {e:'🚌', t:'Stand at the bus stop and wait for the right bus. Check the number with a grown-up!'},
+    {e:'🛑', t:'Stand back from the road while the bus pulls up. Don\'t stand too close to the edge!'},
+    {e:'🚪', t:'Let people get OFF the bus first. Then step on.'},
+    {e:'🎫', t:'Pay your fare or show your bus pass to the driver. Say "Hello!"'},
+    {e:'🪑', t:'Find a seat and sit down before the bus starts moving.'},
+    {e:'🎒', t:'Hold your bag on your lap. Don\'t put bags on empty seats.'},
+    {e:'🔔', t:'Watch for your stop. When it\'s nearly there, press the stop button ONCE.'},
+    {e:'🚪', t:'When the bus stops, stand up and move carefully to the door.'},
+    {e:'👋', t:'Step off the bus. Say "Thank you" to the driver!'},
+  ]},
+  { id:'shopping', cat:'world', icon:'🛒', title:'Go Grocery Shopping', steps:[
+    {e:'📝', t:'Before you go, make a list of what you need. Ask a grown-up to help!'},
+    {e:'🛒', t:'At the shop, grab a basket or trolley near the entrance.'},
+    {e:'👀', t:'Look at the list. What do you need to find first?'},
+    {e:'🛒', t:'Walk down the aisles and put items into the basket one at a time.'},
+    {e:'🔎', t:'Check the list — did you get everything?'},
+    {e:'🧾', t:'Go to the checkout. Put items on the conveyor belt one by one.'},
+    {e:'💳', t:'Wait while the cashier scans the items. Say "Hello!"'},
+    {e:'🛍️', t:'Pack the bags carefully. Heavy things at the bottom!'},
+    {e:'😊', t:'Pay and say "Thank you!" to the cashier. Shopping done!'},
+  ]},
+  { id:'toilet', cat:'world', icon:'🚻', title:'Use a Public Toilet', steps:[
+    {e:'🚻', t:'Find the toilets. Look for the sign with a person on it!'},
+    {e:'🚪', t:'Knock on the cubicle door. If it opens, it\'s free to use.'},
+    {e:'🔒', t:'Go in and close the door. Turn the lock so it shows "Engaged".'},
+    {e:'🚽', t:'Use the toilet.'},
+    {e:'🧻', t:'Use toilet paper and put it in the toilet — not on the floor.'},
+    {e:'🚽', t:'Flush the toilet.'},
+    {e:'🔓', t:'Unlock the door and go to the sink.'},
+    {e:'🙌', t:'Wash your hands really well with soap and water.'},
+    {e:'🧻', t:'Dry your hands on a paper towel or the hand dryer.'},
+    {e:'✅', t:'All done! Leave the bathroom as clean as you found it.'},
+  ]},
+  { id:'order', cat:'world', icon:'🍔', title:'Order Food at a Counter', steps:[
+    {e:'📋', t:'Look at the menu board. What looks good to you?'},
+    {e:'🤔', t:'Decide what you want before it\'s your turn. That\'s helpful!'},
+    {e:'🚶', t:'Walk up to the counter when it\'s your turn.'},
+    {e:'😊', t:'Say "Hello!" to the person at the counter and smile.'},
+    {e:'🗣️', t:'Say what you\'d like in a clear, polite voice. For example: "Can I have a cheese burger please?"'},
+    {e:'💳', t:'Pay with your money or card (or let your grown-up pay!).'},
+    {e:'🙏', t:'Say "Thank you!" and take your receipt or ticket if they give you one.'},
+    {e:'⏳', t:'Wait patiently for your food to be called.'},
+    {e:'😋', t:'Collect your food and say "Thank you!" again. Enjoy!'},
+  ]},
+  { id:'library', cat:'world', icon:'📚', title:'Visit the Library', steps:[
+    {e:'🚪', t:'Walk in quietly. Libraries are peaceful places — use a soft voice!'},
+    {e:'👀', t:'Look around. Can you see where the children\'s books are?'},
+    {e:'📚', t:'Browse the shelves. You can take books off to look at them.'},
+    {e:'🤔', t:'Pick books that look interesting or fun to you!'},
+    {e:'🃏', t:'Go to the checkout desk with your library card and your books.'},
+    {e:'😊', t:'Say "Hello!" and hand over your card and books.'},
+    {e:'📅', t:'The librarian will tell you when to return them. Remember the date!'},
+    {e:'👋', t:'Say "Thank you!" and take your books home. Happy reading!'},
+  ]},
+  { id:'doctor', cat:'world', icon:'🩺', title:'Go to the Doctor', steps:[
+    {e:'🚗', t:'Go to the doctor\'s with your grown-up.'},
+    {e:'🏥', t:'At the reception desk, your grown-up will tell them your name. Say "Hello!"'},
+    {e:'🪑', t:'Sit in the waiting room. You might have to wait a little while.'},
+    {e:'📚', t:'You can look at books or draw quietly while you wait.'},
+    {e:'🚪', t:'When your name is called, go in with your grown-up.'},
+    {e:'🩺', t:'The doctor will ask you how you\'re feeling. Try to tell them what hurts.'},
+    {e:'😌', t:'Be as still as you can if the doctor needs to examine you. It\'s okay to feel nervous!'},
+    {e:'💊', t:'The doctor might give you medicine or advice. Listen carefully.'},
+    {e:'👋', t:'Say "Thank you, Doctor!" when you leave. You did a brilliant job!'},
+  ]},
+  { id:'dentist', cat:'world', icon:'🦷', title:'Go to the Dentist', steps:[
+    {e:'🏥', t:'Arrive at the dentist with your grown-up and check in at reception.'},
+    {e:'🪑', t:'Sit in the waiting room. Take some deep breaths — you\'re safe!'},
+    {e:'🚪', t:'When your name is called, go with the dentist.'},
+    {e:'🪑', t:'Sit in the big chair. The dentist will tip it back so you can lie back.'},
+    {e:'😮', t:'Open your mouth wide when the dentist asks you to.'},
+    {e:'🔦', t:'The dentist will look at all your teeth with a little mirror and light.'},
+    {e:'🦷', t:'They might clean and polish your teeth. It might tickle a little!'},
+    {e:'🌊', t:'Rinse and spit into the little sink next to you.'},
+    {e:'⭐', t:'Great job! Say "Thank you" and you might even get a sticker!'},
+  ]},
+  { id:'atm', cat:'world', icon:'🏧', title:'Use an ATM with a Grown-up', steps:[
+    {e:'🏧', t:'Go to the ATM with your grown-up. Stand close to them.'},
+    {e:'👀', t:'Look around to make sure nobody is standing too close or watching.'},
+    {e:'💳', t:'The grown-up puts their card into the slot at the front of the machine.'},
+    {e:'🔢', t:'They type in their secret PIN number. Always look away — PINs are private!'},
+    {e:'🖱️', t:'Press the buttons to choose what to do — like "Get Cash".'},
+    {e:'💵', t:'The machine will give out the money. The grown-up takes it carefully.'},
+    {e:'💳', t:'Take the bank card back out of the machine.'},
+    {e:'🧾', t:'Take the receipt if one comes out.'},
+    {e:'✅', t:'All done! Never tell anyone else\'s PIN — it\'s a secret!'},
+  ]},
+  { id:'checkout', cat:'world', icon:'🏪', title:'At the Supermarket Checkout', steps:[
+    {e:'🛒', t:'When you\'ve got everything, go to a checkout queue and wait your turn.'},
+    {e:'🧺', t:'Put your items on the conveyor belt one by one. Start with tins and heavy things.'},
+    {e:'📦', t:'Place the divider bar behind your items so the next person\'s things don\'t mix up.'},
+    {e:'😊', t:'Say "Hello!" to the cashier when it\'s your turn.'},
+    {e:'💳', t:'Watch as the cashier scans each item.'},
+    {e:'🛍️', t:'Pack items into bags as they\'re scanned. Squashy things go on top!'},
+    {e:'💰', t:'Pay with money or a card. Your grown-up can help.'},
+    {e:'🧾', t:'Take your receipt and bags. Say "Thank you, goodbye!"'},
+  ]},
+
+  // ── AT SCHOOL ─────────────────────────────────────────────────────────
+  { id:'arrive', cat:'school', icon:'🏫', title:'Arrive at School', steps:[
+    {e:'🚗', t:'When you get to school, say goodbye to your grown-up.'},
+    {e:'🎒', t:'Hang up your bag and coat on your peg or in your locker.'},
+    {e:'📦', t:'Take out anything you need for the morning — like your reading folder or snack.'},
+    {e:'🚀', t:'Go to your classroom. Find your seat and sit down.'},
+    {e:'📚', t:'If the teacher isn\'t there yet, get out a book and read quietly.'},
+    {e:'😊', t:'Say "Good morning!" to your teacher when they arrive.'},
+    {e:'✅', t:'A great start to the day!'},
+  ]},
+  { id:'lunch', cat:'school', icon:'🍱', title:'Lunchtime at School', steps:[
+    {e:'🔔', t:'When the lunch bell rings, pack away what you\'re working on.'},
+    {e:'🙌', t:'Wash your hands before eating!'},
+    {e:'🍱', t:'Get your lunchbox from your bag, or join the queue for school lunch.'},
+    {e:'🪑', t:'Find a seat in the lunch hall and sit down.'},
+    {e:'😋', t:'Eat your lunch. Try to eat your savoury food before your sweet treat!'},
+    {e:'🥤', t:'Drink your water too — staying hydrated helps your brain!'},
+    {e:'🧹', t:'When you\'re done, put any rubbish in the bin and return your tray if needed.'},
+    {e:'🌤️', t:'If there\'s time, go outside for some fresh air and play!'},
+  ]},
+  { id:'help', cat:'school', icon:'✋', title:'Ask for Help in Class', steps:[
+    {e:'🤔', t:'Read or look at the task again. Are you still stuck?'},
+    {e:'🔁', t:'Try one more time on your own — sometimes the answer comes!'},
+    {e:'✋', t:'If you\'re still stuck, put your hand up calmly and wait.'},
+    {e:'🤫', t:'Don\'t shout out — wait patiently for the teacher to come to you.'},
+    {e:'🗣️', t:'When the teacher comes, tell them clearly: "I don\'t understand [this part]."'},
+    {e:'👂', t:'Listen carefully to their explanation.'},
+    {e:'😊', t:'Say "Thank you!" and try again. Asking for help is really brave!'},
+  ]},
+  { id:'packup', cat:'school', icon:'🎒', title:'Pack Up to Go Home', steps:[
+    {e:'🔔', t:'When you hear the end-of-day bell, start packing up.'},
+    {e:'📚', t:'Put your books and notebooks into your bag.'},
+    {e:'✏️', t:'Make sure your pencil case is zipped up and in your bag.'},
+    {e:'🍱', t:'Put your lunchbox and water bottle in your bag.'},
+    {e:'📝', t:'Check if there are any notes or letters to take home to your grown-up.'},
+    {e:'🧥', t:'Get your coat and put it on.'},
+    {e:'😊', t:'Say "Goodbye! Thank you!" to your teacher.'},
+    {e:'🚶', t:'Walk (don\'t run!) to where your grown-up is waiting.'},
+  ]},
+  { id:'recess', cat:'school', icon:'⚽', title:'What to Do at Recess', steps:[
+    {e:'🔔', t:'When the bell rings for break, walk outside calmly.'},
+    {e:'👀', t:'Look around — what do you feel like doing?'},
+    {e:'👫', t:'If you want to play with friends, walk over and say "Hi! Can I play?"'},
+    {e:'⚽', t:'Play a game together. Take turns and play fair!'},
+    {e:'😤', t:'If something upsets you, take a deep breath before reacting.'},
+    {e:'🧍', t:'If you need a moment alone, find a quiet spot to sit and relax.'},
+    {e:'🔔', t:'When the bell rings to go back in, stop playing and walk inside.'},
+    {e:'😊', t:'Line up calmly and go back to class. Break was fun!'},
+  ]},
+
+  // ── SOCIAL SKILLS ─────────────────────────────────────────────────────
+  { id:'meet', cat:'social', icon:'👋', title:'Meet Someone New', steps:[
+    {e:'😊', t:'When you see someone new, give them a friendly smile.'},
+    {e:'👀', t:'Make gentle eye contact — look at their face, not the floor.'},
+    {e:'👋', t:'Wave or say "Hi! My name is [your name]. What\'s yours?"'},
+    {e:'👂', t:'Listen carefully when they tell you their name.'},
+    {e:'🗣️', t:'Say their name back to them: "Nice to meet you, [their name]!"'},
+    {e:'💬', t:'You can ask them a friendly question — like "Do you like football?" or "What\'s your favourite game?"'},
+    {e:'🌟', t:'You made a new friend! You\'re really brave and kind.'},
+  ]},
+  { id:'join', cat:'social', icon:'🤸', title:'Ask to Join a Game', steps:[
+    {e:'👀', t:'Watch the game for a moment so you understand what\'s happening.'},
+    {e:'⏳', t:'Wait for a good moment to ask — not right in the middle of the action.'},
+    {e:'🚶', t:'Walk over to the group.'},
+    {e:'😊', t:'Smile and say: "That looks really fun! Can I play too?"'},
+    {e:'👂', t:'Listen to their answer. If they say yes — great!'},
+    {e:'😌', t:'If they say no, that\'s okay. Take a breath and walk away calmly. There will be other chances!'},
+    {e:'⭐', t:'Asking to join is really brave. Well done!'},
+  ]},
+  { id:'sorry', cat:'social', icon:'🙏', title:'How to Say Sorry', steps:[
+    {e:'🤔', t:'Think about what happened. Do you understand why the other person is upset?'},
+    {e:'🚶', t:'Walk over to the person calmly.'},
+    {e:'👀', t:'Look at them gently.'},
+    {e:'🗣️', t:'Say "I\'m sorry for [what you did]." Be specific — say exactly what you did.'},
+    {e:'👂', t:'Let them talk and listen without interrupting.'},
+    {e:'💬', t:'You can ask: "Is there anything I can do to make it better?"'},
+    {e:'⏳', t:'Give them time. They might need a moment before they feel better.'},
+    {e:'💛', t:'Saying sorry takes courage. You did the right thing!'},
+  ]},
+  { id:'feelings', cat:'social', icon:'😤', title:'Handle Big Feelings', steps:[
+    {e:'😤', t:'Notice the feeling in your body. Are you angry, sad, or scared? That\'s okay!'},
+    {e:'🛑', t:'STOP before you do or say anything.'},
+    {e:'🌬️', t:'Take 3 deep slow breaths. In through your nose, out through your mouth.'},
+    {e:'🤲', t:'If you need to, find a quiet space to calm down.'},
+    {e:'💬', t:'When you feel calmer, try to put the feeling into words: "I feel upset because..."'},
+    {e:'🗣️', t:'Talk to a trusted grown-up about how you\'re feeling.'},
+    {e:'🌟', t:'Big feelings are normal. Everyone has them. You handled it really well!'},
+  ]},
+  { id:'share', cat:'social', icon:'🤝', title:'How to Share', steps:[
+    {e:'👀', t:'Notice if someone else wants what you have or wants a turn.'},
+    {e:'🤔', t:'Think: would you like it if they shared with you?'},
+    {e:'😊', t:'Say: "Do you want to have a turn?"'},
+    {e:'⏱️', t:'If you\'re not ready, that\'s okay — say: "I\'m going to play for 5 more minutes, then it\'s your turn."'},
+    {e:'✋', t:'When it\'s their turn, hand it over with a smile.'},
+    {e:'⭐', t:'Sharing makes friends happy — and it makes YOU feel good too!'},
+  ]},
+
+  // ── STAYING SAFE ──────────────────────────────────────────────────────
+  { id:'cross', cat:'safety', icon:'🚦', title:'Cross the Road Safely', steps:[
+    {e:'🚶', t:'Walk up to the edge of the pavement. STOP — don\'t step into the road yet.'},
+    {e:'👀', t:'Look to the RIGHT.'},
+    {e:'👀', t:'Look to the LEFT.'},
+    {e:'👀', t:'Look to the RIGHT again.'},
+    {e:'👂', t:'Listen carefully — can you hear any cars coming?'},
+    {e:'🚗', t:'Is the road completely clear? Wait until no cars are coming at all.'},
+    {e:'🚶', t:'Walk straight across — don\'t run, and keep looking both ways as you go.'},
+    {e:'✅', t:'You made it safely! Always cross with a grown-up if you\'re not sure.'},
+  ]},
+  { id:'lost', cat:'safety', icon:'🗺️', title:'If You Get Lost', steps:[
+    {e:'🛑', t:'STOP. Stay where you are — don\'t keep walking and get more lost.'},
+    {e:'🌬️', t:'Take a deep breath. It\'s okay to be scared, but you can handle this!'},
+    {e:'👀', t:'Look around. Can you see the person you were with nearby?'},
+    {e:'🏪', t:'If not, go into a nearby shop, café, or public building.'},
+    {e:'🙋', t:'Find a person who works there, or a mum or dad with children.'},
+    {e:'🗣️', t:'Say: "I\'m lost. Can you help me please? My name is [your name]."'},
+    {e:'📞', t:'Ask them to call your grown-up\'s number. Try to memorise your grown-up\'s phone number!'},
+    {e:'🛑', t:'NEVER go with a stranger or leave the building. Wait for your grown-up!'},
+    {e:'💛', t:'Help will come. You are safe and brave!'},
+  ]},
+  { id:'emergency', cat:'safety', icon:'🆘', title:'If There\'s an Emergency', steps:[
+    {e:'🛑', t:'Stay calm. Take a deep breath.'},
+    {e:'🗣️', t:'Shout for a grown-up nearby if you can.'},
+    {e:'📞', t:'If no grown-up is near, call the emergency number. In India: 112. In UK: 999. In US: 911.'},
+    {e:'📱', t:'Pick up the phone and dial the number.'},
+    {e:'🗣️', t:'When someone answers, speak clearly and say: "I need help. My name is [name] and I am at [place]."'},
+    {e:'👂', t:'Listen to what they tell you to do and follow their instructions.'},
+    {e:'🚪', t:'Stay on the phone and stay where you are unless they tell you to move.'},
+    {e:'💪', t:'You are so brave. Help is on the way!'},
+  ]},
+  { id:'fire', cat:'safety', icon:'🔥', title:'Fire Drill at School', steps:[
+    {e:'🔔', t:'When the fire alarm sounds, STOP what you\'re doing immediately.'},
+    {e:'🚶', t:'Stand up calmly — don\'t run!'},
+    {e:'🚪', t:'Walk to the classroom door.'},
+    {e:'🖐️', t:'Feel the door with the back of your hand before opening — if it\'s hot, DON\'T open it. Tell a teacher.'},
+    {e:'🚶', t:'Walk in a line to the fire exit. Follow your teacher.'},
+    {e:'🏃', t:'Move quickly but safely. Don\'t stop to pick up your bag or belongings.'},
+    {e:'🌳', t:'Go to the assembly point outside — your teacher will show you where.'},
+    {e:'🤫', t:'Stand quietly in your class group and wait. Don\'t go back inside until a grown-up says it\'s safe.'},
+    {e:'✅', t:'Great job staying calm. You kept yourself safe!'},
+  ]},
+  { id:'stranger', cat:'safety', icon:'🛡️', title:'Stranger Safety', steps:[
+    {e:'❓', t:'A stranger is any person you don\'t know well.'},
+    {e:'🎁', t:'If a stranger offers you sweets, a gift, or asks you to come with them — say NO!'},
+    {e:'🗣️', t:'Say loudly and clearly: "NO! I don\'t know you!"'},
+    {e:'🏃', t:'Run away from them quickly. Go towards other people.'},
+    {e:'📢', t:'Shout for help if you need to. Making noise is the right thing to do!'},
+    {e:'🏠', t:'Go to a trusted adult you know — like a teacher, parent, or police officer.'},
+    {e:'🗣️', t:'Tell them what happened straight away.'},
+    {e:'💛', t:'You don\'t have to be polite to someone who scares you. Your safety is most important!'},
+  ]},
+
+  // ── FUN ACTIVITIES ────────────────────────────────────────────────────
+  { id:'cinema', cat:'fun', icon:'🎬', title:'Go to the Cinema', steps:[
+    {e:'🎟️', t:'Arrive at the cinema and get your ticket. Your grown-up will help.'},
+    {e:'🍿', t:'If you\'d like a snack, choose one at the counter. Say "Please" and "Thank you!"'},
+    {e:'👀', t:'Find your screen — look at the number on your ticket!'},
+    {e:'🪑', t:'Find your seat. Check the row letter and seat number on your ticket.'},
+    {e:'📱', t:'Turn your phone to silent before the film starts.'},
+    {e:'🤫', t:'The cinema is a quiet place — whisper if you need to say something.'},
+    {e:'🎬', t:'Enjoy the film! It\'s okay to laugh out loud.'},
+    {e:'🚮', t:'When it ends, put your rubbish in the bin and wait for the credits if you like.'},
+    {e:'👋', t:'Walk out calmly and say "That was amazing!" — movies are awesome!'},
+  ]},
+  { id:'playground', cat:'fun', icon:'🛝', title:'At the Playground', steps:[
+    {e:'🎒', t:'Leave your bag with your grown-up before you play.'},
+    {e:'👀', t:'Look at the playground — what do you want to go on first?'},
+    {e:'🚶', t:'Walk (don\'t run!) up the steps or ladder.'},
+    {e:'⏳', t:'Take turns! If someone is waiting, have your go and then let them on.'},
+    {e:'🛝', t:'Slide down one at a time — wait until the person in front moves away.'},
+    {e:'👫', t:'If you want to play with others, ask: "Can I play too?"'},
+    {e:'🤕', t:'If someone gets hurt, tell a grown-up straight away.'},
+    {e:'🔔', t:'When your grown-up says it\'s time to go, stop playing and come when called.'},
+    {e:'😊', t:'Say goodbye to any new friends. What great fun!'},
+  ]},
+  { id:'friend', cat:'fun', icon:'🏠', title:'Visit a Friend\'s House', steps:[
+    {e:'🚪', t:'When you arrive, knock or ring the doorbell and wait.'},
+    {e:'😊', t:'Say "Hello!" and "Thank you for having me!" to your friend\'s parent.'},
+    {e:'👟', t:'Take your shoes off at the door if they do in that house.'},
+    {e:'🎮', t:'Ask your friend what they\'d like to do — let them choose first since it\'s their home!'},
+    {e:'🤝', t:'Play nicely and take turns. Treat their toys with care.'},
+    {e:'🍽️', t:'If offered food or a drink, say "Yes please" or "No thank you" politely.'},
+    {e:'🧹', t:'When you\'re done playing, help tidy up the toys together.'},
+    {e:'🚪', t:'When it\'s time to go, say "Thank you so much, I had a really good time!"'},
+    {e:'💛', t:'A great playdate! You were a wonderful guest.'},
+  ]},
+  { id:'boardgame', cat:'fun', icon:'🎲', title:'Play a Board Game', steps:[
+    {e:'📦', t:'Get the game box and put it on a table.'},
+    {e:'📋', t:'Open the box and unfold the game board in the middle.'},
+    {e:'📖', t:'Read the instructions together, or ask a grown-up to explain the rules.'},
+    {e:'🃏', t:'Hand out the pieces, cards, or money each player needs.'},
+    {e:'🎲', t:'Decide who goes first — roll a dice or do "Rock, Paper, Scissors"!'},
+    {e:'🎮', t:'Take turns in order. Wait patiently when it\'s not your turn.'},
+    {e:'😊', t:'Play fair — no cheating! Games are more fun when everyone follows the rules.'},
+    {e:'🏆', t:'When the game ends, say "Well played!" whether you win or lose.'},
+    {e:'🧹', t:'Pack all the pieces back into the box carefully so they\'re not lost next time.'},
+  ]},
+];
+
+// ══════════════════════════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════════════════════════
+let currentScenario = null, currentStep = 0, currentCat = 'all', speaking = false;
+
+// ══════════════════════════════════════════════════════════════════════════
+//  HOME
+// ══════════════════════════════════════════════════════════════════════════
+function initHome() {
+  // Category pills
+  const scroll = document.getElementById('catScroll');
+  scroll.innerHTML = `<button class="cat-pill active" style="background:#FF6B9D;color:white" onclick="filterCat('all')">⭐ All</button>`
+    + Object.entries(CATS).map(([k,c]) =>
+      `<button class="cat-pill" style="background:${c.bg};color:${c.dark}"
+        onclick="filterCat('${k}')">${c.name}</button>`
+    ).join('');
+
+  renderCards('all');
+}
+
+function filterCat(cat) {
+  currentCat = cat;
+  document.querySelectorAll('.cat-pill').forEach((p,i) => {
+    const keys = ['all', ...Object.keys(CATS)];
+    const active = keys[i] === cat;
+    const c = cat === 'all' ? { color:'#FF6B9D' } : CATS[keys[i]];
+    if (active) {
+      p.classList.add('active');
+      p.style.background = cat === 'all' ? '#FF6B9D' : CATS[cat].color;
+      p.style.color = 'white';
+    } else {
+      p.classList.remove('active');
+      const k = keys[i];
+      if (k === 'all') { p.style.background='#FFE8F0'; p.style.color='#FF6B9D'; }
+      else { p.style.background = CATS[k].bg; p.style.color = CATS[k].dark; }
+    }
+  });
+  renderCards(cat);
+}
+
+function renderCards(cat) {
+  const grid = document.getElementById('cardsGrid');
+  const list = cat === 'all' ? SCENARIOS : SCENARIOS.filter(s => s.cat === cat);
+  grid.innerHTML = list.map(s => {
+    const c = CATS[s.cat];
+    return `<button class="act-card" style="background:${c.bg}" onclick="openScenario('${s.id}')">
+      <div class="act-icon">${s.icon}</div>
+      <div class="act-name">${s.title}</div>
+      <div class="act-cat-tag" style="color:${c.dark}">${c.name}</div>
+    </button>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  STEP SCREEN
+// ══════════════════════════════════════════════════════════════════════════
+function openScenario(id) {
+  currentScenario = SCENARIOS.find(s => s.id === id);
+  currentStep = 0;
+  show('stepScreen');
+  renderStep(false);
+}
+
+function renderStep(goingBack) {
+  const s = currentScenario;
+  const step = s.steps[currentStep];
+  const c = CATS[s.cat];
+  const total = s.steps.length;
+
+  // topbar
+  document.getElementById('stepActTitle').textContent = s.title;
+  document.getElementById('stepBadge').textContent = `${currentStep+1} / ${total}`;
+  document.getElementById('stepBadge').style.background = c.color;
+
+  // progress dots
+  const dots = document.getElementById('progressDots');
+  dots.innerHTML = s.steps.map((_,i) => {
+    let cls = i < currentStep ? 'done' : '';
+    if (i === currentStep) cls = 'active';
+    const style = i === currentStep ? `background:${c.color};width:24px` : i < currentStep ? `background:${c.color};opacity:.4` : '';
+    return `<div class="dot ${cls}" style="${style}"></div>`;
+  }).join('');
+
+  // picture card
+  const card = document.getElementById('pictureCard');
+  card.style.background = c.bg;
+  card.className = 'picture-card ' + (goingBack ? 'back-slide' : '');
+  card.offsetHeight; // force reflow for animation replay
+  card.className = 'picture-card ' + (goingBack ? 'back-slide' : '');
+
+  document.getElementById('cardPicture').textContent = step.e;
+  document.getElementById('cardText').textContent = step.t;
+
+  // next button
+  const nextBtn = document.getElementById('nextBtn');
+  nextBtn.style.background = c.color;
+  const isLast = currentStep === total - 1;
+  document.getElementById('nextLabel').textContent = isLast ? "I did it! 🎉" : "Next step";
+  document.getElementById('nextArrow').textContent  = isLast ? "" : "→";
+
+  // prev button
+  document.getElementById('prevBtn').style.visibility = currentStep === 0 ? 'hidden' : 'visible';
+
+  // stop any ongoing speech
+  stopSpeech();
+}
+
+function nextStep() {
+  if (currentStep < currentScenario.steps.length - 1) {
+    currentStep++;
+    renderStep(false);
+  } else {
+    showComplete();
+  }
+}
+
+function prevStep() {
+  if (currentStep > 0) { currentStep--; renderStep(true); }
+}
+
+// ── Read aloud ─────────────────────────────────────────────────────────────
+function readAloud() {
+  if (!('speechSynthesis' in window)) { return; }
+  if (speaking) { stopSpeech(); return; }
+  const text = currentScenario.steps[currentStep].t;
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.rate = 0.88; utt.pitch = 1.1;
+  const voices = speechSynthesis.getVoices();
+  const friendly = voices.find(v => v.name.includes('Google') && v.lang.startsWith('en'));
+  if (friendly) utt.voice = friendly;
+  utt.onstart = () => { speaking = true; document.getElementById('readAloudBtn').classList.add('speaking'); document.getElementById('readAloudBtn').querySelector('span').textContent = 'Stop reading'; };
+  utt.onend   = () => { speaking = false; document.getElementById('readAloudBtn').classList.remove('speaking'); document.getElementById('readAloudBtn').querySelector('span').textContent = 'Read it to me'; };
+  speechSynthesis.speak(utt);
+}
+
+function stopSpeech() {
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  speaking = false;
+  const btn = document.getElementById('readAloudBtn');
+  if (btn) { btn.classList.remove('speaking'); btn.querySelector('span').textContent = 'Read it to me'; }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  COMPLETE
+// ══════════════════════════════════════════════════════════════════════════
+function showComplete() {
+  stopSpeech();
+  const c = CATS[currentScenario.cat];
+  document.getElementById('completeActivity').textContent = currentScenario.title;
+  document.getElementById('btnAgain').style.background = c.color;
+  show('completeScreen');
+  spawnConfetti(40);
+  if (navigator.vibrate) navigator.vibrate([80,40,80,40,180]);
+}
+
+function tryAgain() { openScenario(currentScenario.id); }
+
+function goHome() {
+  stopSpeech();
+  show('homeScreen');
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  UTILS
+// ══════════════════════════════════════════════════════════════════════════
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function spawnConfetti(n) {
+  const colors = ['#FF6B9D','#FFD166','#4ECBA0','#74B9FF','#A29BFE','#FF9A5C','#FF6B6B'];
+  for (let i = 0; i < n; i++) {
+    const el = document.createElement('div'); el.className = 'confetti';
+    const s = 7 + Math.random() * 9;
+    el.style.cssText = `left:${10+Math.random()*80}%;top:-16px;width:${s}px;height:${s}px;`
+      + `background:${colors[~~(Math.random()*colors.length)]};`
+      + `border-radius:${Math.random()>.5?'50%':'4px'};`
+      + `animation-delay:${Math.random()*.5}s;animation-duration:${1+Math.random()*.8}s;`;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 2000);
+  }
+}
+
+// init
+initHome();
+speechSynthesis.onvoiceschanged = () => {}; // warm up voices
+</script>
+</body>
+</html>

@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>ADHD Toolkit</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box; margin: 0; padding: 0;
+      -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+    }
+    :root {
+      --cream: #FFFAF4; --peach: #FFF0E0;
+      --amber: #FF9A3C; --coral: #FF6B6B;
+      --grad: linear-gradient(135deg,#FF8C42,#FF6060);
+      --violet: #7C5CBF; --violet-light: #EDE8F8; --violet-grad: linear-gradient(135deg,#7C5CBF,#A78BE8);
+      --text: #2D1B0E; --mid: #8B6355; --light: #C4A89A;
+      --shadow: 0 6px 32px rgba(0,0,0,.10); --r: 20px;
+    }
+    html, body {
+      height: 100%; font-family: 'Nunito', sans-serif;
+      background: var(--cream); color: var(--text);
+      overscroll-behavior: none; -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Tab bar ─────────────────────────────────────────────────── */
+    .tab-bar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      display: flex; background: white;
+      border-top: 1px solid #F0E4D8;
+      padding-bottom: env(safe-area-inset-bottom);
+      z-index: 100; box-shadow: 0 -4px 20px rgba(0,0,0,.08);
+    }
+    .tab {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      gap: 3px; padding: 10px 6px 12px;
+      background: none; border: none; cursor: pointer;
+      font-family: 'Nunito', sans-serif; transition: opacity .15s;
+    }
+    .tab-icon { font-size: 22px; }
+    .tab-label { font-size: 11px; font-weight: 800; color: var(--light); letter-spacing: .04em; transition: color .15s; }
+    .tab.active .tab-label { color: var(--amber); }
+    .tab.active[data-tab="da"] .tab-label { color: var(--violet); }
+    .tab-pip {
+      width: 4px; height: 4px; border-radius: 50%; background: transparent;
+      margin-top: 2px; transition: background .15s;
+    }
+    .tab.active .tab-pip { background: var(--amber); }
+    .tab.active[data-tab="da"] .tab-pip { background: var(--violet); }
+
+    /* tooltip */
+    .tab { position: relative; }
+    .tab-tooltip {
+      position: absolute; bottom: calc(100% + 10px); left: 50%;
+      transform: translateX(-50%) scale(.9); transform-origin: bottom center;
+      background: #2D1B0E; color: white; border-radius: 12px;
+      padding: 10px 14px; width: 190px; text-align: center;
+      font-size: 12px; font-weight: 700; line-height: 1.5;
+      pointer-events: none; opacity: 0;
+      transition: opacity .18s, transform .18s;
+      white-space: normal; z-index: 200;
+    }
+    .tab-tooltip::after {
+      content: ''; position: absolute; top: 100%; left: 50%;
+      transform: translateX(-50%);
+      border: 6px solid transparent; border-top-color: #2D1B0E;
+    }
+    .tab:hover .tab-tooltip, .tab:focus .tab-tooltip {
+      opacity: 1; transform: translateX(-50%) scale(1);
+    }
+
+    /* ── Screens ─────────────────────────────────────────────────── */
+    .screen {
+      display: none; min-height: 100dvh;
+      padding: 32px 20px calc(80px + env(safe-area-inset-bottom,0px));
+      flex-direction: column; align-items: center; justify-content: center; gap: 22px;
+    }
+    .screen.active { display: flex; }
+
+    /* ── Shared components ───────────────────────────────────────── */
+    .h1 { font-size: 27px; font-weight: 900; line-height: 1.25; text-align: center; }
+    .sub { font-size: 15px; color: var(--mid); line-height: 1.65; max-width: 310px; text-align: center; }
+
+    .btn-primary {
+      padding: 16px 40px; background: var(--grad); color: white; border: none;
+      border-radius: 16px; font: 800 17px 'Nunito',sans-serif; cursor: pointer;
+      box-shadow: 0 6px 22px rgba(255,107,107,.35); transition: transform .1s;
+    }
+    .btn-primary:active { transform: scale(.97); }
+    .btn-violet {
+      padding: 16px 40px; background: var(--violet-grad); color: white; border: none;
+      border-radius: 16px; font: 800 17px 'Nunito',sans-serif; cursor: pointer;
+      box-shadow: 0 6px 22px rgba(124,92,191,.35); transition: transform .1s;
+    }
+    .btn-violet:active { transform: scale(.97); }
+    .btn-secondary {
+      padding: 14px 28px; background: var(--peach); color: var(--mid); border: none;
+      border-radius: 16px; font: 700 15px 'Nunito',sans-serif; cursor: pointer; transition: transform .1s;
+    }
+    .btn-secondary:active { transform: scale(.97); }
+    .ghost-sm { background: none; border: none; font: 700 13px 'Nunito',sans-serif; color: var(--light); cursor: pointer; padding: 4px 8px; }
+
+    /* confetti */
+    .confetti { position: fixed; pointer-events: none; border-radius: 2px; animation: fall 1.1s ease-out forwards; }
+    @keyframes fall { 0%{transform:translateY(-16px) rotate(0deg);opacity:1} 100%{transform:translateY(100vh) rotate(700deg);opacity:0} }
+
+    /* toast */
+    .toast {
+      position: fixed; bottom: calc(72px + env(safe-area-inset-bottom,0px) + 12px); left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--text); color: white; padding: 12px 20px;
+      border-radius: 14px; font: 700 14px 'Nunito',sans-serif;
+      max-width: 320px; text-align: center; transition: transform .3s; z-index: 999;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ═══════════════════════════════════════════════════════════════
+       THE EXECUTIONER styles
+    ═══════════════════════════════════════════════════════════════ */
+    .hero { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .hero-emoji { font-size: 58px; animation: float 3s ease-in-out infinite; }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+
+    .goal-box {
+      width: 100%; max-width: 400px; background: white;
+      border-radius: var(--r); box-shadow: var(--shadow); padding: 22px 20px;
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    .box-label { font-size: 11px; font-weight: 800; color: var(--light); text-transform: uppercase; letter-spacing: .1em; }
+    .goal-input {
+      width: 100%; border: none; outline: none;
+      font: 700 19px/1.4 'Nunito',sans-serif;
+      color: var(--text); background: transparent; resize: none; min-height: 68px;
+    }
+    .goal-input::placeholder { color: #D9BDB0; font-weight: 600; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip {
+      background: var(--peach); color: var(--mid); border: none; border-radius: 20px;
+      padding: 6px 14px; font: 700 13px 'Nunito',sans-serif; cursor: pointer; transition: background .15s, transform .1s;
+    }
+    .chip:active { transform: scale(.96); }
+
+    /* Loading */
+    .ring-wrap { width: 88px; height: 88px; position: relative; }
+    .ring { position: absolute; inset: 0; border-radius: 50%; border: 4px solid transparent; }
+    .ring-a { border-top-color: var(--amber); animation: spin .95s linear infinite; }
+    .ring-b { inset: 12px; border-top-color: var(--coral); animation: spin .7s linear infinite reverse; }
+    .ring-emoji { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 28px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .load-msg { font-size: 15px; color: var(--mid); text-align: center; max-width: 280px; line-height: 1.6; min-height: 48px; }
+
+    /* Step */
+    #stepScreen { justify-content: flex-start; padding-top: 52px; }
+    .topbar { width: 100%; max-width: 400px; display: flex; align-items: center; justify-content: space-between; }
+    .step-count { font-size: 14px; font-weight: 700; color: var(--mid); }
+    .prog-wrap { width: 100%; max-width: 400px; height: 8px; background: #F0DECE; border-radius: 99px; overflow: hidden; }
+    .prog-fill { height: 100%; background: linear-gradient(90deg,var(--amber),var(--coral)); border-radius: 99px; transition: width .5s ease; }
+    .goal-badge {
+      background: var(--peach); color: var(--mid); border-radius: 20px;
+      padding: 6px 18px; font-size: 13px; font-weight: 700;
+      max-width: 400px; text-align: center; word-break: break-word;
+    }
+    .step-card {
+      width: 100%; max-width: 400px; background: white;
+      border-radius: 24px; box-shadow: 0 10px 44px rgba(255,120,60,.17);
+      padding: 30px 26px; display: flex; flex-direction: column; gap: 14px;
+      animation: cardIn .35s ease;
+    }
+    @keyframes cardIn { from{opacity:0;transform:translateY(18px) scale(.97)} to{opacity:1;transform:none} }
+    .step-tag { font-size: 11px; font-weight: 800; color: var(--amber); text-transform: uppercase; letter-spacing: .1em; }
+    .step-text { font-size: 21px; font-weight: 800; color: var(--text); line-height: 1.45; }
+    .step-time { font-size: 13px; color: var(--mid); font-weight: 600; }
+    .encourage { font-size: 15px; font-weight: 700; color: var(--mid); text-align: center; min-height: 22px; }
+    .done-btn {
+      width: 100%; max-width: 400px; padding: 22px;
+      background: var(--grad); color: white; border: none; border-radius: 20px;
+      font: 900 22px 'Nunito',sans-serif; cursor: pointer; letter-spacing: .02em;
+      box-shadow: 0 8px 28px rgba(255,107,107,.40); transition: transform .1s, box-shadow .1s;
+    }
+    .done-btn:active { transform: scale(.97); box-shadow: 0 4px 12px rgba(255,107,107,.28); }
+    .skip-link { background: none; border: none; font: 600 14px 'Nunito',sans-serif; color: var(--light); cursor: pointer; padding: 8px; }
+
+    /* complete */
+    .big-emoji { font-size: 80px; animation: pop .55s ease; }
+    @keyframes pop { 0%{transform:scale(.4)} 70%{transform:scale(1.18)} 100%{transform:scale(1)} }
+    .stats-row {
+      background: white; border-radius: var(--r); padding: 20px 32px;
+      box-shadow: var(--shadow); display: flex; gap: 36px;
+    }
+    .stat { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .stat-num { font-size: 30px; font-weight: 900; color: var(--amber); }
+    .stat-lbl { font-size: 11px; font-weight: 800; color: var(--mid); text-transform: uppercase; letter-spacing: .06em; }
+
+    /* ═══════════════════════════════════════════════════════════════
+       DECISION ARCHITECT styles
+    ═══════════════════════════════════════════════════════════════ */
+    #da-setup { justify-content: flex-start; padding-top: 44px; }
+
+    .da-header { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .da-emoji { font-size: 52px; }
+
+    /* Preset pills */
+    .preset-grid { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 10px; }
+    .preset-btn {
+      width: 100%; padding: 15px 20px; background: white; border: 2px solid #EDE8F8;
+      border-radius: 16px; font: 700 15px 'Nunito',sans-serif; color: var(--text);
+      cursor: pointer; text-align: left; transition: border-color .15s, background .15s, transform .1s;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .preset-btn:active { transform: scale(.98); }
+    .preset-btn:hover, .preset-btn.selected { border-color: var(--violet); background: var(--violet-light); }
+    .preset-arrow { margin-left: auto; color: var(--light); font-size: 16px; }
+
+    /* Custom input */
+    .da-input-box {
+      width: 100%; max-width: 400px; background: white; border-radius: var(--r);
+      box-shadow: var(--shadow); padding: 18px 20px; display: flex; flex-direction: column; gap: 12px;
+    }
+    .da-input-row { display: flex; gap: 10px; }
+    .da-input {
+      flex: 1; padding: 12px 16px; border: 2px solid #EDE8F8; border-radius: 12px;
+      font: 700 15px 'Nunito',sans-serif; color: var(--text); outline: none; transition: border-color .15s;
+    }
+    .da-input:focus { border-color: var(--violet); }
+    .add-btn {
+      padding: 12px 18px; background: var(--violet-grad); color: white; border: none;
+      border-radius: 12px; font: 800 15px 'Nunito',sans-serif; cursor: pointer; transition: transform .1s;
+    }
+    .add-btn:active { transform: scale(.96); }
+    .option-list { display: flex; flex-wrap: wrap; gap: 8px; min-height: 36px; }
+    .option-pill {
+      background: var(--violet-light); color: var(--violet); border: none; border-radius: 20px;
+      padding: 6px 12px 6px 14px; font: 700 13px 'Nunito',sans-serif; cursor: pointer;
+      display: flex; align-items: center; gap: 6px; transition: transform .1s;
+    }
+    .option-pill:active { transform: scale(.94); }
+    .pill-x { font-size: 14px; opacity: .6; }
+
+    /* Arena */
+    #da-arena { justify-content: flex-start; padding-top: 44px; gap: 18px; }
+
+    .timer-ring-wrap { position: relative; width: 100px; height: 100px; }
+    .timer-svg { width: 100px; height: 100px; transform: rotate(-90deg); }
+    .timer-track { fill: none; stroke: #EDE8F8; stroke-width: 7; }
+    .timer-arc { fill: none; stroke: var(--violet); stroke-width: 7; stroke-linecap: round; stroke-dasharray: 263; transition: stroke-dashoffset .9s linear, stroke .5s; }
+    .timer-arc.urgent { stroke: var(--coral); }
+    .timer-label {
+      position: absolute; inset: 0; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 0;
+    }
+    .timer-time { font-size: 22px; font-weight: 900; color: var(--text); line-height: 1; }
+    .timer-sub { font-size: 10px; font-weight: 700; color: var(--light); text-transform: uppercase; letter-spacing: .08em; }
+
+    .arena-hint { font-size: 13px; color: var(--mid); text-align: center; max-width: 310px; line-height: 1.55; }
+
+    .options-grid { width: 100%; max-width: 420px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+    .arena-card {
+      background: white; border: 2px solid #EDE8F8; border-radius: 16px;
+      padding: 12px 18px; font: 700 15px 'Nunito',sans-serif; color: var(--text);
+      cursor: pointer; transition: border-color .15s, transform .15s, box-shadow .15s;
+      animation: popIn .25s ease;
+    }
+    @keyframes popIn { from{opacity:0;transform:scale(.8)} to{opacity:1;transform:none} }
+    .arena-card:active { transform: scale(.95); }
+    .arena-card.highlighted { border-color: var(--violet); background: var(--violet-light); }
+    .arena-card.veto-out-left  { animation: vetoLeft .4s ease forwards; }
+    .arena-card.veto-out-right { animation: vetoRight .4s ease forwards; }
+    @keyframes vetoLeft  { to{transform:translateX(-120%) rotate(-12deg);opacity:0} }
+    @keyframes vetoRight { to{transform:translateX( 120%) rotate( 12deg);opacity:0} }
+
+    .arena-btns { width: 100%; max-width: 400px; display: flex; gap: 10px; }
+    .arena-btns button { flex: 1; }
+
+    /* Final 2 */
+    #da-final { gap: 20px; }
+    .vs-label { font-size: 13px; font-weight: 800; color: var(--light); text-transform: uppercase; letter-spacing: .1em; }
+    .final-cards { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 14px; }
+    .final-card {
+      width: 100%; padding: 26px 24px; background: white; border-radius: 20px;
+      box-shadow: var(--shadow); border: 3px solid #EDE8F8;
+      font: 800 18px/1.4 'Nunito',sans-serif; color: var(--text);
+      cursor: pointer; text-align: center; transition: border-color .15s, transform .15s, box-shadow .15s;
+    }
+    .final-card:active { transform: scale(.97); }
+    .final-card:hover  { border-color: var(--violet); box-shadow: 0 8px 32px rgba(124,92,191,.2); }
+    .vs-divider { font-size: 22px; font-weight: 900; color: var(--light); text-align: center; }
+
+    /* Result */
+    #da-result { gap: 20px; }
+    .winner-card {
+      width: 100%; max-width: 400px; padding: 32px 28px; background: white;
+      border-radius: 24px; box-shadow: 0 10px 44px rgba(124,92,191,.18);
+      border: 3px solid var(--violet); text-align: center;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .winner-label { font-size: 12px; font-weight: 800; color: var(--violet); text-transform: uppercase; letter-spacing: .1em; }
+    .winner-text { font-size: 24px; font-weight: 900; color: var(--text); line-height: 1.3; }
+    .winner-sub { font-size: 14px; color: var(--mid); line-height: 1.55; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════ THE EXECUTIONER screens ═══════════════════════════════════════ -->
+
+<!-- Home -->
+<div class="screen active" id="homeScreen" data-tab="exe">
+  <div class="hero">
+    <div class="hero-emoji">🧩</div>
+    <div class="h1">What do you want<br>to tackle today?</div>
+    <div class="sub">Just type it. We'll turn it into tiny steps — one at a time.</div>
+  </div>
+  <div class="goal-box">
+    <div class="box-label">Your goal</div>
+    <textarea class="goal-input" id="goalInput" placeholder="e.g. Clean the kitchen" rows="3"></textarea>
+    <div class="chips">
+      <button class="chip" onclick="setGoal('Clean my room')">🛏 Clean my room</button>
+      <button class="chip" onclick="setGoal('Reply to emails')">📧 Reply to emails</button>
+      <button class="chip" onclick="setGoal('Do the laundry')">🧺 Do the laundry</button>
+      <button class="chip" onclick="setGoal('Study for an exam')">📚 Study for exam</button>
+      <button class="chip" onclick="setGoal('Cook dinner')">🍳 Cook dinner</button>
+      <button class="chip" onclick="setGoal('Get ready to go out')">🚿 Get ready</button>
+      <button class="chip" onclick="setGoal('Tidy my desk')">🖥 Tidy my desk</button>
+      <button class="chip" onclick="setGoal('Write a message I\'ve been avoiding')">✉️ That message</button>
+    </div>
+  </div>
+  <button class="btn-primary" style="width:100%;max-width:400px" onclick="startBreakdown()">Break it down ✨</button>
+</div>
+
+<!-- Loading -->
+<div class="screen" id="loadScreen" data-tab="exe">
+  <div class="ring-wrap">
+    <div class="ring ring-a"></div><div class="ring ring-b"></div>
+    <div class="ring-emoji">🧩</div>
+  </div>
+  <div class="h1">Breaking it down…</div>
+  <div class="load-msg" id="loadMsg">Turning your goal into tiny, doable steps.</div>
+</div>
+
+<!-- Step -->
+<div class="screen" id="stepScreen" data-tab="exe">
+  <div class="topbar">
+    <div class="step-count" id="stepCount">Step 1 of 7</div>
+    <button class="ghost-sm" onclick="exeGoHome()">✕ Start over</button>
+  </div>
+  <div class="prog-wrap"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+  <div class="goal-badge" id="goalBadge"></div>
+  <div class="step-card" id="stepCard">
+    <div class="step-tag">Right now, just this:</div>
+    <div class="step-text" id="stepText"></div>
+    <div class="step-time">⏱ About 2 minutes</div>
+  </div>
+  <div class="encourage" id="encourage"></div>
+  <button class="done-btn" onclick="markDone()">✅ Done!</button>
+  <button class="skip-link" onclick="skipStep()">skip this step →</button>
+</div>
+
+<!-- Exe Complete -->
+<div class="screen" id="exeCompleteScreen" data-tab="exe">
+  <div class="big-emoji">🎉</div>
+  <div class="h1">You did it!</div>
+  <div class="sub" id="completeSub">You just tackled something that felt impossible. That's real.</div>
+  <div class="stats-row">
+    <div class="stat"><div class="stat-num" id="statSteps">0</div><div class="stat-lbl">Steps done</div></div>
+    <div class="stat"><div class="stat-num" id="statMins">~0</div><div class="stat-lbl">Minutes</div></div>
+  </div>
+  <button class="btn-primary" onclick="exeGoHome()">Tackle something else →</button>
+</div>
+
+
+<!-- ═══════ DECISION ARCHITECT screens ════════════════════════════════════ -->
+
+<!-- DA Setup -->
+<div class="screen" id="da-setup" data-tab="da">
+  <div class="da-header">
+    <div class="da-emoji">🏛️</div>
+    <div class="h1">What's the decision?</div>
+    <div class="sub">Pick a preset or add your own options — we'll help you choose.</div>
+  </div>
+
+  <div class="preset-grid" id="presetGrid">
+    <button class="preset-btn" onclick="loadPreset('eat')">🍳 <span>What to eat</span><span class="preset-arrow">›</span></button>
+    <button class="preset-btn" onclick="loadPreset('work')">📋 <span>What to tackle first</span><span class="preset-arrow">›</span></button>
+    <button class="preset-btn" onclick="loadPreset('watch')">🎬 <span>What to watch</span><span class="preset-arrow">›</span></button>
+    <button class="preset-btn" onclick="loadPreset('wear')">👗 <span>What to wear</span><span class="preset-arrow">›</span></button>
+    <button class="preset-btn" onclick="loadPreset('free')">✨ <span>What to do with free time</span><span class="preset-arrow">›</span></button>
+  </div>
+
+  <div class="da-input-box">
+    <div class="box-label">Or type your own options</div>
+    <div class="da-input-row">
+      <input class="da-input" id="daOptionInput" placeholder="Add an option…" onkeydown="if(event.key==='Enter')addOption()">
+      <button class="add-btn" onclick="addOption()">Add</button>
+    </div>
+    <div class="option-list" id="optionList"></div>
+  </div>
+
+  <button class="btn-violet" style="width:100%;max-width:400px" onclick="startArena()">Start deciding →</button>
+</div>
+
+<!-- DA Arena -->
+<div class="screen" id="da-arena" data-tab="da">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center">
+    <div class="timer-ring-wrap">
+      <svg class="timer-svg" viewBox="0 0 100 100">
+        <circle class="timer-track" cx="50" cy="50" r="42"/>
+        <circle class="timer-arc" id="timerArc" cx="50" cy="50" r="42"/>
+      </svg>
+      <div class="timer-label">
+        <div class="timer-time" id="timerTime">5:00</div>
+        <div class="timer-sub">left</div>
+      </div>
+    </div>
+    <div class="arena-hint" id="arenaHint">Tap an option to remove it, or wait — we'll narrow it down for you.</div>
+  </div>
+
+  <div class="options-grid" id="optionsGrid"></div>
+
+  <div class="arena-btns">
+    <button class="btn-secondary" onclick="vetoSome()">🗑 Veto a few</button>
+    <button class="btn-violet" onclick="pickRandom()">🎲 Just pick for me</button>
+  </div>
+  <button class="ghost-sm" onclick="daGoHome()">← Start over</button>
+</div>
+
+<!-- DA Final 2 -->
+<div class="screen" id="da-final" data-tab="da">
+  <div class="da-header">
+    <div class="da-emoji">⚔️</div>
+    <div class="h1">Final showdown.</div>
+    <div class="sub">These two survived. Now you pick one.</div>
+  </div>
+  <div class="final-cards" id="finalCards"></div>
+  <button class="ghost-sm" onclick="daGoHome()">← Start over</button>
+</div>
+
+<!-- DA Result -->
+<div class="screen" id="da-result" data-tab="da">
+  <div class="big-emoji" style="font-size:70px">🎯</div>
+  <div class="h1">Decision made.</div>
+  <div class="winner-card">
+    <div class="winner-label">Your choice is</div>
+    <div class="winner-text" id="winnerText"></div>
+    <div class="winner-sub">That's it. Stop thinking. You've decided. Now go. 🚀</div>
+  </div>
+  <button class="btn-violet" onclick="daGoHome()">Make another decision →</button>
+  <button class="ghost-sm" onclick="switchTab('exe')">Switch to The Executioner →</button>
+</div>
+
+
+<!-- Tab bar -->
+<nav class="tab-bar">
+  <button class="tab active" data-tab="exe" id="tab-exe" onclick="switchTab('exe')">
+    <div class="tab-icon">⚡</div>
+    <div class="tab-label">THE EXECUTIONER</div>
+    <div class="tab-pip"></div>
+    <div class="tab-tooltip">Type any task — we break it into 2-minute steps and show you one at a time.</div>
+  </button>
+  <button class="tab" data-tab="da" id="tab-da" onclick="switchTab('da')">
+    <div class="tab-icon">🏛️</div>
+    <div class="tab-label">DECISION ARCHITECT</div>
+    <div class="tab-pip"></div>
+    <div class="tab-tooltip">Can't choose? Add your options — we'll veto them down until only one remains.</div>
+  </button>
+</nav>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════════
+//  SHARED
+// ══════════════════════════════════════════════════════════════════════════
+const CONFETTI_COLORS = ['#FF9A3C','#FF6B6B','#FFD166','#4ECBA0','#A29BFE','#FD79A8','#74B9FF'];
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  if (tab === 'exe') showScreen('homeScreen');
+  else showScreen('da-setup');
+}
+
+function toast(msg, dur = 3000) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), dur);
+}
+
+function spawnConfetti(n, colors) {
+  const c = colors || CONFETTI_COLORS;
+  for (let i = 0; i < n; i++) {
+    const el = document.createElement('div'); el.className = 'confetti';
+    const s = 6 + Math.random() * 8;
+    el.style.cssText = `left:${15+Math.random()*70}%;top:-12px;width:${s}px;height:${s}px;`
+      + `background:${c[~~(Math.random()*c.length)]};border-radius:${Math.random()>.5?'50%':'3px'};`
+      + `animation-delay:${Math.random()*.4}s;animation-duration:${.9+Math.random()*.65}s;`;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1600);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  THE EXECUTIONER
+// ══════════════════════════════════════════════════════════════════════════
+let exeSteps = [], exeCur = 0, exeDone = 0;
+const LOAD_MSGS = ["Thinking of the tiniest possible first step…","Making this feel less scary…","Building your step-by-step path…","You've got this. Almost ready…"];
+const KUDOS = ["You're doing amazing! 🌟","One step at a time — you've got this! 💪","Look at you go! ⚡","That's the way! Keep it up! 🔥","So proud of you! 🤩","Progress! Real, actual progress! 🚀","You're making it happen! ✨","Keep going — you're on a roll! 🎯","That felt good, right? 💛","Unstoppable! 🦁"];
+
+const TASKS = [
+  [["kitchen","wash up","dishes","sink"],["Put one item that doesn't belong in the kitchen back where it goes.","Grab a bin bag and drop in any obvious trash.","Stack all the dirty dishes next to the sink.","Fill the sink with warm soapy water.","Wash the glasses and cups first.","Wash the plates and bowls.","Rinse everything and stack on the drying rack.","Wipe the stove top with a damp cloth — one pass.","Wipe the counter next to the sink.","Put the clean dry items away.","Stand back. The kitchen is better. You did that. 💛"]],
+  [["room","bedroom","tidy","messy"],["Open your curtains — let in some light.","Collect any mugs, glasses, plates and bring them to the kitchen.","Grab a bin bag and throw in all obvious trash.","Pick up 5 items from the floor and put them where they belong.","Pick up 5 more items.","Gather all dirty clothes into the laundry basket.","Make your bed — just pull the duvet up.","Clear your bedside table.","Wipe any visible surfaces with a cloth.","You're done. Be proud. 🛏"]],
+  [["bathroom","toilet","shower room","clean bath"],["Spray the toilet bowl with cleaner — let it sit 2 minutes.","Wipe the outside of the toilet with a damp cloth.","Scrub inside the bowl and flush.","Spray the sink and tap with cleaner.","Wipe the sink and tap dry.","Spray the mirror and wipe it clear.","Wipe the floor around the toilet.","Hang fresh towels.","Done. Bathroom reset. ✨"]],
+  [["floor","vacuum","sweep","mop","hoover"],["Pick up anything on the floor that doesn't belong.","Move any small furniture to clear the path.","Get out the vacuum or broom.","Start at the far corner and work towards the door.","Empty the dustpan or vacuum into the bin.","Mop if needed — one pass across the floor.","Leave to dry. Done. 🧹"]],
+  [["laundry","washing","clothes","dryer","spin"],["Bring the laundry basket to the washing machine.","Open the machine door.","Put the first 5 items inside.","Load the rest of the clothes.","Add one measure of detergent.","Select Normal cycle. Press Start.","Set a reminder for when the cycle ends.","When done: move to dryer or hang up.","Laundry is running. 🧺"]],
+  [["fold","put away clothes","iron"],["Bring clean laundry to a flat surface.","Sort into piles: tops, bottoms, underwear/socks.","Fold and put away socks and underwear.","Fold the tops one by one.","Fold the trousers and jeans.","Put each pile in its place.","Hang anything that needs hanging.","Empty basket = win. 💪"]],
+  [["email","inbox","reply","messages","texts","whatsapp"],["Open your inbox.","Find the oldest or most important unread message.","Read it once.","Decide: archive it or reply.","If replying: write one sentence, then finish it.","Hit send before you overthink it.","Mark as done. Move to the next one.","That's enough for now. ✉️"]],
+  [["respond","that message","been avoiding","difficult message"],["Open the message. Just read — don't reply yet.","Take a breath. You don't have to be perfect.","Write the worst possible draft in one go.","Fix just the first line.","Fix the ending — keep it warm and short.","Read it once more.","Send it. You did the hard thing. 🎯"]],
+  [["study","exam","revision","revise","learn","notes"],["Find your notes and open to the first section.","Write the heading on a blank page in your own words.","Read the first paragraph once.","Summarise it in 2 bullet points.","Take a 30-second break.","Read the next section.","Summarise it in 2 bullets.","Review what you've written. You studied. 📚"]],
+  [["essay","write","writing","assignment","report","draft"],["Open a blank document and save it with a name.","Write the title at the top.","Type your main argument in one sentence.","Write 3 bullet points for what you want to cover.","Expand bullet 1 into a short paragraph.","Expand bullet 2.","Expand bullet 3.","Write one sentence conclusion.","You have a rough draft. ✍️"]],
+  [["cook","dinner","lunch","breakfast","meal","recipe","food"],["Read the recipe once — just read.","Get every ingredient out on the counter.","Get out the pots and pans you'll need.","Start step 1 of the recipe.","Complete steps 2 and 3.","Set a timer for anything cooking.","Wash the prep dishes while it cooks.","Plate up and sit down. 🍳"]],
+  [["shower","wash","get ready","bath","morning"],["Walk to the bathroom — that's all for now.","Turn on the shower and let it warm up.","Get undressed and step in.","Wash your hair. Wash your body.","Step out, dry off, get dressed.","Brush your teeth.","You're ready. The hardest part was starting. 🚿"]],
+  [["take meds","medication","pills","vitamins"],["Go to where your medication is kept.","Get a glass of water.","Take out the correct dose.","Swallow it with water.","Done. That was important. 💊"]],
+  [["sleep","bed","wind down","night routine"],["Phone face-down or on do not disturb.","Fill a glass of water and put it by your bed.","Brush your teeth. Wash your face.","Change into comfortable clothes.","Turn off the main lights and get into bed.","One slow breath in for 4 counts, out for 6.","Rest now. You did enough today. 🌙"]],
+  [["desk","workspace","declutter","clear desk"],["Throw away all obvious trash.","Move mugs and glasses to the kitchen.","Stack loose papers into one pile.","Go through the pile: bin, file, or action each sheet.","Put all stationery away.","Wipe the surface with a cloth.","Clean desk, clearer head. 🖥"]],
+  [["exercise","workout","gym","run","walk","yoga","stretch"],["Put on your workout clothes — that's it for now.","Fill a water bottle and head to your workout space.","2 minutes of gentle warm-up movement.","Start the first exercise — just the first one.","Complete your first set. Rest 60 seconds.","Do the second set. Keep going.","Cool down with 2 minutes of stretching.","Drink water. You showed up. 💪"]],
+  [["bills","budget","finances","bank","admin","forms","paperwork"],["Gather the documents or open the accounts you need.","Write a list of exactly what you need to do.","Start with the smallest item.","Complete it and cross it off.","Start the next item. Complete it.","Keep going — one item at a time.","You handled it. 💛"]],
+  [["shopping","groceries","errands","supermarket"],["Open notes and write down everything you need.","Group it: produce, fridge, cupboard, non-food.","Grab your bag and keys and head out.","Work through each category in order.","Scan your list — anything missed?","Pay and head home. Errand done. 🛒"]],
+  [["call","phone call","ring","call back"],["Find the contact in your phone.","Write one sentence about what you need to say.","Take one breath. Press call.","Say hello and your name.","Say what you need — you can read your note.","Wrap up and say goodbye.","You made the call. That took guts. 📞"]],
+  [["pack","packing","suitcase","bag","trip","travel"],["Open your suitcase on the bed.","List: clothes, toiletries, documents, chargers.","Lay out clothes for each day, then fold and pack.","Pack toiletries into a small bag.","Gather documents: passport, tickets, hotel info.","Pack chargers and electronics.","Do one final scan. Zip up. ✈️"]],
+];
+
+function genericExeSteps(goal) {
+  return [`Write down everything in your head about "${goal}".`,"Pick the one thing that would make the biggest difference.","Break it into the smallest possible first physical action.","Do just that action. Nothing else.","Notice: you've started. The wall is behind you.","What's the very next physical thing you could do?","Do that one thing.","Keep going one step at a time.","You're making it happen. 💛"];
+}
+
+function buildExeSteps(goal) {
+  const g = goal.toLowerCase();
+  for (const [kw, steps] of TASKS) {
+    if (kw.some(k => g.includes(k))) return [...steps];
+  }
+  return genericExeSteps(goal);
+}
+
+function setGoal(t) { document.getElementById('goalInput').value = t; document.getElementById('goalInput').focus(); }
+function exeGoHome() { exeSteps=[]; exeCur=0; exeDone=0; document.getElementById('goalInput').value=''; showScreen('homeScreen'); }
+
+async function startBreakdown() {
+  const goal = document.getElementById('goalInput').value.trim();
+  if (!goal) { toast('Tell me what you want to tackle first 😊'); return; }
+  showScreen('loadScreen');
+  let mi = 0;
+  const iv = setInterval(() => { document.getElementById('loadMsg').textContent = LOAD_MSGS[mi++ % LOAD_MSGS.length]; }, 1800);
+  await new Promise(r => setTimeout(r, 1200 + Math.random()*600));
+  exeSteps = buildExeSteps(goal); exeCur = 0; exeDone = 0;
+  clearInterval(iv);
+  renderExeStep(); showScreen('stepScreen');
+}
+
+function renderExeStep() {
+  const total = exeSteps.length;
+  document.getElementById('stepCount').textContent = `Step ${exeCur+1} of ${total}`;
+  document.getElementById('progFill').style.width  = `${(exeCur/total)*100}%`;
+  document.getElementById('goalBadge').textContent = `🎯 ${document.getElementById('goalInput').value.trim()}`;
+  document.getElementById('stepText').textContent  = exeSteps[exeCur];
+  document.getElementById('encourage').textContent = exeCur > 0 ? KUDOS[Math.floor(Math.random()*KUDOS.length)] : '';
+  const c = document.getElementById('stepCard'); c.style.animation='none'; c.offsetHeight; c.style.animation='';
+}
+
+function markDone() {
+  exeDone++; spawnConfetti(18);
+  if (navigator.vibrate) navigator.vibrate([50,30,100]);
+  exeCur++;
+  if (exeCur >= exeSteps.length) showExeComplete();
+  else { document.getElementById('progFill').style.width=`${(exeCur/exeSteps.length)*100}%`; renderExeStep(); }
+}
+
+function skipStep() { exeCur++; if (exeCur >= exeSteps.length) showExeComplete(); else renderExeStep(); }
+
+function showExeComplete() {
+  document.getElementById('statSteps').textContent = exeDone;
+  document.getElementById('statMins').textContent  = `~${exeDone*2}`;
+  const goal = document.getElementById('goalInput').value.trim();
+  document.getElementById('completeSub').textContent =
+    exeDone === exeSteps.length
+      ? `Every single step. You crushed "${goal}". That took courage. 💛`
+      : `You completed ${exeDone} of ${exeSteps.length} steps. That still counts. That's still real. 💛`;
+  showScreen('exeCompleteScreen');
+  [0,300,600].forEach(d => setTimeout(() => spawnConfetti(20), d));
+  if (navigator.vibrate) navigator.vibrate([100,60,100,60,220]);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  DECISION ARCHITECT
+// ══════════════════════════════════════════════════════════════════════════
+let daOptions = [], daTimer = null, daTimeLeft = 300;
+const TOTAL_TIME = 300; // 5 min
+
+const DA_PRESETS = {
+  eat:   ["Make pasta","Order something in","Scrambled eggs on toast","Leftovers from yesterday","Quick salad","Ramen or noodles","A sandwich","Soup"],
+  work:  ["Check and reply to emails","Work on the main project","Make that call I've been avoiding","Update my notes","Handle the admin pile","Clear my desk first","Plan out the rest of the day"],
+  watch: ["A funny movie","A documentary","That series I keep meaning to start","Re-watch a favourite","Something short (under 30 min)","A thriller","Something easy and cosy"],
+  wear:  ["Comfy and casual","Smart casual","That outfit I've been saving","Whatever is clean and easy","All black","Something bright today"],
+  free:  ["Read a book","Go for a walk","Call a friend","Play a video game","Creative project","Watch something","Have a long shower or bath","Do absolutely nothing"],
+};
+
+const DA_WISDOM = [
+  "Analysis paralysis is just your brain trying to protect you from making the wrong choice. Any choice is better than none.",
+  "Your brain wants to optimise. But 'good enough' and 'decided' beats 'perfect' and 'paralysed'.",
+  "The options you're staring at are all fine. That's why you can't choose. Trust the process.",
+  "Done is better than perfect. Decided is better than frozen.",
+];
+
+function loadPreset(key) {
+  daOptions = [...DA_PRESETS[key]];
+  renderOptionPills();
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+}
+
+function addOption() {
+  const inp = document.getElementById('daOptionInput');
+  const val = inp.value.trim();
+  if (!val) return;
+  if (daOptions.includes(val)) { toast('That option is already in the list'); return; }
+  daOptions.push(val);
+  inp.value = '';
+  renderOptionPills();
+}
+
+function removeOption(idx) {
+  daOptions.splice(idx, 1);
+  renderOptionPills();
+}
+
+function renderOptionPills() {
+  const list = document.getElementById('optionList');
+  list.innerHTML = daOptions.map((o,i) =>
+    `<button class="option-pill" onclick="removeOption(${i})"><span>${o}</span><span class="pill-x">✕</span></button>`
+  ).join('');
+}
+
+function startArena() {
+  if (daOptions.length < 2) { toast('Add at least 2 options to decide between 😊'); return; }
+  daTimeLeft = TOTAL_TIME;
+  renderArena();
+  showScreen('da-arena');
+  startTimer();
+}
+
+function renderArena() {
+  const grid = document.getElementById('optionsGrid');
+  grid.innerHTML = daOptions.map((o,i) =>
+    `<div class="arena-card" id="ac-${i}" onclick="manualVeto(${i})">${o}</div>`
+  ).join('');
+  updateTimerDisplay();
+  document.getElementById('arenaHint').textContent =
+    `Tap an option to remove it, or wait — we'll narrow it down for you.`;
+}
+
+function startTimer() {
+  clearInterval(daTimer);
+  daTimer = setInterval(() => {
+    daTimeLeft--;
+    updateTimerDisplay();
+
+    // auto-veto one option every 60s when > 4 remain
+    if (daTimeLeft > 0 && daTimeLeft % 60 === 0 && daOptions.length > 4) {
+      autoVetoOne();
+    }
+
+    if (daTimeLeft <= 60) {
+      document.getElementById('timerArc').classList.add('urgent');
+      document.getElementById('arenaHint').textContent = "Almost out of time — vetoing now…";
+    }
+
+    if (daTimeLeft <= 0) {
+      clearInterval(daTimer);
+      vetoToTwo();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(daTimeLeft / 60);
+  const s = daTimeLeft % 60;
+  document.getElementById('timerTime').textContent = `${m}:${s.toString().padStart(2,'0')}`;
+  const pct = daTimeLeft / TOTAL_TIME;
+  const circ = 2 * Math.PI * 42;
+  document.getElementById('timerArc').style.strokeDashoffset = circ * (1 - pct);
+}
+
+function autoVetoOne() {
+  if (daOptions.length <= 2) { vetoToTwo(); return; }
+  const idx = Math.floor(Math.random() * daOptions.length);
+  animateVetoCard(idx, () => {
+    daOptions.splice(idx, 1);
+    renderArena();
+  });
+}
+
+function animateVetoCard(idx, cb) {
+  const el = document.getElementById(`ac-${idx}`);
+  if (!el) { cb(); return; }
+  el.classList.add(Math.random() > 0.5 ? 'veto-out-right' : 'veto-out-left');
+  setTimeout(cb, 420);
+}
+
+function manualVeto(idx) {
+  if (daOptions.length <= 2) { toast('Only 2 options left — just pick one!'); return; }
+  animateVetoCard(idx, () => {
+    daOptions.splice(idx, 1);
+    renderArena();
+    if (daOptions.length === 2) { clearInterval(daTimer); setTimeout(goToFinal, 400); }
+  });
+}
+
+function vetoSome() {
+  if (daOptions.length <= 2) { toast('Only 2 left — pick one!'); return; }
+  const target = Math.max(2, Math.ceil(daOptions.length / 2));
+  let i = 0;
+  const next = () => {
+    if (daOptions.length <= target) {
+      if (daOptions.length === 2) { clearInterval(daTimer); setTimeout(goToFinal, 400); }
+      return;
+    }
+    const idx = Math.floor(Math.random() * daOptions.length);
+    animateVetoCard(idx, () => {
+      daOptions.splice(idx, 1);
+      renderArena();
+      setTimeout(next, 500);
+    });
+  };
+  next();
+}
+
+function vetoToTwo() {
+  if (daOptions.length <= 2) { goToFinal(); return; }
+  const idx = Math.floor(Math.random() * daOptions.length);
+  animateVetoCard(idx, () => {
+    daOptions.splice(idx, 1);
+    renderArena();
+    setTimeout(vetoToTwo, 350);
+  });
+}
+
+function pickRandom() {
+  clearInterval(daTimer);
+  const winner = daOptions[Math.floor(Math.random() * daOptions.length)];
+  showWinner(winner);
+}
+
+function goToFinal() {
+  clearInterval(daTimer);
+  if (daOptions.length < 2) { pickRandom(); return; }
+  const [a, b] = daOptions.slice(0, 2);
+  const fc = document.getElementById('finalCards');
+  fc.innerHTML = `
+    <div class="final-card" onclick="showWinner('${escHtml(a)}')">${escHtml(a)}</div>
+    <div class="vs-divider">— vs —</div>
+    <div class="final-card" onclick="showWinner('${escHtml(b)}')">${escHtml(b)}</div>
+  `;
+  showScreen('da-final');
+}
+
+function showWinner(choice) {
+  document.getElementById('winnerText').textContent = choice;
+  showScreen('da-result');
+  [0,280,560].forEach(d => setTimeout(() => spawnConfetti(16, ['#A29BFE','#7C5CBF','#FFD166','#4ECBA0','#FD79A8']), d));
+  if (navigator.vibrate) navigator.vibrate([80,40,80,40,160]);
+}
+
+function daGoHome() {
+  clearInterval(daTimer); daTimer = null; daOptions = [];
+  document.getElementById('optionList').innerHTML = '';
+  document.getElementById('daOptionInput').value = '';
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('timerArc').classList.remove('urgent');
+  showScreen('da-setup');
+}
+
+function escHtml(s) { return s.replace(/'/g,"&#39;").replace(/"/g,"&quot;"); }
+</script>
+</body>
+</html>
